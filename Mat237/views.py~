@@ -1,0 +1,13 @@
+from django.shortcuts import render, get_object_or_404
+from django.utils import timezone
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
+
+import Problems.views
+
+def account_login(request):
+    if request.method == 'POST':
+        render('Problems.views.announcements')
+    else:
+        render('Problems.views.announcements')
+

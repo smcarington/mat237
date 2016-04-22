@@ -1,0 +1,3 @@
+{% extends 'Problems/base.html' %}
+
+{% block content %}

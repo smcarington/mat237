@@ -1,0 +1,44 @@
+{% load staticfiles %}
+{% load navbar_inclusion_tag %}
+
+<html>
+	<head>
+		<title>Mat237!</title>
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+		<link rel="stylesheet" href="{% static "css/Problems.css" %}">
+	</head>
+	<body>
+		<div class = "page-header">
+            <h1><a href="{% url 'announcements' %}">Mat237!</a></h1>
+            
+            <div class="row">
+                <div class = "col-md-8">
+                    {% navbar_inclusion_tag %}
+                </div>
+                <div class = "col-md-4">
+                    {% if user.is_authenticated %}
+                    <p class="top-menu">Hello {{ user.username }}<small> (<a href="{% url 'django.contrib.auth.views.logout' %}">Log out</a>) </small></p>
+                    {% else %}
+                    <div class="top-menu">
+                        <a href="{% url '/accounts/login' %}" class="top-menu"><span class="glyphicon glyphicon-lock"></span>Log In</a>
+                        <br>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        <div> 
+
+		<div class="content container">
+			<div class="row">
+				<div class = "col-md-8">
+					{% block content %}
+					{% endblock %}
+				</div>
+			</div>
+		</div>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> 
+        <script src={% static "javascript/Problems.js" %}></script>
+	</body>
+</html>

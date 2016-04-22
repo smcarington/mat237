@@ -1,0 +1,27 @@
+.page-header {
+    width: 80%;
+    background-color: #e6e6e6;
+    margin: 10px 0px 0px 30px;
+}
+
+h1 a {
+    padding-left: 40px;
+}
+
+.top-menu, .top-menu:hover, .top-menu:visited {
+    color: #000000;
+    float: right;
+    font-size: 12pt;
+    margin-right: 20px;
+}
+
+.dropdown-menu li:hover {
+    visibility: visible;
+}
+
+.dropdown:hover .dropdown-menu {
+    display:block;
+}
+.nav-tabs .dropdown-menu, .nav-pills .dropdown-menu, .navbar .dropdown-menu {
+    margin-top: 0;
+}
