@@ -6,14 +6,31 @@ register = template.Library()
 
 @register.inclusion_tag('Problems/navbar_inclusion_tag.html', takes_context = True)
 def navbar_inclusion_tag(context):
-    ps_titles = ProblemSet.objects.all().values_list('title', flat=True)
-    return {'problem_sets': ps_titles, 'request': context.request }
+    ps = ProblemSet.objects.all()
+    return {'problem_sets': ps, 'request': context.request }
 
 @register.simple_tag
 def check_active(request, view_name):
     if not request:
         return ''
     try:
-        return 'active' if resolve(request.path_info).url_name == view_name else ""
+        if view_name in resolve(request.path_info).url_name:
+            return 'active'
+        else:
+            return ''
     except Resolver404:
         return ''
+
+@register.filter
+def num2diff(value):
+    # Takes a number {1,2,3,4} and returns {easy,med,hard,imp}
+    if value == 1:
+        return "Easy"
+    elif value == 2:
+        return "Medium"
+    elif value == 3:
+        return "Hard"
+    elif value == 4:
+        return "Bonus"
+    else:
+        return ""

@@ -5,7 +5,7 @@
 }
 
 h1 a {
-    padding-left: 40px;
+    padding-left: 20px;
 }
 
 .top-menu, .top-menu:hover, .top-menu:visited {
@@ -25,11 +25,10 @@ h1 a {
 
 .button-div {
     width: 80%;
-    margin: 10px 0px 50px 0px;
 }
 
 .button-div a {
-    margin-top: 50px;
+    margin: 10px 0px 50px 0px;
     float: right;
 }
 
@@ -92,4 +91,86 @@ ul li a.active, ul li a.active:hover, ul li a.active:focus {
     height: 1px;
     clear: both;
     visibility: hidden;
+}
+
+.fadehr {
+     border: 0;
+     border-bottom: 1px dashed #ccc;
+     background: #999;
+     margin: 5px 0 5px 0;
+}
+
+.ps-list ol { 
+    font-family:Georgia, Times, serif; 
+    font-size:24px; 
+    color:black;  
+}
+
+.ps-list ol li { }
+
+.ps-list ol li p { 
+    padding:8px; 
+    font-style:normal; 
+    font-family:Arial; 
+    font-size:13px; 
+    color:black; 
+    border-left: 1px solid #999; 
+}
+
+.ps-list-inner-left {
+    font-size: 10pt;
+    color: #a3c2c2;
+}
+
+.ps-list-inner-left a {
+    font-size: 8pt;
+}
+
+.ps-list-inner-right p {
+    min-height: 50px;
+    margin: 0;
+}
+
+.question-detail {
+    margin: 20px 0 20px 0;
+    padding: 10px;
+    border-style: solid;
+    border-radius: 5px;
+    border-width: 2px;
+    border-color: #a3c2c2;
+}
+
+.question-stats {
+    text-align: center;
+    display: inline-block;
+}
+
+.question-stats p {
+    padding: 0 30px 0 30px;
+    display: inline-block;
+}
+
+.question-solution {
+    width: 100%;
+    height: 200px;
+}
+
+form button {
+    float: right;
+}
+
+.student-solution{
+    border-style: dashed;
+    border-width: 1px;
+    border-color: #b3d1ff;
+    border-radius: 5px;
+    min-height: 50px;
+}
+
+.student-solution p {
+    padding: 10px;
+}
+
+.solution-form{
+    margin-top: 40px;
 }

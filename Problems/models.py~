@@ -9,6 +9,9 @@ class ProblemSet(models.Model):
     title   = models.CharField(max_length=20)
     visible = models.BooleanField(default=True)
 
+    def __str__(self):
+        return self.title;
+
 class Question(models.Model):
     DIFF_CHOICES = (
         ('E', 'Easy'),
@@ -19,6 +22,12 @@ class Question(models.Model):
     problem_set = models.ForeignKey(ProblemSet, related_name = 'problems')
     text        = models.TextField()
     difficulty  = models.CharField(max_length=1, choices=DIFF_CHOICES, default='E');
+    attempts    = models.IntegerField(default=0)
+    solved      = models.IntegerField(default=0)
+    stud_diff   = models.IntegerField(default=1)
+
+    def __str__(self):
+        return self.text[0:20]
 
 class QuestionStatus(models.Model):
     STUD_DIFF_CHOICES = [(i,i) for i in range(1,11)]
@@ -26,7 +35,8 @@ class QuestionStatus(models.Model):
     question   = models.ForeignKey(Question)
     attempt    = models.BooleanField(default=False)
     solved     = models.BooleanField(default=False)
-    difficulty = models.IntegerField(choices=STUD_DIFF_CHOICES)
+    difficulty = models.IntegerField(choices=STUD_DIFF_CHOICES, null=True)
+    solution   = models.TextField(blank=True);
 
 # For staff to make announcements
 class Announcement(models.Model):

@@ -1,0 +1,44 @@
+{% extends 'Problems/base.html' %}
+
+{% block content %}
+    <a href="{% url 'list_problem_set' pk=problem.problem_set.pk %}">&#171; Return to {{problem.problem_set.title}}</a>
+
+    <div class="diff question-detail">
+        {{ problem.text}}
+    </div>
+
+    <div class="question-stats">
+        <h4>Your status:</h4>
+        <form method="post" class="ajax-form" action="/Problems/update_status/">
+            <p>Attempted: <input type="checkbox" id="attempted"></p> <p>Solved: <input type="checkbox" id="solved"> </p> <p> Difficulty: <input type="number" min=1 max=10 id="difficulty">
+            <input type = "hidden" name="user" value="{{user.pk}}">
+            <input type = "hidden" name="question" value="{{question.pk}}">
+        </form>
+    </div>
+
+
+    <div class="question-stats">
+        <h4>Question Statistics:</h4>
+        <p> Attempted: {{problem.attempts}}&#37; </p> <p> Solved: {{problem.solved}}&#37; </p> <p> Average Difficulty: {{problem.stud_diff}} /10 </p>
+    </div>
+
+    <div>
+        <h4> Your solution.</h4>
+        <div class="diff student-solution">
+            {% if status.solution == '' %}
+                <p>You have not submitted a solution.</p>
+            {% else %}
+                {{ status.solution | linebreaks }}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="solution-form">
+        <p>Edit your solution below. </p>
+        <form method="POST"> {% csrf_token %}
+            <textarea class="question-solution" name="solution">{{status.solution}} </textarea>
+            <button type='submit' class="btn btn-default">Save Solution</button>
+        </form>
+    </div>
+
+{% endblock %}

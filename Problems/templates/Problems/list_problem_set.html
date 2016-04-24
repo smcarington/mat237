@@ -1,0 +1,30 @@
+{% extends 'Problems/base.html' %}
+{% load navbar_inclusion_tag %}
+
+{% comment %}
+    Has element problem_set which is a db-item ProblemSet
+    Has element problems which is a list of problems associated
+        to problem_set. Indeed, problems=problem_set.problems
+{% endcomment %}
+
+{% block content %}
+    <h1>{{problem_set.title}}</h1>
+
+    <div class="ps-list">
+        <ol>
+        {% for prob in problems %}
+        <li class="diff-{{prob.difficulty}}"> 
+            <div class="ps-list-inner-left">
+                {{ prob.difficulty | num2diff }}
+                <a href="{% url 'question_details' pk=prob.pk %}">(Details)</a>
+            </div>
+            <div class="ps-list-inner-right">
+                <p>{{prob.text}}</p>
+            </div>
+        </li>
+        <hr class="fadehr">
+        {% endfor %}
+        </ol>
+    </div>
+
+{% endblock %}
