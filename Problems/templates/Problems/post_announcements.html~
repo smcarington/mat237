@@ -1,3 +1,17 @@
 {% extends 'Problems/base.html' %}
 
-{% block content %}
+    {% block content %}
+        <h1>Announcements</h1>
+
+        {% for post in announcements %}
+            {{ post.as_html|safe }}
+        {% endfor %}
+    {% endblock%}
+
+    {% block buttons %}
+        {% if user.is_staff %}
+        <div class="button-div">
+            <a href="{% url '" class="btn btn-default">New Announcement</a>
+        </div>
+        {% endif %}
+    {% endblock %}

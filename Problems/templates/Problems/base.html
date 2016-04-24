@@ -9,6 +9,8 @@
 		<link rel="stylesheet" href="{% static "css/Problems.css" %}">
 	</head>
 	<body>
+        <div class="clearfix"></div>
+
 		<div class = "page-header">
             <h1><a href="{% url 'announcements' %}">Mat237!</a></h1>
             
@@ -18,16 +20,16 @@
                 </div>
                 <div class = "col-md-4">
                     {% if user.is_authenticated %}
-                    <p class="top-menu">Hello {{ user.username }}<small> (<a href="{% url 'django.contrib.auth.views.logout' %}">Log out</a>) </small></p>
+                    <p class="top-menu">Hello {{ user.username }}<small> (<a href="{% url 'django.contrib.auth.views.logout' %}">Log out</a>)<br> (<a href="{% url 'password_change' %}">Change Password</a>)</small></p>
                     {% else %}
                     <div class="top-menu">
-                        <a href="{% url '/accounts/login' %}" class="top-menu"><span class="glyphicon glyphicon-lock"></span>Log In</a>
+                        <a href="{% url 'login' %}" class="top-menu"><span class="glyphicon glyphicon-lock"></span>Log In</a>
                         <br>
                     </div>
                     {% endif %}
                 </div>
             </div>
-        <div> 
+        </div> 
 
 		<div class="content container">
 			<div class="row">
@@ -37,6 +39,11 @@
 				</div>
 			</div>
 		</div>
+
+        {% block buttons %}
+        {% endblock %}
+
+        <div class="clearfix"></div>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> 
         <script src={% static "javascript/Problems.js" %}></script>

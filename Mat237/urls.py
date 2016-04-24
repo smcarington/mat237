@@ -15,13 +15,14 @@ Including another URLconf
     3. Add a URL to urlpatterns:  url(r'^blog/', include(blog_urls))
 """
 from django.conf.urls import url, include, patterns
+from django.contrib.auth.views import login, logout, password_change, password_change_done
 from django.contrib import admin
-
-from . import views
 
 urlpatterns = [
     url(r'^superuser/', admin.site.urls),
     url(r'^Problems/', include('Problems.urls')),
-    url(r'^accounts/login/$', views.account_login, name='account_login'),
-    url(r'^accounts/logout/$', 'django.contrib.auth.views.logout', {'next_page': '/Problems/'}),
+    url(r'^accounts/login/$', login, name='login'),
+    url(r'^accounts/logout/$', logout, {'next_page': '/Problems/'}, name='logout'),
+    url(r'^accounts/password_change/$', password_change, {'template_name': 'registration/password_change.html', 'post_change_redirect': 'announcements'}, name='password_change'),
+    url(r'^accounts/password_change/done/$', password_change_done, name='password_change_done'),
 ]

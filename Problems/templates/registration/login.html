@@ -2,13 +2,14 @@
 
 {% block content %}
 
+<form method="POST" action="{% url 'django.contrib.auth.views.login' %}">
+{% csrf_token %}
+
 {% if form.errors %}
 <p>Your username and password didn't match. Please try again.</p>
 {% endif %}
 
-<form method="POST" action="{% url 'django.contrib.auth.views.login' %}">
-{% csrf_token %}
-    <table>
+   <table class="form-table">
         <tr>
             <td>{{ form.username.label_tag }}</td>
             <td>{{ form.username }}</td>

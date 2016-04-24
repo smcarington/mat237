@@ -16,9 +16,9 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "Mat237.settings")
 
 try:
     application = get_wsgi_application()
-    print 'WSGI without exception'
+    print('WSGI without exception')
 except Exception:
-    print 'handling WSGI exception'
+    print('handling WSGI exception')
     if 'mod_wsgi' in sys.modules:
         traceback.print_exc()
         os.kill(os.getpid(), signal.SIGINT)

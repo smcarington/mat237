@@ -1,0 +1,6 @@
+1. Make gmail account and embed calendar + setup emailing
+2. Write the administration environment:
+	a) Add problem sets
+	b) Add questions to problem sets
+
+3. (BIG ONE) The entire problem set environment.

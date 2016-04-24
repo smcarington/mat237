@@ -36,13 +36,13 @@ ALLOWED_HOSTS = ["127.0.0.1",]
 # Application definition
 
 INSTALLED_APPS = [
+    'Problems',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'Problems'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -54,10 +54,11 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'shibboleth.middleware.ShibbolethRemoteUserMiddleware',
 ]
 
 ROOT_URLCONF = 'Mat237.urls'
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 TEMPLATES = [
     {
@@ -147,3 +148,6 @@ if socket.gethostname() == 'dobox':
     STATIC_ROOT = "/opt/myvenv/static"
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+LOGIN_URL = "/accounts/login/"
+LOGIN_REDIRECT_URL = "/Problems"

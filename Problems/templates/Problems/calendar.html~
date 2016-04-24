@@ -1,0 +1,5 @@
+{% extends "Problems/base.html" %}
+
+{% block content %}
+    <h1> Syllabus </h1>
+{% endblock %}

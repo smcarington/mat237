@@ -3,5 +3,9 @@ from django.contrib import admin
 from . import views
 
 urlpatterns = [
-    url(r'^$', views.post_announcements, name='home'),
+    url(r'^$', views.post_announcements, name='announcements'),
+    url(r'^announcement/new/$', views.new_announcement, name='new_announcement'),
+    url(r'^syllabus/$', views.syllabus, name='new_announcement'),
+    url(r'^calendar/$', views.new_announcement, name='new_announcement'),
+    url(r'^administrative/$', views.new_announcement, name='new_announcement'),
 ]

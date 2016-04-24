@@ -44,5 +44,36 @@ class Announcement(models.Model):
         self.published_date = timezone.now()
         self.save()
 
+    def as_html(self):
+        return """
+            <div class="announcement">
+                <div class="row ann-title">
+                    <div class = "col-sm-4">
+                        <h4>{title}</h4>
+                    </div>
+                    <div class = "col-sm-4">
+                        
+                    </div>
+                    <div class = "col-sm-4">
+                        <small><emph> Posted: {date}</emph> </small>
+                    </div>
+                </div>
+
+                <div class="row ann-text">
+                    <div class = "col-sm-12">
+                        <p>{text}</p>
+                    </div>
+                </div>
+
+                <div class = "row ann-author">
+                    <div class = "col-sm-8">
+                    </div>
+                    <div class = "col-sm-4">
+                        <p>Published by: {author}</p>
+                    </div>
+                </div>
+            </div>
+        """.format(title=self.title, date=self.published_date.strftime("%A, %B %d, %I:%M%p"), text=self.text, author=self.author)
+
     def __str__(self):
         return self.title

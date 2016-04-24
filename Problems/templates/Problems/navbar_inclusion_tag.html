@@ -1,14 +1,19 @@
+{% load navbar_inclusion_tag %}
+
 <div class="navbar-collapse collapse">
     <ul class="nav nav-pills">
-        <li><a href="#">Announcements</a></li>
+        <li><a class = "{% check_active request 'announcements' %}" href="{% url 'announcements' %}">Announcements</a></li>
         <li class="dropdown">
-        <a href="#" data-toggle="dropdown" class="dropdown-toggle">Problem Sets<b class="caret"></b></a>
+        <a href="javascript:void(0)" data-toggle="dropdown" class="dropdown-toggle">Problem Sets<b class="caret"></b></a>
             <ul class="dropdown-menu">
                 {% for ps in problem_sets %}
                 <li><a>{{ ps.title }}</a></li>
                 {% endfor %}
             </ul>
-        <li><a href="#">Syllabus</a></li>
-        <li><a href="#">Calendar</a></li>
+            <li><a class="{% check_active request 'syllabus' %}" href="{% url 'syllabus' %}" >Syllabus</a></li>
+            <li><a class="{% check_active request 'calendar' %}" href="{% url 'calendar' %}" >Calendar</a></li>
+            {% if request.user.is_staff %}
+            <li><a class="{% check_active request 'Administrative' %}" href="{% url 'administrative' %}">Administrative</a></li>
+            {% endif %}
     </ul>
 </div>

@@ -22,6 +22,73 @@ h1 a {
 .dropdown:hover .dropdown-menu {
     display:block;
 }
+
+.button-div {
+    width: 80%;
+}
+
+.button-div a {
+    margin: 10px 0px 50px 0px;
+    float: right;
+}
+
 .nav-tabs .dropdown-menu, .nav-pills .dropdown-menu, .navbar .dropdown-menu {
     margin-top: 0;
+}
+
+.form-table {
+    margin-top: 40px;
+}
+
+ul li a.active, ul li a.active:hover, ul li a.active:focus {
+    background-color: #1a75ff;
+    border-radius: 20px;
+    color: #e6f0ff;
+}
+
+.form-table td {
+    padding-bottom: 10px;
+}
+
+.announcement {
+    margin-top: 10px;
+    box-shadow: 2px 2px 5px black;
+}
+
+.ann-title {
+    position: relative;
+}
+
+.ann-title div h4 {
+    padding-left: 10px;
+}
+
+.ann-title div small {
+    position: absolute;
+    top: 10px;
+    float: right;
+}
+
+.ann-text {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.ann-text div p {
+    text-align: justify;
+}
+
+.ann-author div p {
+    text-align: right;
+    color: grey;
+    font-size: 10pt;
+    padding-right: 10px;
+}
+
+.clearfix::after, .clearfix::before {
+    content: "";
+    display: block;
+    height: 1px;
+    clear: both;
+    visibility: hidden;
 }
