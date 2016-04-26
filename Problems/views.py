@@ -5,12 +5,13 @@ from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.views import password_change
 from django.http import HttpResponse, Http404, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_protect
+from django.core.mail import send_mail
 
 import json
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus
-from .forms import AnnouncementForm, QuestionForm, ProblemSetForm
+from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm
 
 # Create your views here.
 
@@ -183,3 +184,32 @@ def update_status(request):
         raise HttpResponseForbidden()
 
     return HttpResponse(json.dumps(response_data))
+
+@login_required
+@permission_required('Add user')
+def add_user(request):
+# Create a new user, generate a random password, and email it
+    if request.method == 'POST':
+        form = NewStudentUserForm(request.POST)
+        un = request.POST['username']
+        em = request.POST['email']
+
+        user  = User(username=un, email=em)
+        rpass = User.objects.make_random_password()
+        user.set_password(rpass)
+        
+        subject = "You have just been added to MAT237!"
+        message = """
+Your username is {username} and your password is {password}. 
+Please login and change your password
+            """.format(username=un, password=rpass)
+
+        send_mail(subject, message, 'mat237summer2016@gmail.com', [em])
+        user.save()
+
+        return redirect('administrative')
+    else:
+        form = NewStudentUserForm()
+
+    return render(request, 'Problems/edit_announcement.html', {'form' : form})
+

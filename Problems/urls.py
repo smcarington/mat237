@@ -16,4 +16,5 @@ urlpatterns = [
     url(r'^calendar/', views.calendar, name='calendar'),
     url(r'^administrative/', views.administrative, name='administrative'),
     url(r'^update_status', views.update_status, name='update_status'),
+    url(r'^add-user', views.add_user, name='add_user'),
 ]

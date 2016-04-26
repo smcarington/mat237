@@ -16,3 +16,7 @@ class ProblemSetForm(forms.ModelForm):
     class Meta:
         model = ProblemSet
         fields = ('title',)
+
+class NewStudentUserForm(forms.Form):
+    username = forms.CharField(label='username', max_length=20)
+    email    = forms.CharField(label='email', max_length=100)
