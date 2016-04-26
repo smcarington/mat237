@@ -26,5 +26,13 @@
         {% endfor %}
         </ol>
     </div>
-
 {% endblock %}
+
+{% block buttons %}
+    {% if user.is_staff %}
+    <div class="button-div">
+        <a href="{% url 'new_question' listpk=problem_set.pk %}" class="btn btn-default">New Question</a>
+    </div>
+    {% endif %}
+{% endblock %}
+

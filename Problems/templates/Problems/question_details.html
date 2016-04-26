@@ -9,13 +9,15 @@
 
     <div class="question-stats">
         <h4>Your status:</h4>
-        <form method="post" class="ajax-form" action="/Problems/update_status/">
-            <p>Attempted: <input type="checkbox" id="attempted"></p> <p>Solved: <input type="checkbox" id="solved"> </p> <p> Difficulty: <input type="number" min=1 max=10 id="difficulty">
-            <input type = "hidden" name="user" value="{{user.pk}}">
-            <input type = "hidden" name="question" value="{{question.pk}}">
+        <form class="ajax-form">
+            <p>Attempted: <input type="checkbox" id="attempted" name="attempted" {% if status.attempt %}checked{% endif %}></p> 
+            <p>Solved: <input type="checkbox" id="solved" name="solved" {% if status.solved %}checked{% endif %}> </p> 
+            <p> Difficulty: <input type="number" min=1 max=10 id="difficulty" name="difficulty" value="{% if status.difficulty %}{{status.difficulty}}{% else %}1{% endif %}">
+            <input type = "hidden" id="user" value="{{user.pk}}">
+            <input type = "hidden" id="question" value="{{problem.pk}}">
         </form>
+        <p id="response"></p>
     </div>
-
 
     <div class="question-stats">
         <h4>Question Statistics:</h4>

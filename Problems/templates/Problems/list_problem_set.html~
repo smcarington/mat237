@@ -16,7 +16,7 @@
         <li class="diff-{{prob.difficulty}}"> 
             <div class="ps-list-inner-left">
                 {{ prob.difficulty | num2diff }}
-                <a href="{% url 'question_details' pk=prob.pk">(Details)</a>
+                <a href="{% url 'question_details' pk=prob.pk %}">(Details)</a>
             </div>
             <div class="ps-list-inner-right">
                 <p>{{prob.text}}</p>
@@ -26,5 +26,13 @@
         {% endfor %}
         </ol>
     </div>
-
 {% endblock %}
+
+{% block buttons %}
+    {% if user.is_staff %}
+    <div class="button-div">
+        <a href="{% url 'new_question' %}" class="btn btn-default">New Question</a>
+    </div>
+    {% endif %}
+{% endblock %}
+

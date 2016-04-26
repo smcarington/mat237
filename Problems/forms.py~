@@ -1,12 +1,13 @@
 from django import forms
-from .models import Announcement 
+from .models import Announcement, Question
 from django.contrib.admin import widgets
 
 class AnnouncementForm(forms.ModelForm):
     class Meta:
         model = Announcement
-        fields = ('title', 'text', 'stickied', 'expires')
+        fields = ('title', 'text', 'stickied')
 
-    def __init__(self, *args, **kwargs):
-        super(AnnouncementForm, self).__init__(*args, **kwargs)
-        self.fields['expires'].widget = widgets.AdminDateWidget()
+class QuestionForm(forms.ModelForm):
+    class Meta:
+        model = Question
+        fields = ('difficulty', 'text')

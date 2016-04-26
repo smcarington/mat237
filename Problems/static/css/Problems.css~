@@ -38,6 +38,7 @@ h1 a {
 
 .form-table {
     margin-top: 40px;
+    width: 100%;
 }
 
 ul li a.active, ul li a.active:hover, ul li a.active:focus {
@@ -142,7 +143,6 @@ ul li a.active, ul li a.active:hover, ul li a.active:focus {
 
 .question-stats {
     text-align: center;
-    display: inline-block;
 }
 
 .question-stats p {
@@ -173,4 +173,24 @@ form button {
 
 .solution-form{
     margin-top: 40px;
+}
+
+#response {
+    color: red;
+}
+
+#id_text {
+    width: 100%;
+}
+
+.sticky {
+    background-color: #ff9999;
+}
+
+.delete-form {
+    display: inline;
+}
+
+.warning {
+    padding: 10px;
 }

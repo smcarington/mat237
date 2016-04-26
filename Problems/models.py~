@@ -55,8 +55,14 @@ class Announcement(models.Model):
         self.save()
 
     def as_html(self):
+        sticktitle = self.title
+        stclass = ''
+        if self.stickied:
+            sticktitle = self.title + "&#42;"
+            stclass    = 'sticky'
+
         return """
-            <div class="announcement">
+            <div class="diff announcement{extra}">
                 <div class="row ann-title">
                     <div class = "col-sm-4">
                         <h4>{title}</h4>
@@ -83,7 +89,7 @@ class Announcement(models.Model):
                     </div>
                 </div>
             </div>
-        """.format(title=self.title, date=self.published_date.strftime("%A, %B %d, %I:%M%p"), text=self.text, author=self.author)
+        """.format(extra=stclass, title=sticktitle, date=self.published_date.strftime("%A, %B %d, %I:%M%p"), text=self.text, author=self.author)
 
     def __str__(self):
         return self.title
