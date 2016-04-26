@@ -19,9 +19,13 @@
                 <a href="{% url 'question_details' pk=prob.pk %}">(Details)</a>
             </div>
             <div class="ps-list-inner-right">
-                <p>{{prob.text}}</p>
+                {{prob.text | linebreaks}}
             </div>
         </li>
+            {% if user.is_staff %}
+            <a href="{% url 'edit_question' pk=prob.pk %}"><small>Edit</small></a>
+            <a href="{% url 'delete_item' pk=prob.pk objectStr='question' %}"><small>Delete</small></a>
+        {% endif %}
         <hr class="fadehr">
         {% endfor %}
         </ol>

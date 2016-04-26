@@ -14,6 +14,8 @@
     </form>
     {% if type == "announcement" %}
         <a href="{% url 'announcements'%}" class="btn btn-default">No</a>
+    {% elif type == "question" %}
+        <a href="{% url 'list_problem_set' pk=object.problem_set.pk %}">No</a>
     {% endif %}
 
 {% endblock %}

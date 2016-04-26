@@ -19,9 +19,13 @@
                 <a href="{% url 'question_details' pk=prob.pk %}">(Details)</a>
             </div>
             <div class="ps-list-inner-right">
-                <p>{{prob.text}}</p>
+                <p>{{prob.text | linebreaks}}</p>
             </div>
         </li>
+            {% if user.is_staff %}
+            <a href="{% url 'edit_question' pk=prob.pk %}"><small>Edit</small></a>
+            <a href="{% url 'delete_item' pk=prob.pk objectStr='question' %}"><small>Delete</small></a>
+        {% endif %}
         <hr class="fadehr">
         {% endfor %}
         </ol>
@@ -31,7 +35,7 @@
 {% block buttons %}
     {% if user.is_staff %}
     <div class="button-div">
-        <a href="{% url 'new_question' %}" class="btn btn-default">New Question</a>
+        <a href="{% url 'new_question' listpk=problem_set.pk %}" class="btn btn-default">New Question</a>
     </div>
     {% endif %}
 {% endblock %}

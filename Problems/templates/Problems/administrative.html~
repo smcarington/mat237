@@ -4,5 +4,5 @@
     <h1>Administration</h1>
 
     <a href="{% url 'new_problem_set' %}" class="btn btn-default">New Problem Set</a>
-    <a href="#" class="btn btn-default">Add Student User</a>
+    <a href="#" class="btn btn-default">Add User</a>
 {% endblock %}

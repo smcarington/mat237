@@ -195,3 +195,7 @@ form button {
     padding: 10px;
     color: red;
 }
+
+small {
+    font-size: 8pt;
+}

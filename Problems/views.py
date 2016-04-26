@@ -10,7 +10,7 @@ import json
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus
-from .forms import AnnouncementForm, QuestionForm
+from .forms import AnnouncementForm, QuestionForm, ProblemSetForm
 
 # Create your views here.
 
@@ -59,6 +59,9 @@ def delete_item(request, objectStr, pk):
         if objectStr == "announcement":
             theObj      = get_object_or_404(Announcement, pk = pk)
             return_View = redirect('/Problems/')
+        elif objectStr == "question":
+            theObj      = get_object_or_404(Question, pk = pk)
+            return_View = redirect('list_problem_set', pk=theObj.problem_set.pk)
         else:
             return HttpResponse('<h1>Invalid Object Type</h1>')
 
@@ -85,6 +88,38 @@ def new_question(request, listpk):
         form = QuestionForm()
 
     return render(request, 'Problems/edit_announcement.html', {'form' : form})
+
+@login_required
+@permission_required('Can change announcement')
+def edit_question(request, pk):
+    question = get_object_or_404(Question, pk=pk)
+    if request.method == "POST":
+        form = QuestionForm(request.POST, instance=question)
+        if form.is_valid():
+            question = form.save(commit=False)
+            question.save()
+            return redirect('list_problem_set', pk=question.problem_set.pk)
+    else:
+        form = QuestionForm(instance=question)
+
+    return render(request, 'Problems/edit_announcement.html', {'form' : form})
+
+
+@login_required
+@permission_required('Can add question')
+def new_problem_set(request):
+    if request.method == "POST":
+        form = ProblemSetForm(request.POST)
+        if form.is_valid():
+            problem_set= form.save(commit=False)
+            problem_set.save()
+            return redirect('administrative')
+    else:
+        form = ProblemSetForm()
+
+    return render(request, 'Problems/edit_announcement.html', {'form' : form})
+
+
 
 @login_required
 def post_delete(request, pk):
