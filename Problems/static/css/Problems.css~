@@ -1,7 +1,19 @@
+body {
+    background-image: url("/static/nice_snow.png");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+a, a:hover {
+    color: #0B0080;
+}
+
 .page-header {
-    width: 80%;
+    width: 86%;
     background-color: #e6e6e6;
     margin: 10px 0px 0px 30px;
+    border-radius: 10px;
 }
 
 h1 a {
@@ -94,6 +106,10 @@ ul li a.active, ul li a.active:hover, ul li a.active:focus {
     visibility: hidden;
 }
 
+.bot-pad {
+    height:10px;
+}
+
 .fadehr {
      border: 0;
      border-bottom: 1px dashed #ccc;
@@ -184,7 +200,7 @@ form button {
 }
 
 .sticky {
-    background-color: #ff9999;
+    background-color: #ffe6e6;
 }
 
 .delete-form {
@@ -197,5 +213,32 @@ form button {
 }
 
 small {
-    font-size:08pt;
+    font-size: 8pt;
+}
+
+.old-ann{
+    margin: 10px 0 10px 0;
+}
+
+.old-ann{
+    margin-left: 50px;
+}
+
+ul li a {
+    font-weight: bold;
+}
+
+.sidenote p {
+    padding: 5pt;
+    margin: 10px 0;
+    text-align: justify;
+    font-size: 10pt;
+    border-width: 1pt;
+    border-style: solid;
+    border-radius: 10px;
+}
+
+.sidenote ul {
+    padding: 5pt;
+    text-align: justify;
 }

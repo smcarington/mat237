@@ -8,7 +8,11 @@
             <tr>
                 {{field.errors}}
                 <td> {{ field.label_tag }} </td>
-                <td> {{ field }} </td>
+                <td> {{ field }} <br>
+                {% if field.help_text %}
+                <p> {{field.help_text|safe }} </p>
+                {% endif %}
+                </td>
             </tr>
             {% endfor %}
         </table>

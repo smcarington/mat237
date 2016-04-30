@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
+from datetime import timedelta
+
 # Problem sets and questions. Note that questions should be
 # Many2One.
 
@@ -32,7 +34,7 @@ class Question(models.Model):
 class QuestionStatus(models.Model):
     STUD_DIFF_CHOICES = [(i,i) for i in range(1,11)]
     user       = models.ForeignKey(User, related_name = 'question_status')
-    question   = models.ForeignKey(Question)
+    question   = models.ForeignKey(Question, related_name = 'status')
     attempt    = models.BooleanField(default=False)
     solved     = models.BooleanField(default=False)
     difficulty = models.IntegerField(choices=STUD_DIFF_CHOICES, null=True)
@@ -48,7 +50,7 @@ class Announcement(models.Model):
                         default=timezone.now)
     published_date = models.DateTimeField(
                         blank=True, null=True)
-    expires        = models.DateTimeField(blank=True, null=True)
+    expires        = models.DateField(blank=True, null=True, default=timezone.now()+timedelta(days=21))
 
     def publish(self):
         self.published_date = timezone.now()

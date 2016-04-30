@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.core.mail import send_mail
 
 import json
+from datetime import timedelta
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus
@@ -17,8 +18,12 @@ from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUse
 
 # @login_required
 def post_announcements(request):
-    posts = Announcement.objects.filter(published_date__lte=timezone.now()).order_by('-stickied', '-published_date')
+    posts = Announcement.objects.filter(expires__gte=timezone.now()).order_by('-stickied', '-published_date')
     return render(request, 'Problems/post_announcements.html', {'announcements': posts})
+
+def get_old_announcements(request):
+    posts = Announcement.objects.filter(expires__lte=timezone.now()).order_by('-stickied', '-published_date')
+    return render(request, 'Problems/old_announcements.html', {'ann': posts})
 
 @login_required
 @permission_required('Can add announcement')
@@ -204,7 +209,6 @@ Your username is {username} and your password is {password}.
 Please login and change your password
             """.format(username=un, password=rpass)
 
-        import pdb; pdb.set_trace()
         send_mail(subject, message, 'mat237summer2016@gmail.com', [em])
         user.save()
 

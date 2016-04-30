@@ -17,8 +17,12 @@ from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUse
 
 # @login_required
 def post_announcements(request):
-    posts = Announcement.objects.filter(published_date__lte=timezone.now()).order_by('-stickied', '-published_date')
+    posts = Announcement.objects.filter(expires__gte=timezone.now()).order_by('-stickied', '-published_date')
     return render(request, 'Problems/post_announcements.html', {'announcements': posts})
+
+def get_old_announcements(request):
+    posts = Announcement.objects.filter(expires__lte=timezone.now()).order_by('-stickied', '-published_date')
+    return render(request, 'Problems/old_announcements.html', {'ann': posts})
 
 @login_required
 @permission_required('Can add announcement')

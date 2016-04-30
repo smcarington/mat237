@@ -53,10 +53,20 @@ $('document').ready(function() {
             $.post('/Problems/update_status/', {attempted: att, solved: sol, difficulty: dif, user: use, question:que}, 
                 function(data, status) {
                     $response = $("#response");
-                    $repsonse.html(data['response']);
+                    $response.html(data['response']);
                     setTimeout( function() {$response.html('') }, 2000);
             }, "json")
         },1000);
+    });
+
+    // adds a datepicker jquery ui element to dates
+    $('#id_expires').datepicker()
+
+    // gets old announcements and inserts them into the page
+    $('#get_old').click( function() {
+        $.get('/Problems/get_old_announcements/', {}, function(data) {
+            $('.old-ann').html(data);
+        );
     });
 });
 

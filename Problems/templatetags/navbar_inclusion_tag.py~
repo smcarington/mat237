@@ -11,10 +11,10 @@ def navbar_inclusion_tag(context):
 
 @register.simple_tag
 def check_active(request, view_name):
-    import pdb; pdb.set_trace()
     if not request:
         return ''
     try:
+        import pdb; pdb.set_trace()
         if view_name in resolve(request.path_info).url_name:
             return 'active'
         else:

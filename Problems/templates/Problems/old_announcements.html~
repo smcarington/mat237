@@ -1,0 +1,11 @@
+{% if ann %}
+<hr>
+{% for post in ann %}
+    {{ post.as_html|safe }}
+        {% if user.is_staff %}
+            <a href="{% url 'edit_announcement' pk=post.pk %}"><small>Edit</small></a>
+            <a href="{% url 'delete_item' pk=post.pk objectStr='announcement' %}"><small>Delete</small></a>
+        {% endif %}
+    {% endfor %}
+
+{% endif %}

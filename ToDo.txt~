@@ -1,5 +1,2 @@
-1. Make gmail account and embed calendar + setup emailing
-3. Write the administration environment:
-	a) Add problem set
-	b) Add new user
-4. Edit and delete questions
+Add javascript form validation so that students cannot submit
+an arbitrary difficulty. Also need to check this server side.

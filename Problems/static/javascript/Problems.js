@@ -58,5 +58,15 @@ $('document').ready(function() {
             }, "json")
         },1000);
     });
+
+    // adds a datepicker jquery ui element to dates
+    $('#id_expires').datepicker()
+
+    // gets old announcements and inserts them into the page
+    $('#get_old').click( function() {
+        $.get('/Problems/get_old_announcements/', {}, function(data) {
+            $('.old-ann').html(data);
+        });
+    });
 });
 

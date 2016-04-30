@@ -1,6 +1,7 @@
 {% load staticfiles %}
 {% load navbar_inclusion_tag %}
 
+<!DOCTYPE html>
 <html>
 	<head>
 		<title>Mat237!</title>
@@ -37,15 +38,21 @@
 					{% block content %}
 					{% endblock %}
 				</div>
+                <div class = "col-md-4 sidenote">
+                    {% block sidenote %}
+                    {% endblock %}
+                </div>
 			</div>
 		</div>
 
         {% block buttons %}
         {% endblock %}
 
-        <div class="clearfix"></div>
+        <div class="clearfix bot-pad"></div>
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> 
+        <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
         <script src={% static "javascript/Problems.js" %}></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.js"></script>

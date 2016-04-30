@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
+from datetime import timedelta
+
 # Problem sets and questions. Note that questions should be
 # Many2One.
 
@@ -48,7 +50,7 @@ class Announcement(models.Model):
                         default=timezone.now)
     published_date = models.DateTimeField(
                         blank=True, null=True)
-    expires        = models.DateTimeField(blank=True, null=True)
+    expires        = models.DateField(blank=True, null=True, default=timezone.now()+timedelta(days=21))
 
     def publish(self):
         self.published_date = timezone.now()
@@ -59,7 +61,7 @@ class Announcement(models.Model):
         stclass = ''
         if self.stickied:
             sticktitle = self.title + "&#42;"
-            stclass    = 'sticky'
+            stclass    = ' sticky'
 
         return """
             <div class="diff announcement{extra}">

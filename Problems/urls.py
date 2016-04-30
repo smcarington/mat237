@@ -4,9 +4,10 @@ from . import views
 
 urlpatterns = [
     url(r'^$', views.post_announcements, name='announcements'),
+    url(r'^get_old_announcements/', views.get_old_announcements, name='get_old_announcements'),
     url(r'^problemSet/(?P<pk>\d+)/', views.list_problem_set, name='list_problem_set'),
-    url(r'^question/(?P<pk>\d+)/$', views.question_details, name='question_details'),
-    url(r'^question/(?P<pk>\d+)/edit', views.edit_question, name='edit_question'),
+    url(r'^problemSet/question/(?P<pk>\d+)/$', views.question_details, name='question_details'),
+    url(r'^problemSet/question/(?P<pk>\d+)/edit', views.edit_question, name='edit_question'),
     url(r'^announcement/new/', views.new_announcement, name='new_announcement'),
     url(r'^announcement/edit/(?P<pk>\d+)', views.edit_announcement, name='edit_announcement'),
     url(r'^add-question/(?P<listpk>\d+)', views.new_question, name='new_question'),

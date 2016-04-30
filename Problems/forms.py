@@ -5,7 +5,11 @@ from django.contrib.admin import widgets
 class AnnouncementForm(forms.ModelForm):
     class Meta:
         model = Announcement
-        fields = ('title', 'text', 'stickied')
+        fields = ('title', 'text', 'stickied', 'expires')
+        help_texts = {
+            'text': 'Format using HTML.',
+            'expires': 'Default is 3 weeks',
+        }
 
 class QuestionForm(forms.ModelForm):
     class Meta:
