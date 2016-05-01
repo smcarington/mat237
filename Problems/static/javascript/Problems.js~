@@ -58,7 +58,7 @@ $('document').ready(function() {
         }
         
         curFunHandle = setTimeout( function() {
-            $.post('/Problems/update_status/', {attempted: att, solved: sol, difficulty: dif, user: use, question:que}, 
+            $.post('/update_status/', {attempted: att, solved: sol, difficulty: dif, user: use, question:que}, 
                 function(data, status) {
                     $response = $("#response");
                     $response.html(data['response']);

@@ -58,7 +58,7 @@ $('document').ready(function() {
         }
         
         curFunHandle = setTimeout( function() {
-            $.post('/Problems/update_status/', {attempted: att, solved: sol, difficulty: dif, user: use, question:que}, 
+            $.post('/update_status/', {attempted: att, solved: sol, difficulty: dif, user: use, question:que}, 
                 function(data, status) {
                     $response = $("#response");
                     $response.html(data['response']);
@@ -72,7 +72,7 @@ $('document').ready(function() {
 
     // gets old announcements and inserts them into the page
     $('#get_old').click( function() {
-        $.get('/Problems/get_old_announcements/', {}, function(data) {
+        $.get('/get_old_announcements/', {}, function(data) {
             $('.old-ann').html(data);
         });
     });

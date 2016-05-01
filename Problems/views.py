@@ -63,7 +63,7 @@ def delete_item(request, objectStr, pk):
         # Depending on which item is set, we return different pages
         if objectStr == "announcement":
             theObj      = get_object_or_404(Announcement, pk = pk)
-            return_View = redirect('/Problems/')
+            return_View = redirect('/')
         elif objectStr == "question":
             theObj      = get_object_or_404(Question, pk = pk)
             return_View = redirect('list_problem_set', pk=theObj.problem_set.pk)

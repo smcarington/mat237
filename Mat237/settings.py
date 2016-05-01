@@ -150,7 +150,8 @@ else:
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 LOGIN_URL = "/accounts/login/"
-LOGIN_REDIRECT_URL = "/Problems"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 
 DEFAULT_FROM_ADDRESS = 'tholden@math.toronto.edu'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
