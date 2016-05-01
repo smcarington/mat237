@@ -178,10 +178,16 @@ def update_status(request):
 
     response_data = {'response': ''}
 
+    diff_int = int(request.POST['difficulty'])
+
+    if diff_int > 10 or diff_int < 1:
+        response_data['response'] = 'Must pass an integer between 1 and 10. Data not saved'
+        return HttpResponse(json.dumps(response_data))
+
     if user == request.user:
         status.attempt    = (request.POST['attempted'].lower() == 'true')
         status.solved     = (request.POST['solved'].lower() == 'true')
-        status.difficulty = int(request.POST['difficulty'])
+        status.difficulty = diff_int
         status.save()
         response_data['response']='Status successfully updated!'
     else:
@@ -203,7 +209,10 @@ def add_user(request):
         user.set_password(rpass)
         
         subject = "You have just been added to MAT237!"
-        message = """
+        message = """ You have just been added to the MAT237 course website, located at
+
+http://www.mat237.math.toronto.edu
+
 Your username is {username} and your password is {password}. 
 Please login and change your password
             """.format(username=un, password=rpass)

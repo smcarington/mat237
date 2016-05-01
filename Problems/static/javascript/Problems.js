@@ -43,6 +43,14 @@ $('document').ready(function() {
         att = $('#attempted').is(':checked');
         sol = $('#solved').is(':checked');
         dif = $('#difficulty').val();
+
+        if (parseInt(dif) > 10) {
+            $('#difficulty').val('10');
+            dif = '10'
+        } else if (parseInt(dif)<1) {
+            $('#difficulty').val('1');
+            dif = '1'
+        }
         
         if (curFunHandle) {
             clearTimeout(curFunHandle);
