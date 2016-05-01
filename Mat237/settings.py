@@ -89,7 +89,7 @@ if socket.gethostname() == 'dobox':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'mydb', 
+            'NAME': 'mat237db', 
             # The following settings are not used with sqlite3:
             'USER': 'tholden',
             'PASSWORD': dbpasswd,
