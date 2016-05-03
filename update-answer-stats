@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/opt/myvenv/bin/python /opt/course_website/manage.py avgdata
