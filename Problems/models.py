@@ -63,6 +63,8 @@ class Announcement(models.Model):
             sticktitle = self.title + "&#42;"
             stclass    = ' sticky'
 
+        full_name = self.author.first_name +" " + self.author.last_name
+
         return """
             <div class="diff announcement{extra}">
                 <div class="row ann-title">
@@ -91,7 +93,7 @@ class Announcement(models.Model):
                     </div>
                 </div>
             </div>
-        """.format(extra=stclass, title=sticktitle, date=self.published_date.strftime("%A, %B %d, %I:%M%p"), text=self.text, author=self.author)
+        """.format(extra=stclass, title=sticktitle, date=self.published_date.strftime("%A, %B %d, %I:%M%p"), text=self.text, author=full_name)
 
     def __str__(self):
         return self.title
