@@ -15,7 +15,7 @@ from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUse
 
 # Create your views here.
 
-def staff_required(login_url='/admin/'):
+def staff_required(login_url='/accounts/login/'):
     return user_passes_test(lambda u:u.is_staff, login_url=login_url)
 
 # @login_required
@@ -58,7 +58,7 @@ def edit_announcement(request, pk):
 #
 # Deletes either an item or a list, as given by the string object_type
 # Checks to see if the user is allowed access
-@staff_required
+@staff_required()
 def delete_item(request, objectStr, pk):
     if request.user.is_staff:
         # Depending on which item is set, we return different pages
@@ -121,7 +121,7 @@ def new_problem_set(request):
 
     return render(request, 'Problems/edit_announcement.html', {'form' : form})
 
-@staff_required
+@staff_required()
 def post_delete(request, pk):
     post = get_object_or_404(Announcement, pk=pk)
     post.delete()
@@ -133,9 +133,9 @@ def syllabus(request):
 def calendar(request):
     return render(request, 'Problems/calendar.html')
 
-@staff_required
+@staff_required()
 def administrative(request):
-    if request.is_staff:
+    if request.user.is_staff:
         return render(request, 'Problems/administrative.html')
     else:
         return HttpResponseForbidden()
@@ -191,7 +191,7 @@ def update_status(request):
 
     return HttpResponse(json.dumps(response_data))
 
-@staff_required
+@staff_required()
 def add_user(request):
 # Create a new user, generate a random password, and email it
     if request.method == 'POST':
