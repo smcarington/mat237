@@ -16,8 +16,9 @@
             </ul>
             <li><a class="{% check_active request 'syllabus' %}" href="{% url 'syllabus' %}" >Syllabus</a></li>
             <li><a class="{% check_active request 'calendar' %}" href="{% url 'calendar' %}" >Calendar</a></li>
+            <li><a class="{% check_active request 'calendar' %}" href="{% url 'notes' %}" >Notes</a></li>
             {% if request.user.is_staff %}
-            <li><a class="{% check_active request 'administrative' %}" href="{% url 'administrative' %}">Administrative</a></li>
+            <li><a class="{% check_active request 'administrative' %}" href="{% url 'administrative' %}">Administration</a></li>
             {% endif %}
     </ul>
 </div>

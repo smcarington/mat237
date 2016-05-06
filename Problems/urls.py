@@ -14,6 +14,7 @@ urlpatterns = [
     url(r'^administrative/add-ps/$', views.new_problem_set, name='new_problem_set'),
     url(r'^delete/(?P<objectStr>[a-z]+)/(?P<pk>\d+)', views.delete_item, name='delete_item'),
     url(r'^syllabus/', views.syllabus, name='syllabus'),
+    url(r'^notes/', views.notes, name='notes'),
     url(r'^calendar/', views.calendar, name='calendar'),
     url(r'^administrative/', views.administrative, name='administrative'),
     url(r'^update_status', views.update_status, name='update_status'),

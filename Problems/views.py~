@@ -15,7 +15,7 @@ from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUse
 
 # Create your views here.
 
-def staff_required(login_url='/accounts/login'):
+def staff_required(login_url='/accounts/login/'):
     return user_passes_test(lambda u:u.is_staff, login_url=login_url)
 
 # @login_required
@@ -127,11 +127,17 @@ def post_delete(request, pk):
     post.delete()
     return redirect('post_list')
 
+@login_required
 def syllabus(request):
     return render(request, 'Problems/syllabus.html')
 
+@login_required
 def calendar(request):
     return render(request, 'Problems/calendar.html')
+
+@login_required
+def notes(request):
+    return render(request, 'Problems/notes.html')
 
 @staff_required()
 def administrative(request):

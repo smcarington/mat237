@@ -238,6 +238,16 @@ ul li a {
     border-radius: 10px;
 }
 
+.pdf-holder {
+    padding-top: 20px;
+    position: relative;
+    min-height: 80vh;
+}
+
+.pdf-holder object {
+    position: absolute;
+}
+
 .sidenote ul {
     padding: 5pt;
     text-align: justify;

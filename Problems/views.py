@@ -127,11 +127,17 @@ def post_delete(request, pk):
     post.delete()
     return redirect('post_list')
 
+@login_required
 def syllabus(request):
     return render(request, 'Problems/syllabus.html')
 
+@login_required
 def calendar(request):
     return render(request, 'Problems/calendar.html')
+
+@login_required
+def notes(request):
+    return render(request, 'Problems/notes.html')
 
 @staff_required()
 def administrative(request):
