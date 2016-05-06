@@ -146,6 +146,11 @@ ul li a.active, ul li a.active:hover, ul li a.active:focus {
 .ps-list-inner-right p {
     min-height: 50px;
     margin: 0;
+    font-size: 10pt;
+}
+
+.ps-list-inner-right ol {
+    font-size: 10pt;
 }
 
 .question-detail {
@@ -241,7 +246,7 @@ ul li a {
 .pdf-holder {
     padding-top: 20px;
     position: relative;
-    min-height: 50vh;
+    min-height: 80vh;
 }
 
 .pdf-holder object {

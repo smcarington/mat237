@@ -4,7 +4,7 @@
     <a href="{% url 'list_problem_set' pk=problem.problem_set.pk %}">&#171; Return to {{problem.problem_set.title}}</a>
 
     <div class="diff question-detail">
-        {{ problem.text}}
+        {{ problem.text | safe}}
     </div>
 
     <div class="question-stats">

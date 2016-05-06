@@ -19,7 +19,7 @@
                 <a href="{% url 'question_details' pk=prob.pk %}">(Details)</a>
             </div>
             <div class="ps-list-inner-right">
-                {{prob.text | linebreaks}}
+                {{prob.text | safe |linebreaks}}
             </div>
         </li>
             {% if user.is_staff %}
