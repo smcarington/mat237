@@ -135,7 +135,10 @@ def calendar(request):
 
 @staff_required
 def administrative(request):
-    return render(request, 'Problems/administrative.html')
+    if request.is_staff:
+        return render(request, 'Problems/administrative.html')
+    else:
+        return HttpResponseForbidden()
 
 @login_required
 def list_problem_set(request, pk):
