@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from django.shortcuts import redirect
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib.auth.views import password_change
 from django.http import HttpResponse, Http404, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_protect
@@ -15,6 +15,9 @@ from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUse
 
 # Create your views here.
 
+def staff_required(login_url='/admin/'):
+    return user_passes_test(lambda u:u.is_staff, login_url=login_url)
+
 # @login_required
 def post_announcements(request):
     posts = Announcement.objects.filter(expires__gte=timezone.now()).order_by('-stickied', '-published_date')
@@ -24,8 +27,7 @@ def get_old_announcements(request):
     posts = Announcement.objects.filter(expires__lte=timezone.now()).order_by('-stickied', '-published_date')
     return render(request, 'Problems/old_announcements.html', {'ann': posts})
 
-@login_required
-@permission_required('Can add announcement')
+@staff_required()
 def new_announcement(request):
     if request.method == "POST":
         form = AnnouncementForm(request.POST)
@@ -39,8 +41,7 @@ def new_announcement(request):
 
     return render(request, 'Problems/edit_announcement.html', {'form' : form})
 
-@login_required
-@permission_required('Can change announcement')
+@staff_required()
 def edit_announcement(request, pk):
     post = get_object_or_404(Announcement, pk=pk)
     if request.method == "POST":
@@ -57,7 +58,7 @@ def edit_announcement(request, pk):
 #
 # Deletes either an item or a list, as given by the string object_type
 # Checks to see if the user is allowed access
-@login_required
+@staff_required
 def delete_item(request, objectStr, pk):
     if request.user.is_staff:
         # Depending on which item is set, we return different pages
@@ -78,8 +79,7 @@ def delete_item(request, objectStr, pk):
     else:
         return HttpResponseForbidden()
 
-@login_required
-@permission_required('Can add question')
+@staff_required()
 def new_question(request, listpk):
     if request.method == "POST":
         form = QuestionForm(request.POST)
@@ -94,8 +94,7 @@ def new_question(request, listpk):
 
     return render(request, 'Problems/edit_announcement.html', {'form' : form})
 
-@login_required
-@permission_required('Can change announcement')
+@staff_required()
 def edit_question(request, pk):
     question = get_object_or_404(Question, pk=pk)
     if request.method == "POST":
@@ -109,9 +108,7 @@ def edit_question(request, pk):
 
     return render(request, 'Problems/edit_announcement.html', {'form' : form})
 
-
-@login_required
-@permission_required('Can add question')
+@staff_required()
 def new_problem_set(request):
     if request.method == "POST":
         form = ProblemSetForm(request.POST)
@@ -124,25 +121,21 @@ def new_problem_set(request):
 
     return render(request, 'Problems/edit_announcement.html', {'form' : form})
 
-
-
-@login_required
+@staff_required
 def post_delete(request, pk):
     post = get_object_or_404(Announcement, pk=pk)
     post.delete()
     return redirect('post_list')
 
-@login_required
 def syllabus(request):
     return render(request, 'Problems/syllabus.html')
 
-@login_required
 def calendar(request):
-        return render(request, 'Problems/calendar.html')
+    return render(request, 'Problems/calendar.html')
 
-@login_required
+@staff_required
 def administrative(request):
-            return render(request, 'Problems/administrative.html')
+    return render(request, 'Problems/administrative.html')
 
 @login_required
 def list_problem_set(request, pk):
@@ -195,8 +188,7 @@ def update_status(request):
 
     return HttpResponse(json.dumps(response_data))
 
-@login_required
-@permission_required('Add user')
+@staff_required
 def add_user(request):
 # Create a new user, generate a random password, and email it
     if request.method == 'POST':
