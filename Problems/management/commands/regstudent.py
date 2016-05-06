@@ -32,19 +32,22 @@ All the best,
 The MAT237 Instructors"""
 
         for user in lines:
-            [user_name, email] = user
-            
-            # Create user instance in database with randomly generated password. Email
-            # this password to the user
-            user  = User(username=user_name, email=email)
-            rpass = User.objects.make_random_password()
-            user.set_password(rpass)
+            try:
+                [user_name, email] = user
+                
+                # Create user instance in database with randomly generated password. Email
+                # this password to the user
+                user  = User(username=user_name, email=email)
+                rpass = User.objects.make_random_password()
+                user.set_password(rpass)
 
-            custom_message = body.format(username=user_name, password=rpass)
+                custom_message = body.format(username=user_name, password=rpass)
 
-            send_mail(subject_line, custom_message, "tholden@math.toronto.edu", [email])
-            
-            # Having sent the email, we save the user to the database
-            user.save()
+                send_mail(subject_line, custom_message, "tholden@math.toronto.edu", [email])
+                
+                # Having sent the email, we save the user to the database
+                user.save()
 
-            print('Email sent to {username}'.format(username=user_name))
+                print('Email sent to {username}'.format(username=user_name))
+            except:
+                print('Error sending email to {username}'.user[0])
