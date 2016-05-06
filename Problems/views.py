@@ -151,8 +151,9 @@ def list_problem_set(request, pk):
     ps = get_object_or_404(ProblemSet, pk=pk)
 
     # There is no standary sort_by on the charfield that returns difficulty, so we use the 'extra' method
-    CASE_SQL = '(case when difficulty="E" then 1 when difficulty="M" then 2 when difficulty="H" then 3 when difficulty="I" then 4 end)'
-    problems = ps.problems.extra(select={'difficulty': CASE_SQL}, order_by=['difficulty'])
+    #CASE_SQL = '(case when difficulty="E" then 1 when difficulty="M" then 2 when difficulty="H" then 3 when difficulty="I" then 4 end)'
+    #problems = ps.problems.extra(select={'difficulty': CASE_SQL}, order_by=['difficulty'])
+    problems = ps.problems.all()
     return render(request, 'Problems/list_problem_set.html', {'problems': problems, 'problem_set': ps})
 
 @csrf_protect
