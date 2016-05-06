@@ -24,7 +24,7 @@ class Command(BaseCommand):
         subject_line = "MAT237 Website and Login Credentials"
         body         = """Welcome to MAT237. The course website is located at
 
-http://www.mat237.math.toronto.edu
+http://www.utmat237.com
 
 where your username is {username} and password is {password}. When you login, you will be able to change your password.
 

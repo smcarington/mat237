@@ -211,7 +211,7 @@ def add_user(request):
         subject = "You have just been added to MAT237!"
         message = """ You have just been added to the MAT237 course website, located at
 
-http://www.mat237.math.toronto.edu
+http://www.utmat237.com
 
 Your username is {username} and your password is {password}. 
 Please login and change your password
