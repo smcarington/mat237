@@ -24,13 +24,13 @@ def check_active(request, view_name):
 @register.filter
 def num2diff(value):
     # Takes a number {1,2,3,4} and returns {easy,med,hard,imp}
-    if value == "E":
+    if value == 1:
         return "Easy"
     elif value == "M":
-        return "Medium"
+        return 2
     elif value == "H":
-        return "Hard"
+        return 3
     elif value == "B":
-        return "Bonus"
+        return 4
     else:
         return ""

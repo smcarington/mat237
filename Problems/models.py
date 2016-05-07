@@ -16,14 +16,14 @@ class ProblemSet(models.Model):
 
 class Question(models.Model):
     DIFF_CHOICES = (
-        ('E', 'Easy'),
-        ('M', 'Medium'),
-        ('H', 'Hard'),
-        ('I', 'Impossible'),
+        (1, 'Easy'),
+        (2, 'Medium'),
+        (3, 'Hard'),
+        (4, 'Impossible'),
     )
     problem_set = models.ForeignKey(ProblemSet, related_name = 'problems')
     text        = models.TextField()
-    difficulty  = models.CharField(max_length=1, choices=DIFF_CHOICES, default='E');
+    difficulty  = models.IntegerField(choices=DIFF_CHOICES, default=1);
     attempts    = models.IntegerField(default=0)
     solved      = models.IntegerField(default=0)
     stud_diff   = models.IntegerField(default=1)
