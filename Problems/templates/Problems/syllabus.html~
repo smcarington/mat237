@@ -50,7 +50,7 @@
 
 <p>Grade evaluation will be based on the following:</p>
 <ul>
-    <li> Three (3) midterms, 120 minutes in length. The midterms will have a weighting of 10%, 20% and 30%, with 10% assigned your lowest score and 30% assigned to your highest score.</li>
+    <li> Three (3) midterms, 120 minutes in length. The midterms will have a weighting of (10%, 20%, 30%), with 10% assigned your lowest score and 30% assigned to your highest score.</li>
     <li> One (1) final exam, 180 minutes in length, worth 40% of the final grade. </li>
 </ul>
  
@@ -160,34 +160,34 @@
   <tr>
     <th class="tg-e3zv" rowspan="2">Week 1<br></th>
     <th class="tg-031e">May 9/10<br></th>
-    <th class="tg-031e">1.1</th>
+    <th class="tg-031e">Sets, Functions, and Vectors</th>
     <th class="tg-031e"></th>
   </tr>
   <tr>
     <td class="tg-031e">May 11/12<br></td>
-    <td class="tg-031e">1.2</td>
+    <td class="tg-031e">Open/Closed sets, Boundaries</td>
     <td class="tg-031e"></td>
   </tr>
   <tr>
     <td class="tg-e3zv" rowspan="2">Week 2<br></td>
     <td class="tg-031e">May 16/17<br></td>
-    <td class="tg-031e">1.3, 1.4<br></td>
+    <td class="tg-031e">Sequences, Limits, and Continuity<br></td>
     <td class="tg-e3zv">Tutorials Start<br></td>
   </tr>
   <tr>
     <td class="tg-031e">May 18/19<br></td>
-    <td class="tg-031e">1.6, 1.7<br></td>
+    <td class="tg-031e">Compact, Convex, and Connected Sets</td>
     <td class="tg-031e"></td>
   </tr>
   <tr>
     <td class="tg-e3zv" rowspan="3">Week 3<br></td>
     <td class="tg-031e">May 23/24<br></td>
-    <td class="tg-031e">1.7, Convexity, 2.1<br></td>
+    <td class="tg-031e">Multivariate Differentiability (with Review)<br></td>
     <td class="tg-031e"></td>
   </tr>
   <tr>
     <td class="tg-yw4l">May 25/26<br></td>
-    <td class="tg-yw4l">2.2</td>
+    <td class="tg-yw4l">Multivariate + Vector Valued Differentiability</td>
     <td class="tg-yw4l"></td>
   </tr>
   <tr>
@@ -198,34 +198,34 @@
   <tr>
     <td class="tg-9hbo" rowspan="2">Week 4<br></td>
     <td class="tg-yw4l">May 30/31<br></td>
-    <td class="tg-yw4l">VV diff<br></td>
+    <td class="tg-yw4l">Chain Rule</td>
     <td class="tg-yw4l"></td>
   </tr>
   <tr>
     <td class="tg-yw4l">June 1/2<br></td>
-    <td class="tg-yw4l">Chain Rule<br></td>
+    <td class="tg-yw4l">Mixed Partials and the Mean Value Theorem</td>
     <td class="tg-yw4l"></td>
   </tr>
   <tr>
     <td class="tg-9hbo" rowspan="2">Week 5<br></td>
     <td class="tg-yw4l">June 6/7<br></td>
-    <td class="tg-yw4l">2.6, 2.4<br></td>
+    <td class="tg-yw4l">Taylor's Theorem</td>
     <td class="tg-yw4l"></td>
   </tr>
   <tr>
     <td class="tg-yw4l">June 8/9<br></td>
-    <td class="tg-yw4l">2.7, 2.8<br></td>
+    <td class="tg-yw4l">Critical Points + Lagrange Multipliers</td>
     <td class="tg-yw4l"></td>
   </tr>
   <tr>
     <td class="tg-9hbo" rowspan="3">Week 6<br></td>
     <td class="tg-yw4l">June 13/14<br></td>
-    <td class="tg-yw4l">2.9, 2.10<br></td>
+    <td class="tg-yw4l">Uniform Continuity + Parameterizations</td>
     <td class="tg-yw4l"></td>
   </tr>
   <tr>
     <td class="tg-yw4l">June 15/16<br></td>
-    <td class="tg-yw4l">Unif Cont (1.5?), Bonus<br></td>
+    <td class="tg-yw4l">Bonus<br></td>
     <td class="tg-yw4l"></td>
   </tr>
   <tr>
