@@ -10,8 +10,8 @@ from django.core.mail import send_mail
 import json
 
 from django.contrib.auth.models import User
-from .models import Announcement, ProblemSet, Question, QuestionStatus
-from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm
+from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice
+from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm
 
 # Create your views here.
 
@@ -228,3 +228,44 @@ Please login and change your password
 
     return render(request, 'Problems/edit_announcement.html', {'form' : form})
 
+@login_required
+def polls(request):
+    polls = Poll.objects.all()
+
+    return render(request, 'Problems/list_polls.html', {'polls' : polls})
+
+@staff_required()
+def new_poll(request):
+    if request.method == "POST":
+        form = PollForm(request.POST)
+        if form.is_valid():
+            poll = form.save()
+            return redirect('polls')
+    else:
+        form = PollForm()
+
+    return render(request, 'Problems/edit_announcement.html', {'form' : form})
+
+# Only handles rendering the poll admin page. AJAX requests handled by other views
+@staff_required()
+def poll_admin(request, pollpk):
+    poll = get_object_or_404(Poll, pk=pollpk)
+    return render(request, 'Problems/poll_admin.html', {'poll': poll})
+
+@staff_required()
+def new_question(request, pollpk, questionpk=None):
+# To facilitate question + choice at the same time, we must instantiate the
+# question before hand. This will also make editing a question easy in the
+# future
+
+    poll = get_object_or_404(Poll, pk=pollpk)
+
+    # If a question is created, we must instantiate it
+    if questionpk is None:
+        question = PollQuestion(poll=poll)
+
+    if request.method == "POST":
+        return redirect('poll_admin')
+
+    else:
+        return render(request, 'Problems/new_question.html', {'question' : question})

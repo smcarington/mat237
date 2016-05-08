@@ -23,7 +23,7 @@ class Question(models.Model):
     )
     problem_set = models.ForeignKey(ProblemSet, related_name = 'problems')
     text        = models.TextField()
-    difficulty  = models.IntegerField(max_length=1, choices=DIFF_CHOICES, default='E');
+    difficulty  = models.IntegerField(choices=DIFF_CHOICES, default=1);
     attempts    = models.IntegerField(default=0)
     solved      = models.IntegerField(default=0)
     stud_diff   = models.IntegerField(default=1)
@@ -97,3 +97,15 @@ class Announcement(models.Model):
 
     def __str__(self):
         return self.title
+
+class Poll(models.Model):
+    title = models.CharField(max_length=200)
+
+class PollQuestion(models.Model):
+    poll = models.ForeignKey(Poll)
+    text = models.TextField(blank=True,null=True)
+    live = models.BooleanField(default=False)
+
+class PollChoice(models.Model):
+    question = models.ForeignKey(PollQuestion)
+    text     = models.CharField(max_length=200)

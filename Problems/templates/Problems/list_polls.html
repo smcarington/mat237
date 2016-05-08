@@ -1,0 +1,29 @@
+{% extends 'Problems/base.html' %}
+
+{% block content %}
+    <h1> In Class Polls </h1>
+
+    {% for poll in polls %}
+        <div class="row">
+            <div class="poll-title col-md-8">
+                <a href=javascript:void()>{{poll.title}}</a> <small> ({{ poll.pollquestion_set.count }} Questions)</small>
+            </div>
+            {% if user.is_staff %}
+            <div class = "col-md-4">
+                <a href="{% url 'poll_admin' pollpk=poll.pk %}" class="btn btn-default">Poll Administration</a>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+
+{% endblock %}
+
+{% block buttons %}
+    {% if user.is_staff %}
+    <div class="button-div">
+        <a href="{% url 'new_poll' %}" class="btn btn-default">New Poll</a>
+    </div>
+    {% endif %}
+{% endblock %}
+
+

@@ -19,4 +19,8 @@ urlpatterns = [
     url(r'^administrative/', views.administrative, name='administrative'),
     url(r'^update_status', views.update_status, name='update_status'),
     url(r'^add-user', views.add_user, name='add_user'),
+    url(r'^polls/$', views.polls, name='polls'),
+    url(r'^polls/new/$', views.new_poll, name='new_poll'),
+    url(r'^polls/(?P<pollpk>\d+)/admin/$', views.poll_admin, name='poll_admin'),
+    url(r'^polls/(?P<pollpk>\d+)/add_question$', views.new_question, name='new_question'),
 ]
