@@ -20,8 +20,9 @@ class Command(BaseCommand):
             #Compute total attempt percentage
             question.attempts  = round(100*float(sum(att_list))/total_users)
             question.solved    = round(100*float(sum(sol_list))/total_users)
-            question.stud_diff = round(sum(diff_list)/float(len(diff_list)))
+            if len(diff_list) != 0:
+                question.stud_diff = round(sum(diff_list)/float(len(diff_list)))
 
-            self.stdout.write("Updated info for Question: {{question}}. New values are A:{{att}}, S:{{sol}}, D:{{dif}}".format(question=question, att=question.attempts, sol = question.solved, dif=question.stud_diff))
+            self.stdout.write("Updated info for Question: {question}. New values are A:{att}, S:{sol}, D:{dif}".format(question=question, att=question.attempts, sol = question.solved, dif=question.stud_diff))
 
             question.save()
