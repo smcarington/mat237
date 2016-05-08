@@ -37,7 +37,7 @@ class QuestionStatus(models.Model):
     question   = models.ForeignKey(Question, related_name = 'status')
     attempt    = models.BooleanField(default=False)
     solved     = models.BooleanField(default=False)
-    difficulty = models.IntegerField(choices=STUD_DIFF_CHOICES, null=True)
+    difficulty = models.IntegerField(choices=STUD_DIFF_CHOICES, default=1)
     solution   = models.TextField(blank=True);
 
 # For staff to make announcements

@@ -12,6 +12,7 @@ class Command(BaseCommand):
         question_list = Question.objects.all();
 
         for question in question_list:
+            import pdb; pdb.set_trace()
             qstatus   = question.status
             att_list  = qstatus.values_list('attempt', flat=True)
             sol_list  = qstatus.values_list('solved', flat=True)
