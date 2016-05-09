@@ -127,7 +127,6 @@ def post_delete(request, pk):
     post.delete()
     return redirect('post_list')
 
-@login_required
 def syllabus(request):
     return render(request, 'Problems/syllabus.html')
 
