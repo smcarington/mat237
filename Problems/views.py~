@@ -220,15 +220,6 @@ Please login and change your password
 
         send_mail(subject, message, 'mat237summer2016@gmail.com', [em])
         user.save()
-        
-        # Now send a confirmation to the staff member who added this user
-        conf_subject = "User {student} has just been added to MAT237".format{student=un}
-        conf_message = """The Student with the email address {email} and username {student} has been successfully added to the MAT237 group user list. No further action is required on your part.""".format{student=un, email=em}
-
-        try:
-            send_mail(conf_subject, conf_message, 'mat237summer2016@gmail.com', [request.user.email], fail_silently=False)
-        except:
-            print('Error sending confirmation email to staff member')
 
         return redirect('administrative')
     else:
