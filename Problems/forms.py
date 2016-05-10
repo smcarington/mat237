@@ -1,5 +1,5 @@
 from django import forms
-from .models import Announcement, Question, ProblemSet
+from .models import Announcement, Question, ProblemSet, Poll, PollQuestion, PollChoice
 from django.contrib.admin import widgets
 
 class AnnouncementForm(forms.ModelForm):
@@ -24,3 +24,8 @@ class ProblemSetForm(forms.ModelForm):
 class NewStudentUserForm(forms.Form):
     username = forms.CharField(label='username', max_length=20)
     email    = forms.CharField(label='email', max_length=100)
+
+class PollForm(forms.ModelForm):
+    class Meta:
+        model = Poll
+        fields = ('title',)

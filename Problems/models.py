@@ -97,3 +97,15 @@ class Announcement(models.Model):
 
     def __str__(self):
         return self.title
+
+class Poll(models.Model):
+    title = models.CharField(max_length=200)
+
+class PollQuestion(models.Model):
+    poll = models.ForeignKey(Poll)
+    text = models.TextField(blank=True,null=True)
+    live = models.BooleanField(default=False)
+
+class PollChoice(models.Model):
+    question = models.ForeignKey(PollQuestion)
+    text     = models.CharField(max_length=200)
