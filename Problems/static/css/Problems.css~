@@ -307,7 +307,11 @@ ul li a {
 
 .poll-title {
     display: inline-block;
-    padding-left: 100px;
+    padding-left: 30px;
     padding-bottom: 10px;
     font-size: 18pt;
+}
+
+.poll-title p {
+    p
 }

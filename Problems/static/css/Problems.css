@@ -311,3 +311,7 @@ ul li a {
     padding-bottom: 10px;
     font-size: 18pt;
 }
+
+.poll-title p {
+    font-size:10pt;
+}

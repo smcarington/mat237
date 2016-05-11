@@ -68,6 +68,9 @@ def delete_item(request, objectStr, pk):
         elif objectStr == "question":
             theObj      = get_object_or_404(Question, pk = pk)
             return_View = redirect('list_problem_set', pk=theObj.problem_set.pk)
+        elif objectStr == "pollquestion":
+            theObj      = get_object_or_404(PollQuestion, pk = pk)
+            return_View = redirect('poll_admin', pollpk=theObj.poll.pk)
         else:
             return HttpResponse('<h1>Invalid Object Type</h1>')
 
@@ -245,6 +248,12 @@ def new_poll(request):
 
     return render(request, 'Problems/edit_announcement.html', {'form' : form})
 
+def list_pollquestions(request, pollpk):
+    poll = get_object_or_404(Poll, pk=pollpk)
+    questions = poll.pollquestion_set.all()
+
+    return render(request, 'Problems/list_pollquestions.html', {'questions': questions, 'poll': poll})
+
 # Only handles rendering the poll admin page. AJAX requests handled by other views
 @staff_required()
 def poll_admin(request, pollpk):
@@ -259,12 +268,49 @@ def new_question(request, pollpk, questionpk=None):
 
     poll = get_object_or_404(Poll, pk=pollpk)
 
-    # If a question is created, we must instantiate it
+    # If a question is created for the first time, we must instantiate it so that
+    # our choices have somewhere to point. If it already exists, retrieve it
     if questionpk is None:
         question = PollQuestion(poll=poll)
+        question.save()
+    else:
+        question = get_object_or_404(PollQuestion, pk=questionpk)
 
+    # The form has been submitted. We need to create the appropiate database models.
     if request.method == "POST":
-        return redirect('poll_admin')
+        try:
+            data = request.POST
+            numChoices    = int(data['num-choice'])
+            question.text = data['question']
+
+            question.save()
+
+            # Iterate through the choices. Ignore empty choices and otherwise create
+            # database element. Note that numChoice is absolute (starts at 1), while 
+            # the id's for input names start at 0
+            for myit in range(0, numChoices):
+                id_name = "choice_" + str(myit)
+                c_text = data[id_name]
+
+                choice = PollChoice(question=question, text=c_text, cur_poll=question.num_poll)
+                choice.save()
+
+            return redirect('poll_admin', pollpk=pollpk)
+        except:
+            raise Http404('Something went wrong!')
+
+        return redirect('poll_admin', pollpk=pollpk)
 
     else:
-        return render(request, 'Problems/new_question.html', {'question' : question})
+        return render(request, 'Problems/new_question.html',  {'question' : question})
+
+# AJAX view for making a question live
+@csrf_protect
+def make_live(request):
+    question = get_object_or_404(PollQuestion, pk=int(request.POST['question']))
+    question.live = (request.POST['live']=='true');
+    question.save()
+
+    response_data = {'response': 'Question live: ' + str(question.live)}
+
+    return HttpResponse(json.dumps(response_data))

@@ -22,5 +22,8 @@ urlpatterns = [
     url(r'^polls/$', views.polls, name='polls'),
     url(r'^polls/new/$', views.new_poll, name='new_poll'),
     url(r'^polls/(?P<pollpk>\d+)/admin/$', views.poll_admin, name='poll_admin'),
-    url(r'^polls/(?P<pollpk>\d+)/add_question$', views.new_question, name='new_question'),
+    url(r'^polls/(?P<pollpk>\d+)/show_questions/$', views.list_pollquestions, name='list_pollquestions'),
+    url(r'^polls/(?P<pollpk>\d+)/add_question/$', views.new_question, name='new_question'),
+    url(r'^polls/(?P<pollpk>\d+)/add_question/(?P<questionpk>\d+)/$', views.new_question, name='new_question'),
+    url(r'^make_live/$', views.make_live, name='make_live'),
 ]

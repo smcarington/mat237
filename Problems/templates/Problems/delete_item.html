@@ -16,6 +16,8 @@
         <a href="{% url 'announcements'%}" class="btn btn-default">No</a>
     {% elif type == "question" %}
         <a href="{% url 'list_problem_set' pk=object.problem_set.pk %}" class="btn btn-default">No</a>
+    {% elif type == "pollquestion" %}
+        <a href="{% url 'poll_admin' pollpk=object.poll.pk %}" class="btn btn-default">No</a>
     {% endif %}
 
 {% endblock %}

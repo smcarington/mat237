@@ -101,11 +101,23 @@ class Announcement(models.Model):
 class Poll(models.Model):
     title = models.CharField(max_length=200)
 
+    def __str__(self):
+        return self.title
+
 class PollQuestion(models.Model):
-    poll = models.ForeignKey(Poll)
-    text = models.TextField(blank=True,null=True)
-    live = models.BooleanField(default=False)
+    poll     = models.ForeignKey(Poll)
+    text     = models.TextField(blank=True,null=True)
+    live     = models.BooleanField(default=False)
+    num_poll = models.IntegerField(default=1)
+
+    def __str__(self):
+        return "Poll Question for Poll" + str(poll.pk)
 
 class PollChoice(models.Model):
-    question = models.ForeignKey(PollQuestion)
-    text     = models.CharField(max_length=200)
+    question  = models.ForeignKey(PollQuestion)
+    text      = models.CharField(max_length=200)
+    num_votes = models.IntegerField(default=0)
+    cur_poll  = models.IntegerField(default=1)
+
+    def __str__(self):
+        return self.text
