@@ -1,7 +1,7 @@
 {% extends "Problems/base.html" %}
 
 {% block content %}
-<h2> Mat237Y - Advanced Calculus - May - August 2015</h2>
+<h2> Mat237Y - Advanced Calculus - May - August 2016</h2>
 
 <p>Welcome to MAT237, a course in advanced calculus!</p>
 
@@ -126,7 +126,7 @@
     <td class="tg-yw4l">TBA</td>
     <td class="tg-yw4l">Malors</td>
   <tr>
-    <td class="tg-031e">TR 3-4pm</td>
+    <td class="tg-031e">R 2-4pm</td>
     <td class="tg-yw4l">HU 1018</td>
     <td class="tg-yw4l">Tyler</td>
   </tr>
@@ -176,7 +176,7 @@ For students who wish to drop down to MAT235, the deadline for doing so is June 
 
 <p>You are also invited to communicate with the instructors at any time about your learning needs. Confidentiality of learning needs is respectfully and strictly maintained.</p>
 
-<h3>Illness</h3>
+<h3>Missing Work</h3>
 <p> If you have an academic conflict for one of the tests (for example, a tutorial or lab for a different course), then the weight of that test will be transfered to the final exam on presentation of supporting documentation. <p>
 
 <p>If you are unable to write any of the term tests for a legitimate reason, such as severe illness, this will also be accommodated. Students must notify us of the circumstance by email within 24 hours of the administration of the test, and all supporting documentation must be provided within one week of the administration of the test. In the event of illness, the only valid supporting documentation is a <a href="http://www.illnessverification.utoronto.ca/">Verification of Illness Form</a>.
@@ -192,7 +192,6 @@ For students who wish to drop down to MAT235, the deadline for doing so is June 
     <th class="tg-9hbo">Room</th>
     <th class="tg-9hbo">Email<br></th>
     <th class="tg-9hbo">Office<br></th>
-    <th class="tg-9hbo">Office Hours<br></th>
   </tr>
   <tr>
     <td class="tg-e3zv" rowspan="2">Term 1<br></td>
@@ -201,7 +200,6 @@ For students who wish to drop down to MAT235, the deadline for doing so is June 
     <td class="tg-yw4l">GB 221</td>
     <td class="tg-yw4l">tholden [at] math.toronto.edu</td>
     <td class="tg-yw4l">HU 1028</td>
-    <td class="tg-yw4l"></td>
   </tr>
   <tr>
     <td class="tg-031e">Parker Glynn-Adey<br></td>
@@ -209,7 +207,6 @@ For students who wish to drop down to MAT235, the deadline for doing so is June 
     <td class="tg-yw4l">LM 162</td>
     <td class="tg-yw4l">parker.glyn.adey [at] utoronto.ca </td>
     <td class="tg-yw4l">HU 1026</td>
-    <td class="tg-yw4l"></td>
   </tr>
   <tr>
     <td class="tg-9hbo" rowspan="2">Term 2<br></td>
@@ -218,13 +215,11 @@ For students who wish to drop down to MAT235, the deadline for doing so is June 
     <td class="tg-yw4l">TR</td>
     <td class="tg-yw4l">m.pawliuk [at] mail.utoronto.ca<br></td>
     <td class="tg-yw4l">HU 1027<br></td>
-    <td class="tg-yw4l"></td>
   </tr>
   <tr>
     <td class="tg-yw4l">Mykola Matviichuk</td>
     <td class="tg-yw4l">10-1 PM</td>
     <td class="tg-yw4l">MW</td>
-    <td class="tg-yw4l"></td>
     <td class="tg-yw4l"></td>
     <td class="tg-yw4l"></td>
   </tr>
@@ -277,7 +272,7 @@ For students who wish to drop down to MAT235, the deadline for doing so is June 
   <tr>
     <td class="tg-yw4l">May 27<br></td>
     <td class="tg-yw4l"></td>
-    <td class="tg-9hbo">Midterm 1<br></td>
+    <td class="tg-9hbo">Midterm 1, 6-8pm<br></td>
   </tr>
   <tr>
     <td class="tg-9hbo" rowspan="2">Week 4<br></td>

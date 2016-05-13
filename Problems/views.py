@@ -24,7 +24,7 @@ def post_announcements(request):
     return render(request, 'Problems/post_announcements.html', {'announcements': posts})
 
 def get_old_announcements(request):
-    posts = Announcement.objects.filter(expires__lte=timezone.now()).order_by('-stickied', '-published_date')
+    posts = Announcement.objects.filter(expires__lt=timezone.now()).order_by('-stickied', '-published_date')
     return render(request, 'Problems/old_announcements.html', {'ann': posts})
 
 @staff_required()
