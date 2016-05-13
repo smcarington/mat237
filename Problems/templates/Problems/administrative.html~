@@ -1,5 +1,9 @@
 {% extends "Problems/base.html" %}
 
+{% block title %}
+    <title>Administration-Mat237!</title>
+{% endblock %}
+
 {% block content %}
     <h1>Administration</h1>
 
@@ -10,5 +14,5 @@
 
 {% block sidenote %}
     <p><b>Note:</b> You are incapable of deleting problem sets. If you accidentally create a problem set,
-please contact the system administrator to have the problem set removed from the database.</p>
+    please contact the system administrator to have the problem set removed from the database.</p>
 {% endblock %}

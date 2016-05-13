@@ -304,6 +304,15 @@ def new_question(request, pollpk, questionpk=None):
     else:
         return render(request, 'Problems/new_question.html',  {'question' : question})
 
+# Cannot just abuse new_question because we need to handle choices differently
+def edit_question(request, questionpk):
+    question = get_object_or_404(PollQuestion, pk=questionpk)
+    if request.method == "POST":
+        return redirect('poll_admin', pollpk=question.poll.pk)
+    else:
+        return render('Problems/new_question.html', {'question': question})
+
+
 # AJAX view for making a question live
 @csrf_protect
 def make_live(request):

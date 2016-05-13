@@ -4,17 +4,22 @@
 {% endcomment %}
 
 {% block content %}
-    <form method="POST" action="{% url 'new_question pollpk=question.poll.pk questionpk=question.pk %}"   > {% csrf_token %}
+    <form method="POST" action="{% url 'new_question' pollpk=question.poll.pk questionpk=question.pk %}"   > {% csrf_token %}
         <table class="form-table">
             <tbody>
                 <tr>
                     <td>Question:</td>
                     <td> <textarea cols="80" rows="10" id="id_text" name="question"> </textarea></td>
                 </tr>
+                {% for choice in question.pollchoice_set.all %}
+                    <td> Choice: </td>
+                    <td> <input id="id_choice_{{forloop.counter0}}" name="choice_{{forloop.counter0}}" type="text" maxlength="200"></td>
+                {% empty %}
                 <tr> 
                     <td> Choice: </td>
                     <td> <input id="id_choice_0" name="choice_0" type="text" maxlength="200"></td>
                 </tr>
+                {% endfor %}
             </tbody>
         </table>
 
