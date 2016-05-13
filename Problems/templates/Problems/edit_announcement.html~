@@ -1,5 +1,9 @@
 {% extends 'Problems/base.html' %}
 
+{% block title %}
+<title>Edit Item-Mat237!</title>
+{% endblock %}
+
 {% block content %}
     <form method="POST" >
     {% csrf_token %}

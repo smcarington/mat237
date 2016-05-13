@@ -7,6 +7,9 @@
         to problem_set. Indeed, problems=problem_set.problems
 {% endcomment %}
 
+{% block title %}
+<title>Problem Sets-Mat237!</title>
+{% endblock %}
 {% block content %}
     <h1>{{problem_set.title}}</h1>
 
@@ -19,7 +22,7 @@
                 <a href="{% url 'question_details' pk=prob.pk %}">(Details)</a>
             </div>
             <div class="ps-list-inner-right">
-                {{prob.text | safe |linebreaks}}
+                {{prob.text | safe }}
             </div>
         </li>
             {% if user.is_staff %}

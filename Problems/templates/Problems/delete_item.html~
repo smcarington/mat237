@@ -5,6 +5,10 @@
     var type = string of the type
 {% endcomment %}
 
+{% block title %}
+<title>Delete Item-Mat237!</title>
+{% endblock %]
+
 {% block content %}
     <p class="warning"> Are you sure you want delete the following post? </p>
     {{ post.as_html | safe }}

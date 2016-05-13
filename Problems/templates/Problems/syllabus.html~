@@ -1,5 +1,9 @@
 {% extends "Problems/base.html" %}
 
+{% block title %}
+<title>Administration-Mat237!</title>
+{% endblock %}
+
 {% block content %}
 <h2> Mat237Y - Advanced Calculus - May - August 2016</h2>
 
@@ -310,7 +314,7 @@ For students who wish to drop down to MAT235, the deadline for doing so is June 
   <tr>
     <td class="tg-yw4l">June 17<br></td>
     <td class="tg-yw4l"></td>
-    <td class="tg-9hbo">Midterm 2<br></td>
+    <td class="tg-9hbo">Midterm 2, 6-8pm<br></td>
   </tr>
 </table>
 
@@ -353,7 +357,7 @@ For students who wish to drop down to MAT235, the deadline for doing so is June 
   <tr>
     <td class="tg-yw4l">July 15<br></td>
     <td class="tg-yw4l"><br></td>
-    <td class="tg-9hbo">Midterm 3<br></td>
+    <td class="tg-9hbo">Midterm 3, 6-8pm<br></td>
   </tr>
   <tr>
     <td class="tg-9hbo" rowspan="2">Week 4<br></td>

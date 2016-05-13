@@ -1,5 +1,9 @@
 {% extends 'Problems/base.html' %}
 
+{% block title %}
+<title>Question Details-Mat237!</title>
+{% endblock %}
+
 {% block content %}
     <a href="{% url 'list_problem_set' pk=problem.problem_set.pk %}">&#171; Return to {{problem.problem_set.title}}</a>
 

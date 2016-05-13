@@ -1,5 +1,9 @@
 {% extends 'Problems/base.html' %}
 
+{% block title %}
+<title>Polls-Mat237!</title>
+{% endblock %]
+
 {% block content %}
     <h1> In Class Polls </h1>
 

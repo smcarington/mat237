@@ -3,6 +3,9 @@
     Context has PollQuestion element question
 {% endcomment %}
 
+{% block title %}
+<title>Poll Question Edit-Mat237!</title>
+{% endblock %}
 {% block content %}
     <form method="POST"> {% csrf_token %}
         <table class="form-table">
@@ -25,8 +28,8 @@
 {% block script %}
     <script>
         var numChoices = {{question.pollchoice_set.count}} + 1;
-        var appendString = '<tr><td>Choice:</td><td><input id="id_choice_'+numChoices.toString()+'" name="choice_'+numChoices.toString()+'" type="text" maxlength="200"></tr>';
         $("#add-choice").click( function () {
+            appendString = '<tr><td>Choice:</td><td><input id="id_choice_'+numChoices.toString()+'" name="choice_'+numChoices.toString()+'" type="text" maxlength="200"></tr>';
             $("tbody").append(appendString);
             numChoices++;
         });

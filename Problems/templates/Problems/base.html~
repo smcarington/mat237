@@ -4,7 +4,9 @@
 <!DOCTYPE html>
 <html>
 	<head>
+        {% block title %}
 		<title>Mat237!</title>
+        {% endblock %]
 		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
 		<link rel="stylesheet" href="{% static "css/Problems.css" %}">
@@ -57,5 +59,8 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.css">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/contrib/auto-render.min.js"></script>
+
+        {% block script %}
+        {% endblock %}
 	</body>
 </html>

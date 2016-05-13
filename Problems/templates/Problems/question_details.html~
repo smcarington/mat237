@@ -62,7 +62,5 @@
             <div class="diff">
                 \( \sum_{k=1}^\infty \frac1{k^2} = \frac{\pi^2}{6} \)
             </div>
-
-            <li>
         </ul>
 {% endblock %}

@@ -28,7 +28,3 @@
         <a href="{% url 'new_question' pollpk=poll.pk %}" class="btn btn-default">New Question</a>
     </div>
 {% endblock %}
-
-
-
-{% end block %}
