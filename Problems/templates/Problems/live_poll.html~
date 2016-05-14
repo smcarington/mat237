@@ -35,7 +35,7 @@
         {% else %}
             <dl>
                 {% for choice in choices %}
-                <dt>{{choice.text}}</dt>
+                <dt class="diff">{{choice.text}}</dt>
                 <dd><div class="bar" style="width: {% to_percent choice.num_votes votes %}%">{% to_percent choice.num_votes votes %}% <small>({{choice.num_votes}} votes)</small></div></dd>
                 <br>
                 {% endfor %}
