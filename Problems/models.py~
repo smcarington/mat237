@@ -131,6 +131,7 @@ class PollQuestion(models.Model):
         for clone in clones:
             clone.cur_poll = self.num_poll
             clone.pk = None
+            clone.num_votes = 0
             clone.save()
 
     def __str__(self):
@@ -141,6 +142,10 @@ class PollChoice(models.Model):
     text      = models.CharField(max_length=200)
     num_votes = models.IntegerField(default=0)
     cur_poll  = models.IntegerField(default=1)
+
+    def add_vote(self):
+        self.num_votes = self.num_votes+1
+        self.save()
 
     def __str__(self):
         return self.text

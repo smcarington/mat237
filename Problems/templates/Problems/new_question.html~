@@ -5,7 +5,7 @@
 {% endcomment %}
 
 {% block content %}
-    <form method="POST"> {% csrf_token %}
+<form method="POST" action="{% if choices %}{% url 'edit_pollquestion' questionpk=question.pk%}{% else %}{% url 'new_question' pollpk=question.poll.pk questionpk=question.pk %}{% endif %}"> {% csrf_token %}
         <table class="form-table">
             <tbody>
                 <tr>

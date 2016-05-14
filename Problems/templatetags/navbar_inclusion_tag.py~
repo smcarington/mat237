@@ -26,11 +26,15 @@ def num2diff(value):
     # Takes a number {1,2,3,4} and returns {easy,med,hard,imp}
     if value == 1:
         return "Easy"
-    elif value == "M":
-        return 2
-    elif value == "H":
-        return 3
-    elif value == "B":
-        return 4
+    elif value == 2:
+        return "Medium"
+    elif value == 3:
+        return "Hard"
+    elif value == 4:
+        return "Bonus"
     else:
         return ""
+
+@register.simple_tag
+def to_percent(num, den):
+    return str(round(100*num/den))

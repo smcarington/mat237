@@ -313,7 +313,8 @@ def edit_pollquestion(request, questionpk):
     # On form submission, update everything
     if request.method == "POST":
         form_data = request.POST
-        for field, data in form_data.iteritems():
+        # Note here that iteritems for python 2.x and items for python 3
+        for field, data in form_data.items():
             if field == 'question':
                 question.text = form_data[field]
                 question.save()
@@ -369,7 +370,7 @@ def live_question(request):
         # The PollQuestion model has built in functions for this. But we have to make sure
         # that this is the only live question on start.
         if status == 'start':
-            PollQuestion.objects.filter(visible=True).update(visible=False)
+            PollQuestion.objects.filter(visible=True).update(visible=False, can_vote=False)
             question.start()
             response_data = {'response': 'Question pushed to live page'}
         elif status == 'stop':
@@ -401,8 +402,36 @@ def live_poll(request):
     try: 
         question = PollQuestion.objects.get(visible=True)
         choices  = question.pollchoice_set.filter(cur_poll=question.num_poll)
-        return render(request, 'Problems/live_poll.html', {'question': question, 'choices': choices})
+        num_votes = sum(choices.values_list('num_votes', flat=True))
+
+        state = str(question.pk)+"-"+str(question.can_vote)
+        return render(request, 'Problems/live_poll.html', {'question': question, 'choices': choices, 'state': state, 'votes':num_votes})
 
     # If no question is currently live, we do nothing
     except PollQuestion.DoesNotExist:
-        return render(request, 'Problems/live_poll.html')
+        state = "-1"
+        return render(request, 'Problems/live_poll.html', {'state': state})
+
+@login_required
+def query_live(request):
+   
+    # Votes are POSTed, status changes are done via GET
+    # [Future] Currently user can vote as many times as they like by refreshing. May need
+    # to create a db-model to track voting.
+    if request.method == "POST":
+        # POST will send choicepk as field 'pk'
+        choicepk = int(request.POST['pk'])
+        choice   = get_object_or_404(PollChoice, pk=choicepk)
+
+        choice.add_vote()
+        response_data = {'status': 'success'}
+    else:
+        try: 
+            question = PollQuestion.objects.get(visible=True)
+            state = str(question.pk)+"-"+str(question.can_vote)
+
+            response_data = {'state': state}
+        except:
+            response_data = {'state': "-1"}
+
+    return HttpResponse(json.dumps(response_data))

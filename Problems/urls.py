@@ -29,4 +29,5 @@ urlpatterns = [
     url(r'^make_live/$', views.make_live, name='make_live'),
     url(r'^live_question/$', views.live_question, name='live_question'),
     url(r'^live_poll/$', views.live_poll, name='live_poll'),
+    url(r'^query_live/$', views.query_live, name='query_live'),
 ]

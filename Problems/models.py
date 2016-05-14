@@ -143,5 +143,9 @@ class PollChoice(models.Model):
     num_votes = models.IntegerField(default=0)
     cur_poll  = models.IntegerField(default=1)
 
+    def add_vote(self):
+        self.num_votes = self.num_votes+1
+        self.save()
+
     def __str__(self):
         return self.text
