@@ -36,7 +36,11 @@
             <dl>
                 {% for choice in choices %}
                 <dt class="diff">{{choice.text}}</dt>
+<<<<<<< HEAD
                 {% score_div choice.num_votes votes %}
+=======
+                <dd><div class="bar" style="width: {% to_percent choice.num_votes votes %}%">{% to_percent choice.num_votes votes %}% <small>({{choice.num_votes}} votes)</small></div></dd>
+>>>>>>> c0d9b0ee37ca997c48b5438c9c4c4293726340e6
                 <br>
                 {% endfor %}
             </dl>

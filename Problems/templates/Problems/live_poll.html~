@@ -22,7 +22,7 @@
 {% block content %}
     {% if question %}
         <div class="diff question-detail">
-            {{question.text}}
+            {{question.text | safe}}
         </div>
         <p id="response"></p>
         {% if question.can_vote %}
@@ -35,7 +35,7 @@
         {% else %}
             <dl>
                 {% for choice in choices %}
-                <dt>{{choice.text}}</dt>
+                <dt class="diff">{{choice.text}}</dt>
                 {% score_div choice.num_votes votes %}
                 <br>
                 {% endfor %}
