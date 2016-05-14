@@ -5,13 +5,17 @@
     Context contains Poll element called poll.
 {% endcomment %}
 
+{% block title %}
+<title>Poll Administration-Mat237!</title>
+{% endblock %}
+
 {% block content %}
     <h1> {{poll.title}} Administration </h1>
 
     {% for question in poll.pollquestion_set.all %}
         <div class="row">
             <div class="poll-title col-md-6">
-                <p class="diff">{{question.text}}</p>
+                <p class="diff">{{question.text| safe}}</p>
                 <small> <a href="{% url 'edit_pollquestion' questionpk=question.pk %}">Edit</a> <a href="{% url 'delete_item' pk=question.pk objectStr='pollquestion' %}">Delete</a></small>
             </div>
             {% if user.is_staff %}
@@ -40,7 +44,7 @@
 {% block buttons %}
     <div class="button-div">
         <a href="{% url 'new_question' pollpk=poll.pk %}" class="btn btn-default">New Question</a>
-        <button class="btn btn-default old-ann" id="stop_-1">End Polling</button>
+        <button class="btn btn-default old-ann" id="endall_-1">End Polling</button>
     </div>
 {% endblock %}
 

@@ -22,7 +22,7 @@
 {% block content %}
     {% if question %}
         <div class="diff question-detail">
-            {{question.text}}
+            {{question.text | safe}}
         </div>
         <p id="response"></p>
         {% if question.can_vote %}

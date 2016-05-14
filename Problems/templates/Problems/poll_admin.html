@@ -15,7 +15,7 @@
     {% for question in poll.pollquestion_set.all %}
         <div class="row">
             <div class="poll-title col-md-6">
-                <p class="diff">{{question.text}}</p>
+                <p class="diff">{{question.text| safe}}</p>
                 <small> <a href="{% url 'edit_pollquestion' questionpk=question.pk %}">Edit</a> <a href="{% url 'delete_item' pk=question.pk objectStr='pollquestion' %}">Delete</a></small>
             </div>
             {% if user.is_staff %}
