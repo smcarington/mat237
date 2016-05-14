@@ -1,7 +1,7 @@
 {% extends "Problems/base.html" %}
 
 {% block title %}
-<title>Administration-Mat237!</title>
+<title>Syllabus-Mat237!</title>
 {% endblock %}
 
 {% block content %}

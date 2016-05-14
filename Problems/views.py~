@@ -223,7 +223,7 @@ Please login and change your password
 
         send_mail(subject, message, 'mat237summer2016@gmail.com', [em])
         user.save()
-        
+
         # Now send a confirmation to the staff member who added this user
         conf_subject = "User {student} has just been added to MAT237".format(student=un)
         conf_message = """The Student with the email address {email} and username {student} has been successfully added to the MAT237 group user list. No further action is required on your part.""".format(student=un, email=em)
@@ -414,7 +414,7 @@ def live_poll(request):
         num_votes = sum(choices.values_list('num_votes', flat=True))
 
         state = str(question.pk)+"-"+str(question.can_vote)
-        return render(request, 'Problems/live_poll.html', {'question': question, 'choices': choices, 'state': state, num})
+        return render(request, 'Problems/live_poll.html', {'question': question, 'choices': choices, 'state': state, 'votes':num_votes})
 
     # If no question is currently live, we do nothing
     except PollQuestion.DoesNotExist:
