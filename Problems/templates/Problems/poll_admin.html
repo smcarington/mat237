@@ -11,13 +11,13 @@
     {% for question in poll.pollquestion_set.all %}
         <div class="row">
             <div class="poll-title col-md-6">
-                <p>{{question.text}}</p>
-                <small> <a href="#">Edit</a> <a href="{% url 'delete_item' pk=question.pk objectStr='pollquestion' %}">Delete</a></small>
+                <p class="diff">{{question.text}}</p>
+                <small> <a href="{% url 'edit_pollquestion' questionpk=question.pk %}">Edit</a> <a href="{% url 'delete_item' pk=question.pk objectStr='pollquestion' %}">Delete</a></small>
             </div>
             {% if user.is_staff %}
             <div class = "col-md-6">
                 Live: <input type="checkbox" id="check_{{question.pk}}" {% if question.live %}checked{% endif %}>
-                <button class="btn btn-success">Start</button> <button class="btn btn-danger"> Stop</button> <button class="btn btn-default"> Reset </button>
+                <button class="btn btn-success" id="start_{{question.pk}}">Start</button> <button class="btn btn-danger" id="stop_{{question.pk}}"> Stop</button> <button class="btn btn-default" id ="reset_{{question.pk}}"> Reset </button>
                 <p id="response_{{question.pk}}"></p>
             </div>
         </div>
@@ -34,13 +34,13 @@
         <li> Use the 'Stop' button to stop voting and display results.
         <li> The 'Reset' button clears the current poll results and resets votes to zero. The data from the
              previous vote is preserved.
-         <li> The 'Edit' link does not currently work. To be implemented in the future.
     </ul>
 {% endblock %}
 
 {% block buttons %}
     <div class="button-div">
         <a href="{% url 'new_question' pollpk=poll.pk %}" class="btn btn-default">New Question</a>
+        <button class="btn btn-default old-ann" id="endall_-1">End Polling</button>
     </div>
 {% endblock %}
 

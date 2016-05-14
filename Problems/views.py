@@ -289,11 +289,12 @@ def new_question(request, pollpk, questionpk=None):
             # database element. Note that numChoice is absolute (starts at 1), while 
             # the id's for input names start at 0
             for myit in range(0, numChoices):
-                id_name = "choice_" + str(myit)
+                id_name = "new_" + str(myit)
                 c_text = data[id_name]
 
-                choice = PollChoice(question=question, text=c_text, cur_poll=question.num_poll)
-                choice.save()
+                if c_text != '':
+                    choice = PollChoice(question=question, text=c_text, cur_poll=question.num_poll)
+                    choice.save()
 
             return redirect('poll_admin', pollpk=pollpk)
         except:
@@ -305,12 +306,38 @@ def new_question(request, pollpk, questionpk=None):
         return render(request, 'Problems/new_question.html',  {'question' : question})
 
 # Cannot just abuse new_question because we need to handle choices differently
-def edit_question(request, questionpk):
+def edit_pollquestion(request, questionpk):
     question = get_object_or_404(PollQuestion, pk=questionpk)
+    choices = question.pollchoice_set.filter(cur_poll=question.num_poll)
+
+    # On form submission, update everything
     if request.method == "POST":
+        form_data = request.POST
+        for field, data in form_data.iteritems():
+            if field == 'question':
+                question.text = form_data[field]
+                question.save()
+            # 'old' indicates a previous existing choice
+            elif 'old' in field:
+                pkstring  = field.split('_')
+                choice_pk = int(pkstring[-1])
+
+                choice = get_object_or_404(PollChoice, pk=choice_pk)
+                choice.text = form_data[field]
+                if choice.text == '':
+                    choice.delete()
+                else:
+                    choice.save()
+            # 'choice' indicates a new choice that was added
+            elif 'new' in field:
+                c_text = form_data[field]
+
+                choice = PollChoice(question=question, text=c_text, cur_poll=question.num_poll)
+                choice.save()
+
         return redirect('poll_admin', pollpk=question.poll.pk)
     else:
-        return render('Problems/new_question.html', {'question': question})
+        return render(request, 'Problems/new_question.html', {'question': question, 'choices': choices})
 
 
 # AJAX view for making a question live
@@ -323,3 +350,59 @@ def make_live(request):
     response_data = {'response': 'Question live: ' + str(question.live)}
 
     return HttpResponse(json.dumps(response_data))
+
+# AJAX view for an administrator to start/stop/reset a question
+@csrf_protect
+def live_question(request):
+    if request.user.is_staff:
+        data = request.POST
+        question_pk = int(data['questionpk'])
+        status   = data['action']
+
+        if status == 'endall':
+            PollQuestion.objects.filter(visible=True).update(visible=False, can_vote=False)
+            response_data = {'response': 'Polling has ended'}
+            return HttpResponse(json.dumps(response_data))
+       
+        question = get_object_or_404(PollQuestion, pk = question_pk)
+
+        # The PollQuestion model has built in functions for this. But we have to make sure
+        # that this is the only live question on start.
+        if status == 'start':
+            PollQuestion.objects.filter(visible=True).update(visible=False)
+            question.start()
+            response_data = {'response': 'Question pushed to live page'}
+        elif status == 'stop':
+            if not question.can_vote:
+                response_data = {'response': 'No question to stop'}
+            else:
+                question.stop()
+                response_data = {'response': 'Question stopped. Displaying results.'}
+            # Need to do some computations here to return data
+        elif status == 'reset':
+            if not question.visible:
+                response_data = {'response': 'That question is not visible'}
+            else:
+                question.reset()
+                response_data = {'response': 'Data saved. Reopening the vote'}
+    else:
+        response_data = {'response': 'You are not authorized to make this POST'}
+
+    return HttpResponse(json.dumps(response_data))
+
+# Server is only ever in one of three states:
+# 1. Nothing is happening
+# 2. Question is displayed and voting
+# 3. Question is display with results of most recent vote
+# Depending on the states, we render a different page
+@login_required
+def live_poll(request):
+    # See if a question has been opened by an administrator
+    try: 
+        question = PollQuestion.objects.get(visible=True)
+        choices  = question.pollchoice_set.filter(cur_poll=question.num_poll)
+        return render(request, 'Problems/live_poll.html', {'question': question, 'choices': choices})
+
+    # If no question is currently live, we do nothing
+    except PollQuestion.DoesNotExist:
+        return render(request, 'Problems/live_poll.html')

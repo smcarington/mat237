@@ -1,0 +1,29 @@
+{% extends 'Problems/base.html' %}
+
+{% comment %}
+    Has (possibly empty) PollQuestion element 'question'
+    If 'question' is non-empty, has list of PollChoices called 'choices'
+{% endcomment %}
+
+{% block title %}
+    <title>Live Poll-Mat237!</title>
+{% endblock %}
+
+{% block content %}
+    {% if question %}
+        <div class="diff question-detail">
+            {{question.text}}
+        </div>
+        {% if question.can_vote %}
+            <div class="diff multiplechoice"> 
+                {% for choice in choices %}
+                <button class="btn btn-default">{{forloop.counter}}</button> <p>{{choice.text}}</p>
+                <br>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% else %}
+        <p> There is currently no poll on which to vote. </p>
+    {% endif %}
+
+{% endblock %}

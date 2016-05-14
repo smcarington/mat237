@@ -1,23 +1,26 @@
 {% extends 'Problems/base.html' %}
 {% comment %}
     Context has PollQuestion element question
+    Context has list of PollChoice elements choices
 {% endcomment %}
 
 {% block content %}
-    <form method="POST" action="{% url 'new_question' pollpk=question.poll.pk questionpk=question.pk %}"   > {% csrf_token %}
+    <form method="POST"> {% csrf_token %}
         <table class="form-table">
             <tbody>
                 <tr>
                     <td>Question:</td>
-                    <td> <textarea cols="80" rows="10" id="id_text" name="question"> </textarea></td>
+                    <td> <textarea cols="80" rows="10" id="id_text" name="question">{{question.text}}</textarea></td>
                 </tr>
-                {% for choice in question.pollchoice_set.all %}
+                {% for choice in choices %}
+                <tr>
                     <td> Choice: </td>
-                    <td> <input id="id_choice_{{forloop.counter0}}" name="choice_{{forloop.counter0}}" type="text" maxlength="200" data-pk="{{choice.pk}}"></td>
+                    <td> <input id="old_{{choice.pk}}" name="old_{{choice.pk}}" type="text" maxlength="200" value="{{choice.text}}"></td>
+                </tr>
                 {% empty %}
                 <tr> 
                     <td> Choice: </td>
-                    <td> <input id="id_choice_0" name="choice_0" type="text" maxlength="200"></td>
+                    <td> <input id="id_choice_0" name="new_0" type="text" maxlength="200"></td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -28,11 +31,15 @@
     </form>
 {% endblock %}
 
+{% block sidenote %}
+    <p> To delete a choice, simply leave the input blank. </p>
+{% endblock %}
+
 {% block script %}
     <script>
         var numChoices = {{question.pollchoice_set.count}} + 1;
         $("#add-choice").click( function () {
-            appendString = '<tr><td>Choice:</td><td><input id="id_choice_'+numChoices.toString()+'" name="choice_'+numChoices.toString()+'" type="text" maxlength="200"></tr>';
+            appendString = '<tr><td>Choice:</td><td><input id="id_choice_'+numChoices.toString()+'" name="new_'+numChoices.toString()+'" type="text" maxlength="200"></tr>';
             $("tbody").append(appendString);
             numChoices++;
             $("#num-choice").val(numChoices.toString());

@@ -1,7 +1,9 @@
 {% extends 'Problems/base.html' %}
 
 {% block content %}
-    <h1> In Class Polls </h1>
+    <h1> In Class Polls </h1> 
+    
+    <a href="#" class="btn btn-default">Live Poll</a>
 
     {% for poll in polls %}
         <div class="row">

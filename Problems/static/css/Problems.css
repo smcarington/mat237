@@ -309,9 +309,16 @@ ul li a {
     display: inline-block;
     padding-left: 30px;
     padding-bottom: 10px;
+    padding-top: 10px;
     font-size: 18pt;
 }
 
 .poll-title p {
     font-size:10pt;
+}
+
+.multiplechoice, .multiplechoice button, .multiplechoice p {
+    display: inline-block;
+    min-width: 50px;
+    margin: 10px 10px;
 }
