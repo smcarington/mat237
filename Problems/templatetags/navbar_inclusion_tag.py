@@ -1,6 +1,7 @@
 from django import template
 from Problems.models import ProblemSet
 from django.core.urlresolvers import resolve, Resolver404
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -38,3 +39,15 @@ def num2diff(value):
 @register.simple_tag
 def to_percent(num, den):
     return round(100*num/den)
+
+@register.simple_tag
+def score_div(num, den):
+    percent = round(100*num/den)
+    div_str = '<dd><div class="{cl}" style="width: {widthperc}%">{perc}% <small>({num_votes} votes)</small></div></dd>'
+
+    if percent==0:
+        ret_str = div_str.format(cl="zerobar", widthperc=100, perc=percent, num_votes=num)
+    else:
+        ret_str = div_str.format(cl="bar", widthperc=percent, perc=percent, num_votes=num)
+
+    return mark_safe(ret_str)

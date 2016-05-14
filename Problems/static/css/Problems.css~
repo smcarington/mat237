@@ -321,7 +321,7 @@ ul li a {
     display: inline-block;
     min-width: 50px;
     margin: 10px 10px;
-    font-size:14pt;
+    font-size: 14pt;
 }
 
 .bar {
@@ -334,6 +334,14 @@ ul li a {
     height: 25px;
 }
 
+.zerobar {
+    color: black;
+    text-align: left;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 14pt;
+    height: 25px;
+}
 dt {
     display: inline-block;
     margin-left: 10px;
