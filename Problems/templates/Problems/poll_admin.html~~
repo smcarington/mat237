@@ -43,7 +43,6 @@
         <button class="btn btn-default old-ann" id="stop_-1">End Polling</button>
     </div>
 {% endblock %}
-
 {% block script %}
     <script src={% static "javascript/admin.js" %}></script>
 {% endblock %}

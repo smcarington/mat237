@@ -22,5 +22,12 @@ urlpatterns = [
     url(r'^polls/$', views.polls, name='polls'),
     url(r'^polls/new/$', views.new_poll, name='new_poll'),
     url(r'^polls/(?P<pollpk>\d+)/admin/$', views.poll_admin, name='poll_admin'),
-    url(r'^polls/(?P<pollpk>\d+)/add_question$', views.new_question, name='new_question'),
+    url(r'^polls/(?P<pollpk>\d+)/show_questions/$', views.list_pollquestions, name='list_pollquestions'),
+    url(r'^polls/(?P<pollpk>\d+)/add_question/$', views.new_question, name='new_question'),
+    url(r'^polls/(?P<pollpk>\d+)/add_question/(?P<questionpk>\d+)/$', views.new_question, name='new_question'),
+    url(r'^polls/(?P<questionpk>\d+)/edit_question/$', views.edit_pollquestion, name='edit_pollquestion'),
+    url(r'^make_live/$', views.make_live, name='make_live'),
+    url(r'^live_question/$', views.live_question, name='live_question'),
+    url(r'^live_poll/$', views.live_poll, name='live_poll'),
+    url(r'^query_live/$', views.query_live, name='query_live'),
 ]

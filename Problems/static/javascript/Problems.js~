@@ -72,9 +72,21 @@ $('document').ready(function() {
 
     // gets old announcements and inserts them into the page
     $('#get_old').click( function() {
-        $.get('/Problems/get_old_announcements/', {}, function(data) {
+        $.get('/get_old_announcements/', {}, function(data) {
             $('.old-ann').html(data);
         });
+    });
+
+    // Poll administration 
+    $('[id^="check"]').click( function() {
+        var question = $(this).attr('id').split('_')[1];
+        var live     = $(this).is(':checked');
+        $.post('/make_live/', {question: question, live: live}, 
+            function(data) {
+                $response = $("#response_"+question);
+                $response.html(data['response']);
+                setTimeout( function() {$response.html('')}, 2000);
+        }, "json");
     });
 });
 

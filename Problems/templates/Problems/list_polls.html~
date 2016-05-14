@@ -5,12 +5,14 @@
 {% endblock %]
 
 {% block content %}
-    <h1> In Class Polls </h1>
+    <h1> In Class Polls </h1> 
+    
+    <a href="#" class="btn btn-default">Live Poll</a>
 
     {% for poll in polls %}
         <div class="row">
             <div class="poll-title col-md-8">
-                <a href=javascript:void()>{{poll.title}}</a> <small> ({{ poll.pollquestion_set.count }} Questions)</small>
+                <a href="{% url 'list_pollquestions' pollpk=poll.pk %}">{{poll.title}}</a> <small> ({{ poll.pollquestion_set.count }} Questions)</small>
             </div>
             {% if user.is_staff %}
             <div class = "col-md-4">

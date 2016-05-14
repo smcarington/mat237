@@ -1,7 +1,11 @@
 {% extends "Problems/base.html" %}
 
 {% block title %}
+<<<<<<< HEAD
+<title>Administration-Mat237!</title>
+=======
     <title>Administration-Mat237!</title>
+>>>>>>> clicker
 {% endblock %}
 
 {% block content %}

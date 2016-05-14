@@ -1,0 +1,24 @@
+{% extends 'Problems/base.html' %}
+
+{% comment %}
+    Has Poll item 'poll'
+    Has list of PollQuestion elements 'questions'
+{% endcomment %}
+
+{% block content %}
+    <h1>Questions for Poll {{poll.title}}</h1>
+    <a href="{% url 'polls' %}">&#171; Return to Polls</a>
+    
+    {% for question in questions %}
+        {% if question.live %}
+            <div class="diff"> {{question.text}}
+                <ol>
+                {% for choice in question.pollchoice_set.all %}
+                    <li> {{ choice.text }} </li>
+                {% endfor %}
+                </ol> 
+            </div>
+        {% endif %}
+    {% endfor %}
+
+{% endblock %}

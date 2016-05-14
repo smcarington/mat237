@@ -68,6 +68,9 @@ def delete_item(request, objectStr, pk):
         elif objectStr == "question":
             theObj      = get_object_or_404(Question, pk = pk)
             return_View = redirect('list_problem_set', pk=theObj.problem_set.pk)
+        elif objectStr == "pollquestion":
+            theObj      = get_object_or_404(PollQuestion, pk = pk)
+            return_View = redirect('poll_admin', pollpk=theObj.poll.pk)
         else:
             return HttpResponse('<h1>Invalid Object Type</h1>')
 
@@ -220,15 +223,6 @@ Please login and change your password
 
         send_mail(subject, message, 'mat237summer2016@gmail.com', [em])
         user.save()
-        
-        # Now send a confirmation to the staff member who added this user
-        conf_subject = "User {student} has just been added to MAT237".format(student=un)
-        conf_message = """The Student with the email address {email} and username {student} has been successfully added to the MAT237 group user list. No further action is required on your part.""".format(student=un, email=em)
-
-        try:
-            send_mail(conf_subject, conf_message, 'mat237summer2016@gmail.com', [request.user.email], fail_silently=False)
-        except:
-            print('Error sending confirmation email to staff member')
 
         return redirect('administrative')
     else:
@@ -254,6 +248,12 @@ def new_poll(request):
 
     return render(request, 'Problems/edit_announcement.html', {'form' : form})
 
+def list_pollquestions(request, pollpk):
+    poll = get_object_or_404(Poll, pk=pollpk)
+    questions = poll.pollquestion_set.all()
+
+    return render(request, 'Problems/list_pollquestions.html', {'questions': questions, 'poll': poll})
+
 # Only handles rendering the poll admin page. AJAX requests handled by other views
 @staff_required()
 def poll_admin(request, pollpk):
@@ -268,12 +268,170 @@ def new_question(request, pollpk, questionpk=None):
 
     poll = get_object_or_404(Poll, pk=pollpk)
 
-    # If a question is created, we must instantiate it
+    # If a question is created for the first time, we must instantiate it so that
+    # our choices have somewhere to point. If it already exists, retrieve it
     if questionpk is None:
         question = PollQuestion(poll=poll)
+        question.save()
+    else:
+        question = get_object_or_404(PollQuestion, pk=questionpk)
 
+    # The form has been submitted. We need to create the appropiate database models.
     if request.method == "POST":
-        return redirect('poll_admin')
+        try:
+            data = request.POST
+            numChoices    = int(data['num-choice'])
+            question.text = data['question']
+
+            question.save()
+
+            # Iterate through the choices. Ignore empty choices and otherwise create
+            # database element. Note that numChoice is absolute (starts at 1), while 
+            # the id's for input names start at 0
+            for myit in range(0, numChoices):
+                id_name = "new_" + str(myit)
+                c_text = data[id_name]
+
+                if c_text != '':
+                    choice = PollChoice(question=question, text=c_text, cur_poll=question.num_poll)
+                    choice.save()
+
+            return redirect('poll_admin', pollpk=pollpk)
+        except:
+            raise Http404('Something went wrong!')
+
+        return redirect('poll_admin', pollpk=pollpk)
 
     else:
-        return render(request, 'Problems/new_question.html', {'question' : question})
+        return render(request, 'Problems/new_question.html',  {'question' : question})
+
+# Cannot just abuse new_question because we need to handle choices differently
+def edit_pollquestion(request, questionpk):
+    question = get_object_or_404(PollQuestion, pk=questionpk)
+    choices = question.pollchoice_set.filter(cur_poll=question.num_poll)
+
+    # On form submission, update everything
+    if request.method == "POST":
+        form_data = request.POST
+        # Note here that iteritems for python 2.x and items for python 3
+        for field, data in form_data.items():
+            if field == 'question':
+                question.text = form_data[field]
+                question.save()
+            # 'old' indicates a previous existing choice
+            elif 'old' in field:
+                pkstring  = field.split('_')
+                choice_pk = int(pkstring[-1])
+
+                choice = get_object_or_404(PollChoice, pk=choice_pk)
+                choice.text = form_data[field]
+                if choice.text == '':
+                    choice.delete()
+                else:
+                    choice.save()
+            # 'choice' indicates a new choice that was added
+            elif 'new' in field:
+                c_text = form_data[field]
+
+                choice = PollChoice(question=question, text=c_text, cur_poll=question.num_poll)
+                choice.save()
+
+        return redirect('poll_admin', pollpk=question.poll.pk)
+    else:
+        return render(request, 'Problems/new_question.html', {'question': question, 'choices': choices})
+
+
+# AJAX view for making a question live
+@csrf_protect
+def make_live(request):
+    question = get_object_or_404(PollQuestion, pk=int(request.POST['question']))
+    question.live = (request.POST['live']=='true');
+    question.save()
+
+    response_data = {'response': 'Question live: ' + str(question.live)}
+
+    return HttpResponse(json.dumps(response_data))
+
+# AJAX view for an administrator to start/stop/reset a question
+@csrf_protect
+def live_question(request):
+    if request.user.is_staff:
+        data = request.POST
+        question_pk = int(data['questionpk'])
+        status   = data['action']
+
+        if status == 'endall':
+            PollQuestion.objects.filter(visible=True).update(visible=False, can_vote=False)
+            response_data = {'response': 'Polling has ended'}
+            return HttpResponse(json.dumps(response_data))
+       
+        question = get_object_or_404(PollQuestion, pk = question_pk)
+
+        # The PollQuestion model has built in functions for this. But we have to make sure
+        # that this is the only live question on start.
+        if status == 'start':
+            PollQuestion.objects.filter(visible=True).update(visible=False, can_vote=False)
+            question.start()
+            response_data = {'response': 'Question pushed to live page'}
+        elif status == 'stop':
+            if not question.can_vote:
+                response_data = {'response': 'No question to stop'}
+            else:
+                question.stop()
+                response_data = {'response': 'Question stopped. Displaying results.'}
+            # Need to do some computations here to return data
+        elif status == 'reset':
+            if not question.visible:
+                response_data = {'response': 'That question is not visible'}
+            else:
+                question.reset()
+                response_data = {'response': 'Data saved. Reopening the vote'}
+    else:
+        response_data = {'response': 'You are not authorized to make this POST'}
+
+    return HttpResponse(json.dumps(response_data))
+
+# Server is only ever in one of three states:
+# 1. Nothing is happening
+# 2. Question is displayed and voting
+# 3. Question is display with results of most recent vote
+# Depending on the states, we render a different page
+@login_required
+def live_poll(request):
+    # See if a question has been opened by an administrator
+    try: 
+        question = PollQuestion.objects.get(visible=True)
+        choices  = question.pollchoice_set.filter(cur_poll=question.num_poll)
+        num_votes = sum(choices.values_list('num_votes', flat=True))
+
+        state = str(question.pk)+"-"+str(question.can_vote)
+        return render(request, 'Problems/live_poll.html', {'question': question, 'choices': choices, 'state': state, 'votes':num_votes})
+
+    # If no question is currently live, we do nothing
+    except PollQuestion.DoesNotExist:
+        state = "-1"
+        return render(request, 'Problems/live_poll.html', {'state': state})
+
+@login_required
+def query_live(request):
+   
+    # Votes are POSTed, status changes are done via GET
+    # [Future] Currently user can vote as many times as they like by refreshing. May need
+    # to create a db-model to track voting.
+    if request.method == "POST":
+        # POST will send choicepk as field 'pk'
+        choicepk = int(request.POST['pk'])
+        choice   = get_object_or_404(PollChoice, pk=choicepk)
+
+        choice.add_vote()
+        response_data = {'status': 'success'}
+    else:
+        try: 
+            question = PollQuestion.objects.get(visible=True)
+            state = str(question.pk)+"-"+str(question.can_vote)
+
+            response_data = {'state': state}
+        except:
+            response_data = {'state': "-1"}
+
+    return HttpResponse(json.dumps(response_data))

@@ -309,5 +309,40 @@ ul li a {
     display: inline-block;
     padding-left: 30px;
     padding-bottom: 10px;
+    padding-top: 10px;
     font-size: 18pt;
+}
+
+.poll-title p {
+    font-size:10pt;
+}
+
+.multiplechoice, .multiplechoice button, .multiplechoice p {
+    display: inline-block;
+    min-width: 50px;
+    margin: 10px 10px;
+    font-size: 14pt;
+}
+
+.bar {
+    background-color: #0000ff;
+    color: white;
+    text-align: center;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 14pt;
+    height: 25px;
+}
+
+dt {
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 16pt;
+}
+
+dd {
+    display: inline-block;
+    width: 100%;
+    margin-left: 30px;
+    padding: 10px 0px;
 }

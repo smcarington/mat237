@@ -101,11 +101,51 @@ class Announcement(models.Model):
 class Poll(models.Model):
     title = models.CharField(max_length=200)
 
+    def __str__(self):
+        return self.title
+
 class PollQuestion(models.Model):
-    poll = models.ForeignKey(Poll)
-    text = models.TextField(blank=True,null=True)
-    live = models.BooleanField(default=False)
+    poll     = models.ForeignKey(Poll)
+    text     = models.TextField(blank=True,null=True)
+    live     = models.BooleanField(default=False)
+    num_poll = models.IntegerField(default=1)
+    visible  = models.BooleanField(default=False)
+    can_vote = models.BooleanField(default=False)
+
+    # Called when an administrator pushes the poll to the live page. View handles
+    # setting all other visibility settings to false
+    def start(self):
+        self.visible  = True
+        self.can_vote = True
+        self.save()
+
+    def stop(self):
+        self.can_vote = False
+        self.save()
+
+    def reset(self):
+        # Clone the choices, update cur_poll and num_poll
+        clones = self.pollchoice_set.filter(cur_poll=self.num_poll)
+        self.num_poll = self.num_poll+1
+        self.save()
+        for clone in clones:
+            clone.cur_poll = self.num_poll
+            clone.pk = None
+            clone.num_votes = 0
+            clone.save()
+
+    def __str__(self):
+        return "Poll Question for Poll" + str(self.poll.pk)
 
 class PollChoice(models.Model):
-    question = models.ForeignKey(PollQuestion)
-    text     = models.CharField(max_length=200)
+    question  = models.ForeignKey(PollQuestion)
+    text      = models.CharField(max_length=200)
+    num_votes = models.IntegerField(default=0)
+    cur_poll  = models.IntegerField(default=1)
+
+    def add_vote(self):
+        self.num_votes = self.num_votes+1
+        self.save()
+
+    def __str__(self):
+        return self.text

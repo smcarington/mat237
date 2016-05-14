@@ -34,3 +34,7 @@ def num2diff(value):
         return "Bonus"
     else:
         return ""
+
+@register.simple_tag
+def to_percent(num, den):
+    return round(100*num/den)

@@ -4,9 +4,6 @@
     Context has list of PollChoice elements choices
 {% endcomment %}
 
-{% block title %}
-<title>Poll Question Edit-Mat237!</title>
-{% endblock %}
 {% block content %}
 <form method="POST" action="{% if choices %}{% url 'edit_pollquestion' questionpk=question.pk%}{% else %}{% url 'new_question' pollpk=question.poll.pk questionpk=question.pk %}{% endif %}"> {% csrf_token %}
         <table class="form-table">
