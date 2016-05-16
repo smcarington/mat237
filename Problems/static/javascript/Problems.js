@@ -76,5 +76,47 @@ $('document').ready(function() {
             $('.old-ann').html(data);
         });
     });
+
+    // On Problem set page, deal with ability to print questions and solutions.
+    // First, nice JS for "all" checkboxes. Unnecessary but nice.
+    $("[id$='-all'").click( function() {
+        qs=$(this).attr('id').split('')[0]
+        $("[name^='"+qs+"-']").prop("checked", $(this).is(":checked"));
+    });
+
+    // Cannot include solution without text
+    $("[name^='s-']").click( function() {
+        var thisNum = $(this).attr('name').split('-')[1];
+        $("[name='q-"+thisNum+"']").prop("checked",true);
+    });
+
+    // Now deal with the button press. Harvest the selected questions and send this list
+    // to the server
+    $('#pdflatex').click(function () {
+        // Check to see if the 'all' buttons have been pushed
+        var allbox = {"q": false, "a": false};
+        var qbox = []
+        if ($("#q-all").is(":checked")) {
+            allbox["q"] = true;
+        }
+        if ($("#s-all").is(":checked")) {
+            allbox["s"] = true;
+        }
+
+        $("[name^='q-']").each( function () {
+            if ($(this).is(":checked")) {
+                var thisNum = $(this).attr('name').split('-')[1];
+                sol = $("[name='s-"+thisNum+"'").is(":checked");
+
+                qbox.push({"number": thisNum, "sol":sol});
+            }
+        });
+
+        $.post("/pdflatex/", {"all": allbox, "questions": qbox}, function(data) {
+            $("#response").html(data['response']);
+            setTimeout( function() {$response.html('') }, 5000);
+        }, "json");
+    });
+
 });
 

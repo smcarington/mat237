@@ -26,6 +26,9 @@
                 {{prob.text | safe }}
             </div>
         </li>
+            (Text: <input type="checkbox" name="q-{{prob.pk}}"> &nbsp;
+            Solution: <input type="checkbox" name="s-{{prob.pk}}">
+            )
             {% if user.is_staff %}
             <a href="{% url 'edit_question' pk=prob.pk %}"><small>Edit</small></a>
             <a href="{% url 'delete_item' pk=prob.pk objectStr='question' %}"><small>Delete</small></a>
@@ -33,14 +36,18 @@
         <hr class="fadehr">
         {% endfor %}
         </ol>
+        <p>All Text: <input type="checkbox" id="quest-all" name="quest-all"> &nbsp;
+           All Solution: <input type="checkbox" id="sol-all" name="sol-all">
+        </p>
     </div>
 {% endblock %}
 
 {% block buttons %}
-    {% if user.is_staff %}
     <div class="button-div">
+    <button class="btn btn-default" id="pdflatex">Email Problem Set</button>
+    {% if user.is_staff %}
         <a href="{% url 'new_question' listpk=problem_set.pk %}" class="btn btn-default">New Question</a>
-    </div>
     {% endif %}
+    </div>
 {% endblock %}
 
