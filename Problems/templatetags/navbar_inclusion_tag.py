@@ -42,12 +42,15 @@ def to_percent(num, den):
 
 @register.simple_tag
 def score_div(num, den):
-    percent = round(100*num/den)
     div_str = '<dd><div class="{cl}" style="width: {widthperc}%">{perc}% <small>({num_votes} votes)</small></div></dd>'
 
-    if percent==0:
-        ret_str = div_str.format(cl="zerobar", widthperc=100, perc=percent, num_votes=num)
+    if den == 0:
+        ret_str = div_str.format(cl="zerobar", widthperc=100, perc="No votes", num_votes="No votes")
     else:
-        ret_str = div_str.format(cl="bar", widthperc=percent, perc=percent, num_votes=num)
+        percent = round(100*num/den)
+        if percent==0:
+            ret_str = div_str.format(cl="zerobar", widthperc=100, perc=percent, num_votes=num)
+        else:
+            ret_str = div_str.format(cl="bar", widthperc=percent, perc=percent, num_votes=num)
 
     return mark_safe(ret_str)
