@@ -270,7 +270,7 @@ def poll_admin(request, pollpk):
     return render(request, 'Problems/poll_admin.html', {'poll': poll})
 
 @staff_required()
-def new_question(request, pollpk, questionpk=None):
+def new_pollquestion(request, pollpk, questionpk=None):
 # To facilitate question + choice at the same time, we must instantiate the
 # question before hand. This will also make editing a question easy in the
 # future
@@ -312,7 +312,7 @@ def new_question(request, pollpk, questionpk=None):
         return redirect('poll_admin', pollpk=pollpk)
 
     else:
-        return render(request, 'Problems/new_question.html',  {'question' : question})
+        return render(request, 'Problems/new_pollquestion.html',  {'question' : question})
 
 # Cannot just abuse new_question because we need to handle choices differently
 def edit_pollquestion(request, questionpk):
@@ -347,7 +347,7 @@ def edit_pollquestion(request, questionpk):
 
         return redirect('poll_admin', pollpk=question.poll.pk)
     else:
-        return render(request, 'Problems/new_question.html', {'question': question, 'choices': choices})
+        return render(request, 'Problems/new_pollquestion.html', {'question': question, 'choices': choices})
 
 
 # AJAX view for making a question live

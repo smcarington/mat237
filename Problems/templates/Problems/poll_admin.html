@@ -11,6 +11,8 @@
 
 {% block content %}
     <h1> {{poll.title}} Administration </h1>
+    <a href="{% url 'polls' %}">&#171; Return to Polls</a>
+    <a href="{% url 'live_poll' %}" class="btn btn-default">Live Poll</a>
 
     {% for question in poll.pollquestion_set.all %}
         <div class="row">
@@ -43,7 +45,7 @@
 
 {% block buttons %}
     <div class="button-div">
-        <a href="{% url 'new_question' pollpk=poll.pk %}" class="btn btn-default">New Question</a>
+        <a href="{% url 'new_pollquestion' pollpk=poll.pk %}" class="btn btn-default">New Question</a>
         <button class="btn btn-default old-ann" id="endall_-1">End Polling</button>
     </div>
 {% endblock %}
