@@ -445,8 +445,65 @@ def query_live(request):
 
     return HttpResponse(json.dumps(response_data))
 
+## ----------------- PDFLATEX -----------------------##
+
 @login_required
 def pdflatex(request):
-    # Accepts POST request from problem set page. Creates LaTeX document of the given files,
-    # sends them out to be compiled, then emails the pdf to the student.
+    """ Accepts POST request from problem set page. Creates LaTeX document of the given files,
+        sends them out to be compiled, then emails the pdf to the student.
+    """
 
+    if request.method == "POST":
+        user = request.user
+        data = json.loads(request.body.decode())
+
+        problem_set = int(data['problem_set'])
+        problemSet  = get_object_or_404(ProblemSet, pk=problem_set)
+        questions   = data['questions']
+
+        qlist = []
+
+        # data should have a bunch of fields corresponding to the questions chosen
+        import pdb; pdb.set_trace() 
+        for item in questions:
+            qpk       = int(item['number'])
+            
+            # Grab the question, as well as the QuestionStatus object for that question
+            # corresponding to the given user
+            quest    = get_object_or_404(Question, pk=qpk)
+            stud_sol = quest.status.filter(user=user)
+            text     = quest.text
+
+            if quest['sol']:
+                sol_text = stud_sol.solution
+            else:
+                sol_text = ''
+
+            qlist.push([text, sol_text])
+
+        # Send the data to a helper function to add the pre-amble. Returns a string which
+        # we will make into a file for compiling
+        latex_source = create_latex_source(qlist)
+        # Send the file to be compiled and emailed using another helper function
+        compile_and_email(latex_source, user)
+
+    else:
+        raise Http404('Request not posted')
+
+def create_latex_source(question_list):
+    """ A helper function for the function 'pdflatex'. Accepts a list of questions and
+        their solutions and assembles the appropriate latex file. 
+        Input: question_list - a 2d array who's 0-argument is the question text and
+                   whose 1-argument is the solution text (possibly empty)
+        Out  : (string) with the full pdf source code
+    """
+    pass
+
+def compile_and_email(latex_source, user):
+    """ A helper function for the function 'pdflatex'. Accepts a string with the full latex
+        source code. Creates a file with this string, compiles it, and emails it to the user.
+        Input: latex_source - A (string) containing the latex source code.
+               user         - (User) element corresponding to session user.
+        Out  : A (string) indicating the success/failure of the method.
+    """
+    pass
