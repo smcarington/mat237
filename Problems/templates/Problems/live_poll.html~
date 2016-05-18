@@ -21,14 +21,15 @@
 
 {% block content %}
     {% if question %}
-        <div class="diff question-detail">
+        <div class="diff question-detail live-poll">
             {{question.text | safe}}
         </div>
         <p id="response"></p>
         {% if question.can_vote %}
             <div class="diff multiplechoice"> 
                 {% for choice in choices %}
-                <button class="btn btn-primary" id="button_{{choice.pk}}">{{forloop.counter}}</button> <p>{{choice.text}}</p>
+                <button class="btn btn-primary" id="button_{{choice.pk}}">{{forloop.counter}}</button> 
+                <p>{{choice.text}}</p> 
                 <br>
                 {% endfor %}
             </div>
@@ -38,6 +39,7 @@
                 <dt class="diff">{{choice.text}}</dt>
                 {% score_div choice.num_votes votes %}
                 <br>
+                <hr class="fadehr">
                 {% endfor %}
             </dl>
         {% endif %}

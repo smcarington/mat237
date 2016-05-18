@@ -39,7 +39,7 @@ h1 a {
     width: 80%;
 }
 
-.button-div a {
+.button-div a, .button-div button {
     margin: 10px 0px 50px 0px;
     float: right;
     display:inline;
@@ -353,4 +353,13 @@ dd {
     width: 100%;
     margin-left: 30px;
     padding: 10px 0px;
+}
+
+.live-poll {
+    font-size: 14pt;
+}
+
+.live-text {
+    display: inline-block
+    width: 80%;
 }

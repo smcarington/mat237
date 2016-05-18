@@ -354,3 +354,12 @@ dd {
     margin-left: 30px;
     padding: 10px 0px;
 }
+
+.live-poll {
+    font-size: 14pt;
+}
+
+.live-text {
+    display: inline-block;
+    width: 80%;
+}
