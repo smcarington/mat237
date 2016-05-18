@@ -5,9 +5,12 @@ from django.contrib.auth.decorators import login_required, permission_required, 
 from django.contrib.auth.views import password_change
 from django.http import HttpResponse, Http404, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_protect
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMessage
+from django.conf import settings
 
 import json
+import subprocess
+import os
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice
@@ -259,7 +262,7 @@ def new_poll(request):
 
 def list_pollquestions(request, pollpk):
     poll = get_object_or_404(Poll, pk=pollpk)
-    questions = poll.pollquestion_set.filter()
+    questions = poll.pollquestion_set.all()
 
     return render(request, 'Problems/list_pollquestions.html', {'questions': questions, 'poll': poll})
 
@@ -444,3 +447,118 @@ def query_live(request):
             response_data = {'state': "-1"}
 
     return HttpResponse(json.dumps(response_data))
+
+## ----------------- PDFLATEX -----------------------##
+
+@login_required
+def pdflatex(request):
+    """ Accepts POST request from problem set page. Creates LaTeX document of the given files,
+        sends them out to be compiled, then emails the pdf to the student.
+    """
+
+    if request.method == "POST":
+        user = request.user
+        data = json.loads(request.body.decode())
+
+        problem_set = int(data['problem_set'])
+        problemSet  = get_object_or_404(ProblemSet, pk=problem_set)
+        questions   = data['questions']
+
+        qlist = []
+
+        # data should have a bunch of fields corresponding to the questions chosen
+        for item in questions:
+            qpk       = int(item['number'])
+            
+            # Grab the question, as well as the QuestionStatus object for that question
+            # corresponding to the given user
+            quest    = get_object_or_404(Question, pk=qpk)
+            stud_sol = quest.status.filter(user=user)
+            text     = quest.text
+
+            if item['sol']:
+                sol_text = stud_sol[0].solution
+            else:
+                sol_text = ''
+
+            qlist.append([text, sol_text])
+
+        # Send the data to a helper function to add the pre-amble. Returns a string which
+        # we will make into a file for compiling
+        ps_title = "Problem Set {num}".format(num=str(problem_set))
+        latex_source = create_latex_source(qlist, ps_title)
+        # Send the file to be compiled and emailed using another helper function
+        import pdb; pdb.set_trace()
+        compile_and_email(latex_source, user)
+
+        response_data = {'response': 'Email sent successfully'}
+
+        return HttpResponse(json.dumps(response_data))
+
+    else:
+        raise Http404('Request not posted')
+
+def create_latex_source(question_list, title):
+    """ A helper function for the function 'pdflatex'. Accepts a list of questions and
+        their solutions and assembles the appropriate latex file. 
+        Input: question_list - a 2d array who's 0-argument is the question text and
+                   whose 1-argument is the solution text (possibly empty)
+        Out  : (string) with the full pdf source code
+    """
+
+    # Note that amssymb is the only package that we should need.
+    preamble = """\\documentclass{{article}}
+\\usepackage{{amssymb,amsthm}}
+
+\\newenvironment{{solution}}{{\\renewcommand\qedsymbol{{$\\blacksquare$}}
+  \proof[Solution]
+}}{{\\endproof}}
+
+\\begin{{document}}
+    \\begin{{center}} \\large {the_title} \\end{{center}}
+    \\begin{{enumerate}}
+""".format(the_title=title)
+    postamb  = """
+    \\end{enumerate}
+\\end{document}"""
+    temp_que = """    \\item {question_text}
+
+"""
+    temp_sol = """    
+    \\begin{{solution}}
+        {solution_text}
+    \\end{{solution}}
+
+"""
+    document = preamble
+    for question in question_list:
+        document = document + temp_que.format(question_text=question[0])
+        if question[1] !='':
+            document = document + temp_sol.format(solution_text=question[1])
+
+    return document + postamb
+
+def compile_and_email(latex_source, user):
+    """ A helper function for the function 'pdflatex'. Accepts a string with the full latex
+        source code. Creates a file with this string, compiles it, and emails it to the user.
+        Input: latex_source - A (string) containing the latex source code.
+               user         - (User) element corresponding to session user.
+        Out  : A (string) indicating the success/failure of the method.
+    """
+
+    # Write the string to a file so that we can curl it to the external server
+    file_name = "/tmp/latex_{userpk}.tex".format(userpk=user.pk)
+    with open(file_name, 'w') as f:
+        f.write(latex_source)
+    
+    command = "pdflatex -output-directory=/tmp/ {filename}".format(filename=file_name)
+
+    # Compile the document
+    subprocess.call([command], shell=True)
+
+    subject = "MAT237 - PDF document"
+    message = "Your compiled document is attached"
+
+    email = EmailMessage(subject, message, 'mat237summer2016@gmail.com', [user.email])
+    email.attach_file(file_name[0:-3]+"pdf")
+    email.send()
