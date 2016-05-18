@@ -54,3 +54,7 @@ def score_div(num, den):
             ret_str = div_str.format(cl="bar", widthperc=percent, perc=percent, num_votes=num)
 
     return mark_safe(ret_str)
+
+@register.filter
+def filter_poll_choice(question):
+    return question.pollchoice_set.filter(cur_poll=question.num_poll)

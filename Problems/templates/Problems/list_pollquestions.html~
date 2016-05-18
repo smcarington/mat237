@@ -1,4 +1,5 @@
 {% extends 'Problems/base.html' %}
+{% load navbar_inclusion_tag %}
 
 {% comment %}
     Has Poll item 'poll'
@@ -11,9 +12,9 @@
     
     {% for question in questions %}
         {% if question.live %}
-            <div class="diff"> {{question.text}}
+            <div class="diff question-detail"> {{question.text}}
                 <ol>
-                {% for choice in question.pollchoice_set.all %}
+                {% for choice in question|filter_poll_choice %}
                     <li> {{ choice.text }} </li>
                 {% endfor %}
                 </ol> 
