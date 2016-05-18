@@ -12,7 +12,7 @@
     
     {% for question in questions %}
         {% if question.live %}
-            <div class="diff question-detail"> {{question.text}}
+            <div class="diff question-detail"> {{question.text|safe}}
                 <ol>
                 {% for choice in question|filter_poll_choice %}
                     <li> {{ choice.text }} </li>
