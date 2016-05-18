@@ -444,10 +444,3 @@ def query_live(request):
             response_data = {'state': "-1"}
 
     return HttpResponse(json.dumps(response_data))
-
-@login_required
-def pdflatex(request):
-    # Accepts POST request from problem set page. Creates LaTeX document of the given files,
-    # sends them out to be compiled, then emails the pdf to the student.
-
-
