@@ -40,6 +40,12 @@
            All Solution: <input type="checkbox" id="sol-all" name="sol-all">
         </p>
     </div>
+
+    <input type="hidden" id="problem-set" value="{{problem_set.pk}}">
+{% endblock %}
+
+{% block sidenote %}
+    The "Email Problem Set" feature is still being fine tuned. For example, some html tags are still appearing in the compiled document. Please be patient, as updates will be forthcoming.
 {% endblock %}
 
 {% block buttons %}

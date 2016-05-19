@@ -44,6 +44,12 @@
     <input type="hidden" id="problem-set" value="{{problem_set.pk}}">
 {% endblock %}
 
+{% block sidenote %}
+    <p>
+        The "Email Problem Set" feature is still being fine tuned. For example, some html tags are still appearing in the compiled document. Please be patient, as updates will be forthcoming.
+    </p>
+{% endblock %}
+
 {% block buttons %}
     <div class="button-div">
     <button class="btn btn-default" id="pdflatex">Email Problem Set</button>
