@@ -79,7 +79,7 @@ $('document').ready(function() {
 
     // On Problem set page, deal with ability to print questions and solutions.
     // First, nice JS for "all" checkboxes. Unnecessary but nice.
-    $("[id$='-all'").click( function() {
+    $("[id$='-all']").click( function() {
         qs=$(this).attr('id').split('')[0]
         $("[name^='"+qs+"-']").prop("checked", $(this).is(":checked"));
     });

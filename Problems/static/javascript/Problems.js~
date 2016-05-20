@@ -113,7 +113,7 @@ $('document').ready(function() {
             }
         });
 
-        $.post("/pdflatex/", jSON.stringify({"all": allbox, "questions": qbox, "problem_set": ps}), function(data) {
+        $.post("/pdflatex/", JSON.stringify({"all": allbox, "questions": qbox, "problem_set": ps}), function(data) {
             $("#response").html(data['response']);
             setTimeout( function() {$response.html('') }, 5000);
         }, "json");
