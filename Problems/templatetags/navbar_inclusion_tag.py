@@ -57,4 +57,4 @@ def score_div(num, den):
 
 @register.filter
 def filter_poll_choice(question):
-    return question.pollchoice_set.filter(cur_poll=question.num_poll)
+    return question.pollchoice_set.filter(cur_poll=question.num_poll).order_by('id')

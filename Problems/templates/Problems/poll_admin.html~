@@ -16,19 +16,24 @@
     <a href="{% url 'live_poll' %}" class="btn btn-default">Live Poll</a>
 
     {% for question in poll.pollquestion_set.all %}
-        <div class="row">
+    <div id="global-{{question.pk}}">
+        <div class="row div-{{question.pk}}" {% if question.can_vote %}style="background-color: #c2c2c2"{% endif %}>
             <div class="poll-title col-md-6">
                 <p class="diff">{{question.text| safe}}</p>
-                <small> <a href="{% url 'edit_pollquestion' questionpk=question.pk %}">Edit</a> <a href="{% url 'delete_item' pk=question.pk objectStr='pollquestion' %}">Delete</a> <a href=javascript:void(0)>Choices</a></small>
+                <small> <a href="{% url 'edit_pollquestion' questionpk=question.pk %}">Edit</a> <a href="{% url 'delete_item' pk=question.pk objectStr='pollquestion' %}">Delete</a> <a href=javascript:void(0) id="open-{{question.pk}}">Choices</a></small>
             </div>
             {% if user.is_staff %}
-            <div class = "col-md-6">
+            <div class = "col-md-4" style="padding:0">
                 Slide: <input type="checkbox" id="check_{{question.pk}}" {% if question.live %}checked{% endif %}>
                 <button class="btn btn-success" id="start_{{question.pk}}">Start</button> <button class="btn btn-danger" id="stop_{{question.pk}}"> Stop</button> <button class="btn btn-default" id ="reset_{{question.pk}}"> Reset </button>
                 <p id="response_{{question.pk}}"></p>
             </div>
+            <div class = "col-md-2">
+                <div id="arrow-up-{{question.pk}}" class="arrow">&#x25B2;</div>
+                <div id="arrow-down-{{question.pk}}" class="arrow">&#x25BC;</div>
+            </div>
         </div>
-        <div class="row"
+        <div class="row">
             <div class="col-md-6" id="{{question.pk}}-choices" style="display:none"> 
                 <ol>
                 {% for choice in question|filter_poll_choice %}
@@ -37,6 +42,7 @@
                 </ol>
             </div>
         </div>
+    </div>
         {% endif %}
         <hr class="fadehr">
     {% endfor %}

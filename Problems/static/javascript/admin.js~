@@ -17,7 +17,7 @@ $('document').ready(function() {
         [action, pk] = $(this).attr('id').split('_');
         $.post('/live_question/', {action: action, questionpk: pk},
             function(data) {
-                if (action=='stop') {
+                if (action=='endall') {
                     $('[id^="response"]').html(data['response']);
                     setTimeout( function() {$('[id^="response"]').html('')}, 2000);
                 } else {
@@ -26,5 +26,43 @@ $('document').ready(function() {
                     setTimeout( function() {$response.html('')}, 2000);
                 }
             }, "json");
+        // Highlight the appropriate div so it is easy to see
+        if (action == 'start') {
+            color = "#c2c2c2";
+        } else if (action == 'stop') {
+            color = "transparent"
+        }
+        $(".div-"+pk).css("background-color", color);
+    });
+
+    // Opens choices option in poll administration
+    $("[id^='open']").click( function () {
+        qpk = $(this).attr('id').split('-')[1];
+        $target = $("#"+qpk+"-choices");
+        if ($target.is(":visible") ) {
+            $target.hide(300);
+        } else {
+            $target.show(300);
+        }
+    });
+
+    // Helper function for swapping two elements
+    function swapDiv(element, order) {
+        if (order == "up") { 
+            element.parent().insertBefore(element, element.previousSibling);
+        } else if (order == "down") {
+            element.parentNode.insertBefore(element.nextSibling, element);
+        }
+    }
+
+    $("[id^='arrow']").click( function() {
+        [pre, action, pk] = $(this).attr('id').split('-');
+        // Find the appropriate div. It is the grandparent, not great grandparent
+        $thisDiv = $(this).parents("#global-"+pk)
+        if (action == "up") {
+            $thisDiv.insertBefore($thisDiv.prev());
+        } else if (action == "down") {
+            $thisDiv.next().insertBefore($thisDiv);
+        }
     });
 });

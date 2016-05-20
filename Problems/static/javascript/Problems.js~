@@ -118,7 +118,8 @@ $('document').ready(function() {
                     $response = $("#response");
                     $response.html(data['response']);
                     setTimeout( function() {$response.html('') }, 2000);
-                }, "json");
+                },
+        "json");
     });
 
 });

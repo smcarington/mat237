@@ -369,3 +369,10 @@ dd {
     float: right;
     clear: right;
 }
+
+.arrow, .arrow:hover, .arrow:visited,  .arrow:focus {
+    vertical-align: middle;
+    text-decoration: none;
+    font-size: 14pt;
+    color: #3366ff;
+}
