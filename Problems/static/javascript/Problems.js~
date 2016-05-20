@@ -79,7 +79,7 @@ $('document').ready(function() {
 
     // On Problem set page, deal with ability to print questions and solutions.
     // First, nice JS for "all" checkboxes. Unnecessary but nice.
-    $("[id$='-all'").click( function() {
+    $("[id$='-all']").click( function() {
         qs=$(this).attr('id').split('')[0]
         $("[name^='"+qs+"-']").prop("checked", $(this).is(":checked"));
     });
@@ -113,10 +113,12 @@ $('document').ready(function() {
             }
         });
 
-        $.post("/pdflatex/", JSON.stringify({"all": allbox, "questions": qbox, "problem_set": ps}), function(data) {
-            $("#response").html(data['response']);
-            setTimeout( function() {$response.html('') }, 5000);
-        }, "json");
+        $.post("/pdflatex/", JSON.stringify({"all": allbox, "questions": qbox, "problem_set": ps}), 
+                function(data) {
+                    $response = $("#response");
+                    $response.html(data['response']);
+                    setTimeout( function() {$response.html('') }, 2000);
+                }, "json");
     });
 
 });

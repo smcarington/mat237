@@ -11,6 +11,7 @@ from django.conf import settings
 import json
 import subprocess
 import os
+import re
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice
@@ -397,7 +398,7 @@ def live_question(request):
                 response_data = {'response': 'That question is not visible'}
             else:
                 question.reset()
-                response_data = {'response': 'Data saved. Reopening the vote'}
+                response_data = {'response': 'Data saved. Press start to reopen.'}
     else:
         response_data = {'response': 'You are not authorized to make this POST'}
 
@@ -487,8 +488,9 @@ def pdflatex(request):
         # we will make into a file for compiling
         ps_title = "Problem Set {num}".format(num=str(problem_set))
         latex_source = create_latex_source(qlist, ps_title)
+        # Sanitize the string of html tags
+        latex_source = latexify_string(latex_source)
         # Send the file to be compiled and emailed using another helper function
-        import pdb; pdb.set_trace()
         compile_and_email(latex_source, user)
 
         response_data = {'response': 'Email sent successfully'}
@@ -497,6 +499,25 @@ def pdflatex(request):
 
     else:
         raise Http404('Request not posted')
+
+def latexify_string(string):
+    """ A helper function which accepts a latex html string, possibly including tags,
+        and returns a string where those tags have been appropriate replaced with
+        LaTeX commands. For example, <ol>...</ol> will become \\begin{enumerate}...
+        \\end{enumerate}
+    """
+
+    ret_string = string
+    ret_string = re.sub(r'<ol>', r'\\begin{enumerate}', ret_string)
+    ret_string = re.sub(r'</ol>', r'\\end{enumerate}', ret_string)
+    ret_string = re.sub(r'<ul>', r'\\begin{itemize}', ret_string)
+    ret_string = re.sub(r'</ul>', r'\\end{itemize}', ret_string)
+    ret_string = re.sub(r'<li>', r'\\item ', ret_string)
+    ret_string = re.sub(r'(<br>)+', r'\\', ret_string)
+    ret_string = re.sub(r'<b>(.*)</b>', r'\\textbf{\1}', ret_string)
+    ret_string = re.sub(r'<i>(.*)</i>', r'\\emph{\1}', ret_string)
+
+    return ret_string
 
 def create_latex_source(question_list, title):
     """ A helper function for the function 'pdflatex'. Accepts a list of questions and
@@ -551,7 +572,7 @@ def compile_and_email(latex_source, user):
     with open(file_name, 'w') as f:
         f.write(latex_source)
     
-    command = "pdflatex -output-directory=/tmp/ {filename}".format(filename=file_name)
+    command = "pdflatex -halt-on-error -output-directory=/tmp/ {filename} >/dev/null 2>&1&".format(filename=file_name)
 
     # Compile the document
     subprocess.call([command], shell=True)

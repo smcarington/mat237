@@ -1,4 +1,5 @@
 {% extends 'Problems/base.html' %}
+{% load navbar_inclusion_tag %}
 {% load staticfiles %}
 
 {% comment %}
@@ -18,13 +19,22 @@
         <div class="row">
             <div class="poll-title col-md-6">
                 <p class="diff">{{question.text| safe}}</p>
-                <small> <a href="{% url 'edit_pollquestion' questionpk=question.pk %}">Edit</a> <a href="{% url 'delete_item' pk=question.pk objectStr='pollquestion' %}">Delete</a></small>
+                <small> <a href="{% url 'edit_pollquestion' questionpk=question.pk %}">Edit</a> <a href="{% url 'delete_item' pk=question.pk objectStr='pollquestion' %}">Delete</a> <a href=javascript:void(0)>Choices</a></small>
             </div>
             {% if user.is_staff %}
             <div class = "col-md-6">
-                Live: <input type="checkbox" id="check_{{question.pk}}" {% if question.live %}checked{% endif %}>
+                Slide: <input type="checkbox" id="check_{{question.pk}}" {% if question.live %}checked{% endif %}>
                 <button class="btn btn-success" id="start_{{question.pk}}">Start</button> <button class="btn btn-danger" id="stop_{{question.pk}}"> Stop</button> <button class="btn btn-default" id ="reset_{{question.pk}}"> Reset </button>
                 <p id="response_{{question.pk}}"></p>
+            </div>
+        </div>
+        <div class="row"
+            <div class="col-md-6" id="{{question.pk}}-choices" style="display:none"> 
+                <ol>
+                {% for choice in question|filter_poll_choice %}
+                    <li><p class="diff">{{choice.text}}</p>
+                {% endfor %}
+                </ol>
             </div>
         </div>
         {% endif %}
@@ -41,11 +51,13 @@
         <li> The 'Reset' button clears the current poll results and resets votes to zero. The data from the
              previous vote is preserved.
     </ul>
+    <div class="button-div">
+        <a href="{% url 'new_pollquestion' pollpk=poll.pk %}" class="btn btn-default">New Question</a>
+    </div>
 {% endblock %}
 
 {% block buttons %}
     <div class="button-div">
-        <a href="{% url 'new_pollquestion' pollpk=poll.pk %}" class="btn btn-default">New Question</a>
         <button class="btn btn-default old-ann" id="endall_-1">End Polling</button>
     </div>
 {% endblock %}

@@ -113,10 +113,13 @@ $('document').ready(function() {
             }
         });
 
-        $.post("/pdflatex/", JSON.stringify({"all": allbox, "questions": qbox, "problem_set": ps}), function(data) {
-            $("#response").html(data['response']);
-            setTimeout( function() {$response.html('') }, 5000);
-        }, "json");
+        $.post("/pdflatex/", JSON.stringify({"all": allbox, "questions": qbox, "problem_set": ps}), 
+                function(data) {
+                    $response = $("#response");
+                    $response.html(data['response']);
+                    setTimeout( function() {$response.html('') }, 2000);
+                },
+        "json");
     });
 
 });

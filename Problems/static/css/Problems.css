@@ -203,6 +203,7 @@ form button {
 
 #response {
     color: red;
+    float: right;
 }
 
 #id_text {
@@ -362,4 +363,9 @@ dd {
 .live-text {
     display: inline-block;
     width: 80%;
+}
+
+#pdflatex {
+    float: right;
+    clear: right;
 }
