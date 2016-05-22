@@ -46,7 +46,12 @@
 
 {% block sidenote %}
     <p>
-        The "Email Problem Set" feature is still being fine tuned. For example, some html tags are still appearing in the compiled document. Please be patient, as updates will be forthcoming.
+        The "Email Problem Set" utility should now be functional. Note that you can choose a specific collection of questions
+        by checking the "Text" box in each question. In addition, if you have submitted a solution, you can include the solution
+        in your pdf.
+        <br>
+        If you have selected no questions, the "Email Problem Set" button will default to sending the entire problem set, without
+        any solutions.
     </p>
     {% if user.is_staff %}
         <a href="{% url 'new_question' listpk=problem_set.pk %}" class="btn btn-default">New Question</a>
