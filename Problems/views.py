@@ -7,6 +7,7 @@ from django.http import HttpResponse, Http404, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_protect
 from django.core.mail import send_mail, EmailMessage
 from django.conf import settings
+from django.db.models import Max
 
 import json
 import subprocess
@@ -310,7 +311,10 @@ def new_pollquestion(request, pollpk, questionpk=None):
     # If a question is created for the first time, we must instantiate it so that
     # our choices have somewhere to point. If it already exists, retrieve it
     if questionpk is None:
-        question = PollQuestion(poll=poll)
+        # With positioning, we need to determine the largest current position.
+        cur_pos = PollQuestion.objects.filter(poll=poll).aggregate(Max('position'))
+        
+        question = PollQuestion(poll=poll, position = cur_pos['position__max'] + 1)
         question.save()
     else:
         question = get_object_or_404(PollQuestion, pk=questionpk)
