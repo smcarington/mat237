@@ -68,4 +68,21 @@ $('document').ready(function() {
         $.post('/change_question_order/', {action:action, pk:pk},
         "json");
     });
+
+    // Check to see how many votes have been cast
+    function voteCheck() {
+        $.get('/query_live/', 
+            function(data) {
+                [pk, state] = data['state'].split('-');
+                if (state == 'True') {
+                    $("#votes-"+pk).html("Total Votes: "+data['numVotes']);
+                } else if (state == 'False') {
+                    $("#votes-"+pk).html('');
+                }
+            }, 
+        "json");
+        setTimeout(voteCheck, 5000);
+    }
+    // Start the method to check if votes have been cast
+    setTimeout(voteCheck, 5000);
 });

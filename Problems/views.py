@@ -474,6 +474,13 @@ def query_live(request):
             state = str(question.pk)+"-"+str(question.can_vote)
 
             response_data = {'state': state}
+
+            # If the user is staff, return the number of votes as well
+            if request.user.is_staff:
+                choices  = question.pollchoice_set.filter(cur_poll=question.num_poll)
+                num_votes = sum(choices.values_list('num_votes', flat=True))
+                response_data['numVotes'] = num_votes
+
         except:
             response_data = {'state': "-1"}
 

@@ -28,6 +28,7 @@
                 Slide: <input type="checkbox" id="check_{{question.pk}}" {% if question.live %}checked{% endif %}>
                 <button class="btn btn-success" id="start_{{question.pk}}">Start</button> <button class="btn btn-danger" id="stop_{{question.pk}}"> Stop</button> <button class="btn btn-default" id ="reset_{{question.pk}}"> Reset </button>
                 <p id="response_{{question.pk}}"></p>
+                <p id="votes_{{question.pk}}"></p>
             </div>
             <div class = "col-md-2">
                 <div id="arrow-up-{{question.pk}}" class="arrow">&#x25B2;</div>
