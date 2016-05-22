@@ -498,23 +498,29 @@ def pdflatex(request):
         qlist = []
 
         # data should have a bunch of fields corresponding to the questions chosen
-        for item in questions:
-            qpk       = int(item['number'])
-            
-            # Grab the question, as well as the QuestionStatus object for that question
-            # corresponding to the given user
-            quest    = get_object_or_404(Question, pk=qpk)
-            if item['sol']:
-                try:
-                    sol_text = quest.status.get(user=user).solution
-                except QuestionStatus.DoesNotExist:
+        
+        # Student didnt select anything, just print all questions
+        if len(questions) == 0:
+            for question in problemSet.problems.all():
+                qlist.append([question.text, '']) 
+        else:
+            for item in questions:
+                qpk       = int(item['number'])
+                
+                # Grab the question, as well as the QuestionStatus object for that question
+                # corresponding to the given user
+                quest    = get_object_or_404(Question, pk=qpk)
+                if item['sol']:
+                    try:
+                        sol_text = quest.status.get(user=user).solution
+                    except QuestionStatus.DoesNotExist:
+                        sol_text = ''
+                else:
                     sol_text = ''
-            else:
-                sol_text = ''
 
-            text     = quest.text
+                text     = quest.text
 
-            qlist.append([text, sol_text])
+                qlist.append([text, sol_text])
 
         # Send the data to a helper function to add the pre-amble. Returns a string which
         # we will make into a file for compiling
@@ -602,11 +608,10 @@ def compile_and_email(latex_source, user):
     with open(file_name, 'w') as f:
         f.write(latex_source)
     
-#    command = "pdflatex -halt-on-error -output-directory=/tmp/ {filename} >/dev/null 2>&1&".format(filename=file_name)
-    command = "pdflatex -halt-on-error -output-directory=/tmp/ {filename}".format(filename=file_name)
-
+    command = ["pdflatex", "-halt-on-error", "-output-directory=/tmp", file_name]
     # Compile the document
-    subprocess.call([command], shell=True)
+    DEVNULL = open(os.devnull, 'w')
+    subprocess.call(command, stdout=DEVNULL, stderr=subprocess.STDOUT)
     print("done compiling")
 
     subject = "MAT237 - PDF document"
@@ -614,16 +619,15 @@ def compile_and_email(latex_source, user):
 
     email = EmailMessage(subject, message, 'mat237summer2016@gmail.com', [user.email])
     try:
-        print("attaching file")
         email.attach_file(file_name[0:-3]+"pdf")
-        print("sending file")
         email.send()
         response_data = {'response': 'Email sent successfully'}
 
-        delete_command = "rm -f {filename}* > /dev/null 2>&1&1".format(filename=file_name[0:-3])
-        subprocess.call([delete_command],shell=True)
-    except:
+        delete_command = ["rm", "-f", "{filename}*".format(filename=file_name[0:-3])]
+        subprocess.call(delete_command, stdout=DEVNULL, stderr=subprocess.STDOUT)
+    except Exception as e:
         response_data = {'response': 'No document created. Likely an error in your code.'}
+        print(e)
 
     return response_data
         
