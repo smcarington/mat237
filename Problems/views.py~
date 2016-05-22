@@ -602,19 +602,26 @@ def compile_and_email(latex_source, user):
     with open(file_name, 'w') as f:
         f.write(latex_source)
     
-    command = "pdflatex -halt-on-error -output-directory=/tmp/ {filename} >/dev/null 2>&1&".format(filename=file_name)
+#    command = "pdflatex -halt-on-error -output-directory=/tmp/ {filename} >/dev/null 2>&1&".format(filename=file_name)
+    command = "pdflatex -halt-on-error -output-directory=/tmp/ {filename}".format(filename=file_name)
 
     # Compile the document
     subprocess.call([command], shell=True)
+    print("done compiling")
 
     subject = "MAT237 - PDF document"
     message = "Your compiled document is attached"
 
     email = EmailMessage(subject, message, 'mat237summer2016@gmail.com', [user.email])
     try:
+        print("attaching file")
         email.attach_file(file_name[0:-3]+"pdf")
+        print("sending file")
         email.send()
         response_data = {'response': 'Email sent successfully'}
+
+        delete_command = "rm -f {filename} > /dev/null 2>&1&1".format(filename=file_name)
+        subprocess.call([delete_command],shell=True)
     except:
         response_data = {'response': 'No document created. Likely an error in your code.'}
 
