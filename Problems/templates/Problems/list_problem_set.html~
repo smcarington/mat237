@@ -51,14 +51,16 @@
     {% if user.is_staff %}
         <a href="{% url 'new_question' listpk=problem_set.pk %}" class="btn btn-default">New Question</a>
     {% endif %}
-
 {% endblock %}
 
 {% block buttons %}
     <div class="button-div">
+        <div>
         <button class="btn btn-default" id="pdflatex">Email Problem Set</button>
-        <br>
-        <p id="response"></p>
+        </div>
+        <div>
+        <p class="response-right"></p>
+        </div>
     </div>
 {% endblock %}
 

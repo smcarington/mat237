@@ -36,6 +36,7 @@ h1 a {
 }
 
 .button-div {
+    position: absolute;
     width: 80%;
 }
 
@@ -203,6 +204,9 @@ form button {
 
 #response {
     color: red;
+}
+
+.right {
     float: right;
 }
 
@@ -373,6 +377,7 @@ dd {
 .arrow, .arrow:hover, .arrow:visited,  .arrow:focus {
     vertical-align: middle;
     text-decoration: none;
+    cursor: pointer;
     font-size: 14pt;
     color: #3366ff;
     width: 20px;

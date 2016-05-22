@@ -267,11 +267,37 @@ def list_pollquestions(request, pollpk):
 
     return render(request, 'Problems/list_pollquestions.html', {'questions': questions, 'poll': poll})
 
+## ----------------- Poll Admin ----------------------- ##
+
 # Only handles rendering the poll admin page. AJAX requests handled by other views
 @staff_required()
 def poll_admin(request, pollpk):
     poll = get_object_or_404(Poll, pk=pollpk)
-    return render(request, 'Problems/poll_admin.html', {'poll': poll})
+    questions = poll.pollquestion_set.all().order_by('position')
+    return render(request, 'Problems/poll_admin.html', {'poll': poll, 'questions': questions})
+
+@staff_required()
+def change_question_order(request):
+    """ AJAX handler for poll_admin page to change question order. 
+        request.POST should have elements action, pk
+    """
+
+    data   = request.POST
+    pk     = int(data['pk'])
+    action = data['action']
+
+    question = get_object_or_404(PollQuestion, pk=pk)
+    ret_flag = question.move_position(action)
+
+    if (ret_flag < 0) :
+        response_data = {'response': 'No movement of questions'}
+    else:
+        response_data = {'response': 'Question successfully moved'}
+
+    return HttpResponse(json.dumps(response_data))
+
+## ----------------- Poll Admin ----------------------- ##
+
 
 @staff_required()
 def new_pollquestion(request, pollpk, questionpk=None):
@@ -449,7 +475,7 @@ def query_live(request):
 
     return HttpResponse(json.dumps(response_data))
 
-## ----------------- PDFLATEX -----------------------##
+## ----------------- PDFLATEX ----------------------- ## 
 
 @login_required
 def pdflatex(request):
@@ -474,13 +500,15 @@ def pdflatex(request):
             # Grab the question, as well as the QuestionStatus object for that question
             # corresponding to the given user
             quest    = get_object_or_404(Question, pk=qpk)
-            stud_sol = quest.status.filter(user=user)
-            text     = quest.text
-
             if item['sol']:
-                sol_text = stud_sol[0].solution
+                try:
+                    sol_text = quest.status.get(user=user).solution
+                except QuestionStatus.DoesNotExist:
+                    sol_text = ''
             else:
                 sol_text = ''
+
+            text     = quest.text
 
             qlist.append([text, sol_text])
 
@@ -491,9 +519,7 @@ def pdflatex(request):
         # Sanitize the string of html tags
         latex_source = latexify_string(latex_source)
         # Send the file to be compiled and emailed using another helper function
-        compile_and_email(latex_source, user)
-
-        response_data = {'response': 'Email sent successfully'}
+        response_data = compile_and_email(latex_source, user)
 
         return HttpResponse(json.dumps(response_data))
 
@@ -581,5 +607,14 @@ def compile_and_email(latex_source, user):
     message = "Your compiled document is attached"
 
     email = EmailMessage(subject, message, 'mat237summer2016@gmail.com', [user.email])
-    email.attach_file(file_name[0:-3]+"pdf")
-    email.send()
+    try:
+        email.attach_file(file_name[0:-3]+"pdf")
+        email.send()
+        response_data = {'response': 'Email sent successfully'}
+    except:
+        response_data = {'response': 'No document created. Likely an error in your code.'}
+
+    return response_data
+        
+
+## ----------------- PDFLATEX ----------------------- ## 

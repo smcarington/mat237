@@ -55,6 +55,7 @@ $('document').ready(function() {
         }
     }
 
+    // Listener for moving arrows.
     $("[id^='arrow']").click( function() {
         [pre, action, pk] = $(this).attr('id').split('-');
         // Find the appropriate div. It is the grandparent, not great grandparent
@@ -64,5 +65,7 @@ $('document').ready(function() {
         } else if (action == "down") {
             $thisDiv.next("[id^='global']").insertBefore($thisDiv);
         }
+        $.post('/change_question_order/', {action:action, pk:pk},
+        "json");
     });
 });

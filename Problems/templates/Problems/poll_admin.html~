@@ -4,6 +4,7 @@
 
 {% comment %}
     Context contains Poll element called poll.
+    Context contains PollQuestion element called questions (filtered by order).
 {% endcomment %}
 
 {% block title %}
@@ -15,7 +16,7 @@
     <a href="{% url 'polls' %}">&#171; Return to Polls</a>
     <a href="{% url 'live_poll' %}" class="btn btn-default">Live Poll</a>
 
-    {% for question in poll.pollquestion_set.all %}
+    {% for question in questions %}
     <div id="global-{{question.pk}}">
         <div class="row div-{{question.pk}}" {% if question.can_vote %}style="background-color: #c2c2c2"{% endif %}>
             <div class="poll-title col-md-6">
@@ -42,9 +43,9 @@
                 </ol>
             </div>
         </div>
+        <hr class="fadehr">
     </div>
         {% endif %}
-        <hr class="fadehr">
     {% endfor %}
 
 {% endblock %}

@@ -111,6 +111,7 @@ class PollQuestion(models.Model):
     num_poll = models.IntegerField(default=1)
     visible  = models.BooleanField(default=False)
     can_vote = models.BooleanField(default=False)
+    position = models.IntegerField(default=0)
 
     # Called when an administrator pushes the poll to the live page. View handles
     # setting all other visibility settings to false
@@ -134,8 +135,34 @@ class PollQuestion(models.Model):
             clone.num_votes = 0
             clone.save()
 
+    def move_position(self, direction):
+        """ Change the position of a PollQuestion item. Handles the problem of 
+            changing neighbouring position numbers as well. 
+            Input : direction - A (String) indicating either 'up' or 'down'.
+            Output: status - An integer indicating the success state.
+                             -2 ~ no neighbouring object
+                              1 - success
+        """
+        # Grab the neighbour. Throw an appropriate error.
+        cur_pos = self.position
+        try:
+            if direction == "up":
+                neighbour = PollQuestion.objects.get(position=cur_pos-1)
+            elif direction == "down":
+                neighbour = PollQuestion.objects.get(position=cur_pos+1)
+        except PollQuestion.DoesNotExist:
+                return -2
+        
+        self.position = neighbour.position
+        neighbour.position = cur_pos
+
+        self.save()
+        neighbour.save()
+
+        return 1
+
     def __str__(self):
-        return "Poll Question for Poll" + str(self.poll.pk)
+        return "Poll {number}: {text}".format(number=self.poll.pk, text=self.text[0:20])
 
 class PollChoice(models.Model):
     question  = models.ForeignKey(PollQuestion)
