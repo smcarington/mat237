@@ -14,7 +14,9 @@ $('document').ready(function() {
     // When a button is clicked (that is, the start/stop/reset buttons), determine 
     // the appropriate action and send the server the appropriate response
     $('button').click( function() {
-        [action, pk] = $(this).attr('id').split('_');
+        preData = $(this).attr('id').split('_');
+        action  = preData[0];
+        pk      = preData[1];
         $.post('/live_question/', {action: action, questionpk: pk},
             function(data) {
                 if (action=='endall') {
@@ -57,7 +59,10 @@ $('document').ready(function() {
 
     // Listener for moving arrows.
     $("[id^='arrow']").click( function() {
-        [pre, action, pk] = $(this).attr('id').split('-');
+        preData = $(this).attr('id').split('-');
+        pre    = preData[0];
+        action = preData[1];
+        pk     = preData[2];
         // Find the appropriate div. It is the grandparent, not great grandparent
         $thisDiv = $(this).parents("#global-"+pk)
         if (action == "up") {
@@ -73,7 +78,10 @@ $('document').ready(function() {
     function voteCheck() {
         $.get('/query_live/', 
             function(data) {
-                [pk, state] = data['state'].split('-');
+                preData = data['state'].split('-');
+                pk      = preData[0];
+                state   = preData[1];
+                [pk, state] 
                 if (state == 'True') {
                     $("#votes-"+pk).html("Total Votes: "+data['numVotes']);
                 } else if (state == 'False') {
@@ -83,6 +91,6 @@ $('document').ready(function() {
         "json");
         setTimeout(voteCheck, 5000);
     }
-
+    // Start the method to check if votes have been cast
     setTimeout(voteCheck, 5000);
 });

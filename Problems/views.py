@@ -313,8 +313,11 @@ def new_pollquestion(request, pollpk, questionpk=None):
     if questionpk is None:
         # With positioning, we need to determine the largest current position.
         cur_pos = PollQuestion.objects.filter(poll=poll).aggregate(Max('position'))
-        
-        question = PollQuestion(poll=poll, position = cur_pos['position__max'] + 1)
+
+        if cur_pos['position__max'] is None:
+            question = PollQuestion(poll=poll, position = 0)
+        else:
+            question = PollQuestion(poll=poll, position = cur_pos['position__max'] + 1)
         question.save()
     else:
         question = get_object_or_404(PollQuestion, pk=questionpk)

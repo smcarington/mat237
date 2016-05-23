@@ -207,7 +207,7 @@ form button {
 }
 
 .right {
-    color: red;
+    float: right;
 }
 
 #id_text {
@@ -381,4 +381,10 @@ dd {
     font-size: 14pt;
     color: #3366ff;
     width: 20px;
+}
+
+#endall_-1 {
+    position: relative;
+    float: left;
+    margin-left: 100px;
 }
