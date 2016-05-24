@@ -264,7 +264,7 @@ def new_poll(request):
 
 def list_pollquestions(request, pollpk):
     poll = get_object_or_404(Poll, pk=pollpk)
-    questions = poll.pollquestion_set.all()
+    questions = poll.pollquestion_set.order_by('position')
 
     return render(request, 'Problems/list_pollquestions.html', {'questions': questions, 'poll': poll})
 

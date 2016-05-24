@@ -264,7 +264,7 @@ def new_poll(request):
 
 def list_pollquestions(request, pollpk):
     poll = get_object_or_404(Poll, pk=pollpk)
-    questions = poll.pollquestion_set.all()
+    questions = poll.pollquestion_set.order_by('position')
 
     return render(request, 'Problems/list_pollquestions.html', {'questions': questions, 'poll': poll})
 
@@ -314,7 +314,7 @@ def new_pollquestion(request, pollpk, questionpk=None):
         # With positioning, we need to determine the largest current position.
         cur_pos = PollQuestion.objects.filter(poll=poll).aggregate(Max('position'))
 
-        if cur_pos['position_max'] is None:
+        if cur_pos['position__max'] is None:
             question = PollQuestion(poll=poll, position = 0)
         else:
             question = PollQuestion(poll=poll, position = cur_pos['position__max'] + 1)
