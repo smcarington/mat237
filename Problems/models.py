@@ -146,6 +146,7 @@ class PollQuestion(models.Model):
         # Grab the neighbour. Throw an appropriate error.
         cur_pos = self.position
         try:
+            import pdb; pdb.set_trace()
             if direction == "up":
                 # neighbour = PollQuestion.objects.get(poll=self.poll,position=cur_pos-1)
                 # To more easily deal with deletions, instead of reseting the positions on 
@@ -153,12 +154,12 @@ class PollQuestion(models.Model):
                 # with higher position, and ordering them so that the closest is in the first position.
 
                 neighbours = PollQuestion.objects.filter(poll=self.poll, position__lt=cur_pos).order_by('-position')
-                if neighbours == []:
+                if len(neighbours)==0:
                     return -2
             elif direction == "down":
                 # neighbour = PollQuestion.objects.get(poll=self.poll,position=cur_pos+1)
                 neighbours = PollQuestion.objects.filter(poll=self.poll, position__gt=cur_pos).order_by('position')
-                if neighbours == []:
+                if len(neighbours)==0:
                     return -2
         except PollQuestion.DoesNotExist:
                 return -2

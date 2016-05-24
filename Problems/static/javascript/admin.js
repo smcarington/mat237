@@ -88,8 +88,8 @@ $('document').ready(function() {
                 }
             }, 
         "json");
-//        setTimeout(voteCheck, 5000);
+        setTimeout(voteCheck, 5000);
     }
     // Start the method to check if votes have been cast
-//    setTimeout(voteCheck, 5000);
+    setTimeout(voteCheck, 5000);
 });
