@@ -81,7 +81,6 @@ $('document').ready(function() {
                 preData = data['state'].split('-');
                 pk      = preData[0];
                 state   = preData[1];
-                [pk, state] 
                 if (state == 'True') {
                     $("#votes-"+pk).html("Total Votes: "+data['numVotes']);
                 } else if (state == 'False') {
@@ -89,7 +88,7 @@ $('document').ready(function() {
                 }
             }, 
         "json");
-        setTimeout(voteCheck, 5000);
+//        setTimeout(voteCheck, 5000);
     }
     // Start the method to check if votes have been cast
     setTimeout(voteCheck, 5000);

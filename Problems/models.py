@@ -147,11 +147,23 @@ class PollQuestion(models.Model):
         cur_pos = self.position
         try:
             if direction == "up":
-                neighbour = PollQuestion.objects.get(position=cur_pos-1)
+                # neighbour = PollQuestion.objects.get(poll=self.poll,position=cur_pos-1)
+                # To more easily deal with deletions, instead of reseting the positions on 
+                # deletion, just get the nearest neighbour. Do this by getting all questions
+                # with higher position, and ordering them so that the closest is in the first position.
+
+                neighbours = PollQuestion.objects.filter(poll=self.poll, position__lt=cur_pos).order_by('-position')
+                if neighbours == []:
+                    return -2
             elif direction == "down":
-                neighbour = PollQuestion.objects.get(position=cur_pos+1)
+                # neighbour = PollQuestion.objects.get(poll=self.poll,position=cur_pos+1)
+                neighbours = PollQuestion.objects.filter(poll=self.poll, position__gt=cur_pos).order_by('position')
+                if neighbours == []:
+                    return -2
         except PollQuestion.DoesNotExist:
                 return -2
+
+        neighbour = neighbours[0]
         
         self.position = neighbour.position
         neighbour.position = cur_pos
