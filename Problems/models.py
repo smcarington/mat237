@@ -146,7 +146,6 @@ class PollQuestion(models.Model):
         # Grab the neighbour. Throw an appropriate error.
         cur_pos = self.position
         try:
-            import pdb; pdb.set_trace()
             if direction == "up":
                 # neighbour = PollQuestion.objects.get(poll=self.poll,position=cur_pos-1)
                 # To more easily deal with deletions, instead of reseting the positions on 
