@@ -322,7 +322,12 @@ def new_pollquestion(request, pollpk, questionpk=None):
     else:
         question = get_object_or_404(PollQuestion, pk=questionpk)
 
-    # The form has been submitted. We need to create the appropiate database models.
+        if (request.method == "POST") and ('del' in request.POST):
+            # User has left the page without submitting the form. So delete the question
+            question.delete()
+            data_response = {'response': 'Object successfully deleted'}
+            return HttpResponse(json.dumps(data_response))
+
     if request.method == "POST":
         try:
             data = request.POST
@@ -384,7 +389,7 @@ def edit_pollquestion(request, questionpk):
 
         return redirect('poll_admin', pollpk=question.poll.pk)
     else:
-        return render(request, 'Problems/new_pollquestion.html', {'question': question, 'choices': choices})
+        return render(request, 'Problems/new_pollquestion.html', {'question': question, 'choices': choices, 'edit': True})
 
 
 # AJAX view for making a question live
@@ -430,8 +435,8 @@ def live_question(request):
             if not question.visible:
                 response_data = {'response': 'That question is not visible'}
             else:
-                question.reset()
-                response_data = {'response': 'Data saved. Press start to reopen.'}
+                pk_map = question.reset()
+                response_data = {'response': 'Data saved. Press start to reopen.', 'pkMap': pk_map}
     else:
         response_data = {'response': 'You are not authorized to make this POST'}
 
@@ -483,9 +488,14 @@ def query_live(request):
                 choices  = question.pollchoice_set.filter(cur_poll=question.num_poll)
                 num_votes = sum(choices.values_list('num_votes', flat=True))
                 response_data['numVotes'] = num_votes
+                for choice in choices:
+                    field = str(choice.pk)+"-votes"
+                    num_votes = str(choice.num_votes)
+                    response_data[field]=num_votes
 
-        except:
+        except Exception as e:
             response_data = {'state': "-1"}
+            print(e)
 
     return HttpResponse(json.dumps(response_data))
 

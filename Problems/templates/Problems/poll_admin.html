@@ -20,7 +20,7 @@
     <div id="global-{{question.pk}}">
         <div class="row div-{{question.pk}}" {% if question.can_vote %}style="background-color: #c2c2c2"{% endif %}>
             <div class="poll-title col-md-6">
-                <p class="diff">{{question.text| safe}}</p>
+                <p class="diff">[{{forloop.counter}}/{{questions.count}}] {{question.text| safe}}</p>
                 <small> <a href="{% url 'edit_pollquestion' questionpk=question.pk %}">Edit</a> <a href="{% url 'delete_item' pk=question.pk objectStr='pollquestion' %}">Delete</a> <a href=javascript:void(0) id="open-{{question.pk}}">Choices</a></small>
             </div>
             {% if user.is_staff %}
@@ -39,7 +39,7 @@
             <div class="col-md-6" id="{{question.pk}}-choices" style="display:none"> 
                 <ol>
                 {% for choice in question|filter_poll_choice %}
-                    <li><p class="diff">{{choice.text}}</p>
+                <li><p class="diff">{{choice.text}} <small id="{{choice.pk}}-votes">({{choice.num_votes}} votes)</small></p>
                 {% endfor %}
                 </ol>
             </div>
@@ -53,7 +53,7 @@
 
 {% block sidenote %}
     <ul>
-        <li> The `Live' checkbox makes the question available to students.
+        <li> The `Slide' checkbox makes the question available to students and should only be used once all instructors have completed polling.
         <li> Use the 'Start' button to push the question to the live-poll page and open voting.
         <li> Use the 'Stop' button to stop voting and display results.
         <li> The 'Reset' button clears the current poll results and resets votes to zero. The data from the

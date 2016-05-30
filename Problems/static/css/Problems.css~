@@ -37,7 +37,7 @@ h1 a {
 
 .button-div {
     position: absolute;
-    width: 80%;
+    width: 60%;
 }
 
 .button-div a, .button-div button {
@@ -387,4 +387,8 @@ dd {
     position: relative;
     float: left;
     margin-left: 100px;
+}
+
+.pollquestion-button {
+
 }

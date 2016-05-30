@@ -388,3 +388,7 @@ dd {
     float: left;
     margin-left: 100px;
 }
+
+.pollquestion-button {
+    position: absolute;
+}

@@ -1,0 +1,11 @@
+$('document').ready(function() {
+
+    var numChoices = {{question.pollchoice_set.count}} + 1;
+    $("#add-choice").click( function () {
+        appendString = '<tr><td>Choice:</td><td><input id="id_choice_'+numChoices.toString()+'" name="new_'+numChoices.toString()+'" type="text" maxlength="200"></tr>';
+        $("tbody").append(appendString);
+        numChoices++;
+        $("#num-choice").val(numChoices.toString());
+    });
+};
+

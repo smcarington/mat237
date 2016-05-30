@@ -125,15 +125,30 @@ class PollQuestion(models.Model):
         self.save()
 
     def reset(self):
-        # Clone the choices, update cur_poll and num_poll
+        # Clone the choices, update cur_poll and num_poll. Returns a dictionary
+        # item containing the map of primary keys
         clones = self.pollchoice_set.filter(cur_poll=self.num_poll)
         self.num_poll = self.num_poll+1
         self.save()
+
+        # By setting the clone pk=None, the save method creates a new instance of the model.
+        # We must still manually reset the number of votes though. In addition, for the change
+        # in the poll-admin page, we need to return a map of how the primary keys have changed.
+        pk_map = {}
         for clone in clones:
+            old_pk = str(clone.pk)
+
+            # Reset the clone
             clone.cur_poll = self.num_poll
             clone.pk = None
             clone.num_votes = 0
             clone.save()
+
+            # Get the new pk and add it to the pk_map
+            new_pk = str(clone.pk)
+            pk_map[old_pk]=new_pk
+
+        return pk_map
 
     def move_position(self, direction):
         """ Change the position of a PollQuestion item. Handles the problem of 
@@ -178,7 +193,7 @@ class PollQuestion(models.Model):
 
 class PollChoice(models.Model):
     question  = models.ForeignKey(PollQuestion)
-    text      = models.CharField(max_length=200)
+    text      = models.CharField(max_length=400)
     num_votes = models.IntegerField(default=0)
     cur_poll  = models.IntegerField(default=1)
 
