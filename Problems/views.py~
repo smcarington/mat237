@@ -652,6 +652,39 @@ def compile_and_email(latex_source, user):
         print(e)
 
     return response_data
-        
-
 ## ----------------- PDFLATEX ----------------------- ## 
+
+## ----------------- HISTORY ----------------------- ## 
+
+def poll_history(request, questionpk, poll_num=None):
+    """ A view handler for a staff member to view poll question histories.
+        Input: questionpk - an integer corresponding to the primary key for the pollquestion
+               poll_num   - a number corresponding to the value of the poll. -1 indicates all polls
+    """
+
+    question = get_object_or_404(PollQuestion, pk=questionpk)
+
+#    try:
+    data = request.GET
+    return_data = {}
+    if poll_num == "-1":
+        choices = question.pollchoice_set.all()
+    elif poll_num is not None:
+        choices = question.pollchoice_set.filter(cur_poll=int(poll_num))
+        num_votes = sum(choices.values_list('num_votes', flat=True))
+        return_data['votes']    = num_votes
+    else:
+        choices = question.pollchoice_set.filter(cur_poll=question.num_poll)
+        num_votes = sum(choices.values_list('num_votes', flat=True))
+        return_data['votes']    = num_votes
+
+    return_data['question'] = question
+    return_data['choices']  = choices
+    return_data['poll_num'] = poll_num
+    
+    return render(request, 'Problems/poll_history.html', return_data)
+
+#    except Exception as e:
+#        raise Http404('An error occured in processing your request. Exception: ' + str(e))
+
+## ----------------- HISTORY ----------------------- ## 

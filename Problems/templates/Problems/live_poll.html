@@ -37,7 +37,7 @@
             <dl>
                 {% for choice in choices %}
                 <dt class="diff">{{choice.text}}</dt>
-                {% score_div choice.num_votes votes %}
+                <dd>{% score_div choice.num_votes votes %}</dd>
                 <br>
                 <hr class="fadehr">
                 {% endfor %}

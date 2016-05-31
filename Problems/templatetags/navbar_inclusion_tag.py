@@ -1,5 +1,5 @@
 from django import template
-from Problems.models import ProblemSet
+from Problems.models import ProblemSet, PollQuestion, PollChoice
 from django.core.urlresolvers import resolve, Resolver404
 from django.utils.safestring import mark_safe
 
@@ -42,10 +42,10 @@ def to_percent(num, den):
 
 @register.simple_tag
 def score_div(num, den):
-    div_str = '<dd><div class="{cl}" style="width: {widthperc}%">{perc}% <small>({num_votes} votes)</small></div></dd>'
+    div_str = '<div class="{cl}" style="width: {widthperc}%; margin-left:30px">{perc}% <small>({num_votes} votes)</small></div>'
 
     if den == 0:
-        ret_str = div_str.format(cl="zerobar", widthperc=100, perc="No votes", num_votes="No votes")
+        ret_str = div_str.format(cl="zerobar", widthperc=100, perc="No votes", num_votes="No")
     else:
         percent = round(100*num/den)
         if percent==0:
@@ -55,6 +55,24 @@ def score_div(num, den):
 
     return mark_safe(ret_str)
 
+@register.simple_tag
+def total_votes(questionpk, cur_poll):
+    # For the question with pk questionpk, and the choices with cur_poll, return the total votes
+    q = PollQuestion.objects.get(pk=questionpk)
+    choices = q.pollchoice_set.filter(cur_poll=cur_poll)
+    return sum(choices.values_list('num_votes', flat=True))
+
 @register.filter
-def filter_poll_choice(question):
-    return question.pollchoice_set.filter(cur_poll=question.num_poll).order_by('id')
+def filter_poll_choice(query_set, poll=None):
+    if type(query_set) is PollQuestion:
+        if poll is None:
+            return query_set.pollchoice_set.filter(cur_poll=query_set.num_poll).order_by('id')
+        else:
+            return query_set.pollchoice_set.filter(cur_poll=poll).order_by('id')
+    elif type(query_set) is PollChoice:
+        return query_set.filter(cur_poll=poll)
+
+@register.filter
+def get_range(value):
+    "Generates a range for numeric for loops"
+    return range(value)

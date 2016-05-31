@@ -32,4 +32,5 @@ urlpatterns = [
     url(r'^live_poll/$', views.live_poll, name='live_poll'),
     url(r'^query_live/$', views.query_live, name='query_live'),
     url(r'^pdflatex/$', views.pdflatex, name='pdflatex'),
+    url(r'^history/(?P<questionpk>\d+)/(?P<poll_num>-?\d+)/$', views.poll_history, name='poll_history'),
 ]

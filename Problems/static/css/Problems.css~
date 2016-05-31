@@ -390,5 +390,12 @@ dd {
 }
 
 .pollquestion-button {
+    position: absolute;
+}
 
+#poll-select {
+    width: 20%;
+    margin-bottom: 10pt;
+    font-weight: bold;
+    background-color: blue;
 }
