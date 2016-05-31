@@ -127,7 +127,7 @@ class PollQuestion(models.Model):
     def reset(self):
         # Clone the choices, update cur_poll and num_poll. Returns a dictionary
         # item containing the map of primary keys
-        clones = self.pollchoice_set.filter(cur_poll=self.num_poll)
+        clones = self.pollchoice_set.filter(cur_poll=self.num_poll).order_by('id')
         self.num_poll = self.num_poll+1
         self.save()
 
