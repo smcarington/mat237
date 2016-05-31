@@ -20,7 +20,7 @@
     <div id="global-{{question.pk}}">
         <div class="row div-{{question.pk}}" {% if question.can_vote %}style="background-color: #c2c2c2"{% endif %}>
             <div class="poll-title col-md-6">
-                <p class="diff">[{{forloop.counter}}/{{questions.count}}] {{question.text| safe}}</p>
+                <p class="diff"><b>[{{forloop.counter}}/{{questions.count}}]</b> {{question.text| safe}}</p>
                 <small> <a href="{% url 'edit_pollquestion' questionpk=question.pk %}">Edit</a> <a href="{% url 'delete_item' pk=question.pk objectStr='pollquestion' %}">Delete</a> <a href=javascript:void(0) id="open-{{question.pk}}">Choices</a> <a href="{% url 'poll_history' questionpk=question.pk poll_num=question.num_poll %}">History</a></small>
             </div>
             {% if user.is_staff %}
