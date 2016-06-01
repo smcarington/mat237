@@ -211,7 +211,7 @@ def content_file_name(instance, filename):
 class LinkedDocument(models.Model):
     link_name = models.CharField(max_length=200)
     user      = models.ForeignKey(User)
-    doc_file  = models.FileField(upload_to=content_file_name)
+    doc_file  = models.FileField()
 
     def __str__(self):
         return self.user.username + ' ' + self.doc_file.name

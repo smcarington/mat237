@@ -206,7 +206,7 @@ class PollChoice(models.Model):
 
 # User uploads go to a special file in MEDIA_ROOT
 def content_file_name(instance, filename):
-    return '/'.join(['content', instance.user.username, filename])
+    return '/'.join(['content', filename])
 
 class LinkedDocument(models.Model):
     link_name = models.CharField(max_length=200)
