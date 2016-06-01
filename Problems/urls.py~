@@ -32,7 +32,7 @@ urlpatterns = [
     url(r'^live_poll/$', views.live_poll, name='live_poll'),
     url(r'^query_live/$', views.query_live, name='query_live'),
     url(r'^pdflatex/$', views.pdflatex, name='pdflatex'),
-    url(r'^history/(?P<questionpk>\d+)/$', views.poll_history, name='poll_history'),
-    url(r'^history/(?P<questionpk>\d+)/$', views.poll_history, name='poll_history'),
     url(r'^history/(?P<questionpk>\d+)/(?P<poll_num>-?\d+)/$', views.poll_history, name='poll_history'),
+    url(r'^success/$', views.success_url, name='success_url'),
+    url(r'^upload_file/', views.upload_file, name='upload_file'),
 ]

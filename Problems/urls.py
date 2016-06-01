@@ -33,4 +33,5 @@ urlpatterns = [
     url(r'^query_live/$', views.query_live, name='query_live'),
     url(r'^pdflatex/$', views.pdflatex, name='pdflatex'),
     url(r'^history/(?P<questionpk>\d+)/(?P<poll_num>-?\d+)/$', views.poll_history, name='poll_history'),
+    url(r'^upload_file/', views.upload_file, name='upload_file'),
 ]

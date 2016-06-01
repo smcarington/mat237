@@ -1,5 +1,5 @@
 from django import forms
-from .models import Announcement, Question, ProblemSet, Poll, PollQuestion, PollChoice
+from .models import Announcement, Question, ProblemSet, Poll, PollQuestion, PollChoice, LinkedDocument
 from django.contrib.admin import widgets
 
 class AnnouncementForm(forms.ModelForm):
@@ -29,3 +29,8 @@ class PollForm(forms.ModelForm):
     class Meta:
         model = Poll
         fields = ('title',)
+
+class LinkedDocumentForm(forms.ModelForm):
+    class Meta:
+        model  = LinkedDocument
+        fields = ('link_name', 'doc_file',)

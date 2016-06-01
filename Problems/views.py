@@ -6,6 +6,7 @@ from django.contrib.auth.views import password_change
 from django.http import HttpResponse, Http404, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_protect
 from django.core.mail import send_mail, EmailMessage
+from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.db.models import Max
 
@@ -15,8 +16,8 @@ import os
 import re
 
 from django.contrib.auth.models import User
-from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice
-from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm
+from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument
+from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm
 
 # Create your views here.
 
@@ -144,7 +145,9 @@ def calendar(request):
 
 @login_required
 def notes(request):
-    return render(request, 'Problems/notes.html')
+    # Post links in the sidebar
+    docs = LinkedDocument.objects.all()
+    return render(request, 'Problems/notes.html', {'docs':docs})
 
 @staff_required()
 def administrative(request):
@@ -688,3 +691,17 @@ def poll_history(request, questionpk, poll_num=None):
 #        raise Http404('An error occured in processing your request. Exception: ' + str(e))
 
 ## ----------------- HISTORY ----------------------- ## 
+
+def upload_file(request):
+    if request.method == "POST":
+        form = LinkedDocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            file_item = form.save(commit=False)
+            file_item.user = request.user
+            file_item.save()
+            success_string = "File successfully uploaded."
+            redirect_string   = '<a href="{url}">Return to Administration Page</a>'.format(url=reverse('administrative'))
+            return render(request, 'Problems/success.html', {'success_string': success_string, 'redirect_string': redirect_string})
+    else:
+        form = LinkedDocumentForm()
+        return render(request, 'Problems/edit_announcement.html', {'form' : form})

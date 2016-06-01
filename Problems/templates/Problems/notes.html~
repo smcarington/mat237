@@ -1,5 +1,13 @@
 {% extends 'Problems/base.html' %}
 
+{% comment %}
+    Context has array of LinkedDocument elements called 'docs'
+{% endcomment %}
+
+{% block title %}
+<title>Lecture Notes-Mat237!</title>
+{% endblock %}
+
 {% block content %}
 <div class="pdf-holder">
     <object data='http://www.math.toronto.edu/tholden/LectureNotes237.pdf' 
@@ -9,4 +17,12 @@
         <p>This browser does not support inline PDFs. Please download the PDF to view it: <a href="http://www.math.toronto.edu/tholden/LectureNotes237.pdf">Download PDF</a></p>
     </object>
 </div>
+{% endblock %}
+
+{% block sidebar %}
+    <ul>
+    {% for doc in docs %}
+        <li><a href={{doc.doc_file.url}}>{{doc.link_name}}</a> </li>
+    {% endfor %}
+    </ul>
 {% endblock %}

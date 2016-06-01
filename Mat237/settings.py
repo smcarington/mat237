@@ -163,3 +163,6 @@ with open('/etc/gmailsettings.txt') as f:
     EMAIL_HOST_USER = content[0].strip()
     EMAIL_HOST_PASSWORD = content[1].strip()
 EMAIL_USE_TLS = True
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL  = '/media/'

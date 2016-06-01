@@ -1,0 +1,21 @@
+{% extends 'Problems/base.html' %}
+
+{% comment %}
+    Context has String element "success_string".
+    Context has String element "redirect_string"
+{% endcomment %}
+
+{% block title %}
+    <title>Success!-Mat237!</title>
+{% endblock %}
+
+{% block content %}
+<div>
+    <p> {{success_string}} </p>
+</div>
+
+<div>
+    {{redirect_string | safe}}.
+</div>
+    
+{% endblock %}

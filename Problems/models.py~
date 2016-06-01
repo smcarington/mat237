@@ -127,7 +127,7 @@ class PollQuestion(models.Model):
     def reset(self):
         # Clone the choices, update cur_poll and num_poll. Returns a dictionary
         # item containing the map of primary keys
-        clones = self.pollchoice_set.filter(cur_poll=self.num_poll)
+        clones = self.pollchoice_set.filter(cur_poll=self.num_poll).order_by('id')
         self.num_poll = self.num_poll+1
         self.save()
 
@@ -203,3 +203,15 @@ class PollChoice(models.Model):
 
     def __str__(self):
         return self.text
+
+# User uploads go to a special file in MEDIA_ROOT
+def content_file_name(instance, filename):
+    return '/'.join(['content', instance.user.username, filename])
+
+class LinkedDocument(models.Model):
+    link_name = models.CharField(max_length=200)
+    user      = models.ForeignKey(User)
+    doc_file  = models.FileField(upload_to=content_file_name)
+
+    def __str__(self):
+        return self.user.username + ' ' + self.doc_file.name
