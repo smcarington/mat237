@@ -147,8 +147,10 @@ STATIC_URL = '/static/'
 
 if socket.gethostname() == 'dobox':
     STATIC_ROOT = "/opt/myvenv/static"
+    MEDIA_ROOT= "/opt/myvenv/media"
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
@@ -164,5 +166,4 @@ with open('/etc/gmailsettings.txt') as f:
     EMAIL_HOST_PASSWORD = content[1].strip()
 EMAIL_USE_TLS = True
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL  = '/media/'
