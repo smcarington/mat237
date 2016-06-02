@@ -629,11 +629,13 @@ def compile_and_email(latex_source, user):
     """
 
     # Write the string to a file so that we can curl it to the external server
-    file_name = "/tmp/latex_{userpk}.tex".format(userpk=user.pk)
+    latex_directory = "/".join([settings.MEDIA_ROOT, "latex"])
+    file_name = "/".join([latex_directory, "latex_{userpk}.tex".format(userpk=user.pk)])
     with open(file_name, 'w') as f:
         f.write(latex_source)
     
-    command = ["pdflatex", "-halt-on-error", "-output-directory=/tmp", file_name]
+    import pdb; pdb.set_trace()
+    command = ["pdflatex", "-halt-on-error", "-output-directory={dir}".format(dir=latex_directory), file_name]
     # Compile the document
     DEVNULL = open(os.devnull, 'w')
     subprocess.call(command, stdout=DEVNULL, stderr=subprocess.STDOUT)
