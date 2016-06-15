@@ -653,7 +653,6 @@ def compile_and_email(latex_source, user):
     with open(file_name, 'w') as f:
         f.write(latex_source)
     
-    import pdb; pdb.set_trace()
     command = ["pdflatex", "-halt-on-error", "-output-directory={dir}".format(dir=latex_directory), file_name]
     # Compile the document
     DEVNULL = open(os.devnull, 'w')

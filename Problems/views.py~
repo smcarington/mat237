@@ -448,7 +448,7 @@ def live_question(request):
         elif status == 'stop':
             if not question.can_vote:
                 response_data = {'response': 'This question is not live.'}
-            elif question.visible:
+            elif not question.visible:
                 response_data = {'response': 'That question is not visible'}
             else:
                 question.stop()
