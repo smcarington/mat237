@@ -20,13 +20,13 @@
     <div id="global-{{question.pk}}">
         <div class="row div-{{question.pk}}" {% if question.can_vote %}style="background-color: #c2c2c2"{% endif %}>
             <div class="poll-title col-md-6">
-                <p class="diff">[{{forloop.counter}}/{{questions.count}}] {{question.text| safe}}</p>
+                <p class="diff"><b>[{{forloop.counter}}/{{questions.count}}]</b> {{question.text| safe}}</p>
                 <small> <a href="{% url 'edit_pollquestion' questionpk=question.pk %}">Edit</a> <a href="{% url 'delete_item' pk=question.pk objectStr='pollquestion' %}">Delete</a> <a href=javascript:void(0) id="open-{{question.pk}}">Choices</a> <a href="{% url 'poll_history' questionpk=question.pk poll_num=question.num_poll %}">History</a></small>
             </div>
             {% if user.is_staff %}
             <div class = "col-md-4" style="padding:0">
                 Slide: <input type="checkbox" id="check_{{question.pk}}" {% if question.live %}checked{% endif %}>
-                <button class="btn btn-success" id="start_{{question.pk}}">Start</button> <button class="btn btn-danger" id="stop_{{question.pk}}"> Stop</button> <button class="btn btn-default" id ="reset_{{question.pk}}"> Reset </button>
+                <button class="btn btn-success" id="start_{{question.pk}}">Start</button> <button class="btn btn-danger" id="stop_{{question.pk}}"> Stop</button> 
                 <p id="response_{{question.pk}}"></p>
                 <p id="votes-{{question.pk}}"></p>
             </div>
@@ -58,6 +58,7 @@
         <li> Use the 'Stop' button to stop voting and display results.
         <li> The 'Reset' button clears the current poll results and resets votes to zero. The data from the
              previous vote is preserved.
+        <li> 
     </ul>
     <div class="button-div">
         <a href="{% url 'new_pollquestion' pollpk=poll.pk %}" class="btn btn-default">New Question</a>
@@ -66,6 +67,7 @@
 
 {% block buttons %}
     <div class="button-div">
+        <a class="btn btn-default" id='slides_live'>Toggle Slides</a>
         <button class="btn btn-default" id="endall_-1">End Polling</button>
     </div>
 {% endblock %}

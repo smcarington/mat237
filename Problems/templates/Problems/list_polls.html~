@@ -6,7 +6,6 @@
 
 {% block content %}
     <h1> In Class Polls </h1> 
-    <a href="{% url 'polls' %}">&#171; Return to Polls</a>
     <a href="{% url 'live_poll' %}" class="btn btn-default">Live Poll</a>
 
     {% for poll in polls %}

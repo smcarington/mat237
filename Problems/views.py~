@@ -409,6 +409,13 @@ def make_live(request):
 # AJAX view for an administrator to start/stop/reset a question
 @csrf_protect
 def live_question(request):
+    """
+        AJAX view for poll-admin page. request.POST should have a field called 'status' which
+        describes which button was hit. Can be one of
+            'start'  - make a question live and open voting
+            'stop'   - close voting, display results, and reset
+            'endall' - removes questions from the poll page
+    """
     if request.user.is_staff:
         data = request.POST
         question_pk = int(data['questionpk'])
@@ -423,23 +430,35 @@ def live_question(request):
 
         # The PollQuestion model has built in functions for this. But we have to make sure
         # that this is the only live question on start.
+        #
+        # As of June 15, 2015, moved reset() to stop.
         if status == 'start':
+            # On 'start' we reset the poll. However, to avoid saving a bunch of empty polls
+            # we first check to see if any votes have been cast.
+            choices  = question.pollchoice_set.filter(cur_poll=question.num_poll)
+            num_votes = sum(choices.values_list('num_votes', flat=True))
+
+            response_data = {'response': 'Question pushed to live page'}
+            if num_votes != 0:
+                pk_map = question.reset()
+                response_data['pkMap'] = pk_map
+
             PollQuestion.objects.filter(visible=True).update(visible=False, can_vote=False)
             question.start()
-            response_data = {'response': 'Question pushed to live page'}
         elif status == 'stop':
             if not question.can_vote:
                 response_data = {'response': 'This question is not live.'}
+            elif question.visible:
+                response_data = {'response': 'That question is not visible'}
             else:
                 question.stop()
                 response_data = {'response': 'Question stopped. Displaying results.'}
-            # Need to do some computations here to return data
-        elif status == 'reset':
-            if not question.visible:
-                response_data = {'response': 'That question is not visible'}
-            else:
-                pk_map = question.reset()
-                response_data = {'response': 'Data saved. Press start to reopen.', 'pkMap': pk_map}
+#        elif status == 'reset':
+#            if not question.visible:
+#                response_data = {'response': 'That question is not visible'}
+#            else:
+#                pk_map = question.reset()
+#                response_data = {'response': 'Data saved. Press start to reopen.', 'pkMap': pk_map}
     else:
         response_data = {'response': 'You are not authorized to make this POST'}
 
@@ -635,7 +654,7 @@ def compile_and_email(latex_source, user):
         f.write(latex_source)
     
     import pdb; pdb.set_trace()
-    command = ["pdflatex", "-halt-on-error", "-output-directory={dir}".format(latex_directory), file_name]
+    command = ["pdflatex", "-halt-on-error", "-output-directory={dir}".format(dir=latex_directory), file_name]
     # Compile the document
     DEVNULL = open(os.devnull, 'w')
     subprocess.call(command, stdout=DEVNULL, stderr=subprocess.STDOUT)

@@ -27,9 +27,11 @@ $(document).ready(function() {
                     $response.html(data['response']);
                     setTimeout( function() {$response.html('')}, 2000);
                 }
+
+                // Check to see if the question has been restarted.
                 // When resetting a question, we must replace the choice pk's. In this instance only, the
                 // response item contains a pk map whose keys are the old pk's, and whose values are the new pk's
-                if (action=='reset') {
+                if (data.hasOwnProperty('pkMap')) {
                     pkMap = data['pkMap'];
                     $("#"+pk+"-choices>ol>li>p>small").each( function() {
                         // Determine the old pk, which is the field for the new pk
@@ -39,6 +41,17 @@ $(document).ready(function() {
                         $(this).html("(0 votes)");
                     });
                 }
+
+                //if (action=='reset') {
+                //    pkMap = data['pkMap'];
+                //    $("#"+pk+"-choices>ol>li>p>small").each( function() {
+                //        // Determine the old pk, which is the field for the new pk
+                //        idString = $(this).attr('id').split('-');
+                //        newIDString = pkMap[idString[0]]+"-votes";
+                //        $(this).attr('id', newIDString);
+                //        $(this).html("(0 votes)");
+                //    });
+                //}
             }, "json");
         // Highlight the appropriate div so it is easy to see
         if (action == 'start') {
@@ -109,4 +122,8 @@ $(document).ready(function() {
     }
     // Start the method to check if votes have been cast
     setTimeout(voteCheck, 2000);
+
+    $("#slides_live").click( function() {
+        $('[type="checkbox"]').click();
+    });
 });
