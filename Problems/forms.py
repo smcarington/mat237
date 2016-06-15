@@ -34,3 +34,7 @@ class LinkedDocumentForm(forms.ModelForm):
     class Meta:
         model  = LinkedDocument
         fields = ('link_name', 'doc_file',)
+
+class TextFieldForm(forms.Form):
+    attrs = {'cols': '150', 'rows': '30'}
+    text_field = forms.CharField(widget=forms.Textarea(attrs))

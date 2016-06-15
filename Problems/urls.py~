@@ -14,6 +14,7 @@ urlpatterns = [
     url(r'^administrative/add-ps/$', views.new_problem_set, name='new_problem_set'),
     url(r'^delete/(?P<objectStr>[a-z]+)/(?P<pk>\d+)', views.delete_item, name='delete_item'),
     url(r'^syllabus/', views.syllabus, name='syllabus'),
+    url(r'^edit_syllabus/', views.edit_syllabus, name='syllabus'),
     url(r'^notes/', views.notes, name='notes'),
     url(r'^calendar/', views.calendar, name='calendar'),
     url(r'^administrative/', views.administrative, name='administrative'),
@@ -33,6 +34,5 @@ urlpatterns = [
     url(r'^query_live/$', views.query_live, name='query_live'),
     url(r'^pdflatex/$', views.pdflatex, name='pdflatex'),
     url(r'^history/(?P<questionpk>\d+)/(?P<poll_num>-?\d+)/$', views.poll_history, name='poll_history'),
-    url(r'^success/$', views.success_url, name='success_url'),
     url(r'^upload_file/', views.upload_file, name='upload_file'),
 ]

@@ -17,7 +17,7 @@ import re
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument
-from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm
+from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm
 
 # Create your views here.
 
@@ -136,8 +136,45 @@ def post_delete(request, pk):
     post.delete()
     return redirect('post_list')
 
+def get_syllabus(new_text=None):
+    """
+        Helper function for syllabus and edit_syllabus views. Handles the actual
+        file system for manipulating the syllabus
+    """
+    file_path = settings.MEDIA_ROOT + "/syllabus-body.txt"
+    if new_text:
+        try:
+            with open(file_path, 'w') as f:
+                f.write(new_text)
+            return "Syllabus successfully updated"
+        except Exception as e:
+            raise e
+    else:
+        try:
+            with open(file_path, 'r') as f:
+                body = f.read()
+            return body
+        except Exception as e:
+            raise e
+
 def syllabus(request):
-    return render(request, 'Problems/syllabus.html')
+    body = get_syllabus()
+    return render(request, 'Problems/syllabus.html', {'body': body} )
+
+def edit_syllabus(request):
+    """
+        Creates a form for editing the syllabus and updates that form
+    """
+    if request.method == "POST":
+        new_text = request.POST['text_field']
+        response_string = get_syllabus(new_text)
+        redirect_string = '<a href="{url}">Visit Syllabus Page</a>'.format(url=reverse('syllabus'))
+        return render(request, 'Problems/success.html', {'success_string': success_string, 'redirect_string': redirect_string})
+    else:
+        cur_text = get_syllabus()
+        data     = {'text_field': cur_text}
+        form     = TextFieldForm(data)
+        return render(request, 'Problems/edit_announcement.html', {'form' : form})
 
 @login_required
 def calendar(request):
@@ -653,7 +690,6 @@ def compile_and_email(latex_source, user):
     with open(file_name, 'w') as f:
         f.write(latex_source)
     
-    import pdb; pdb.set_trace()
     command = ["pdflatex", "-halt-on-error", "-output-directory={dir}".format(dir=latex_directory), file_name]
     # Compile the document
     DEVNULL = open(os.devnull, 'w')
