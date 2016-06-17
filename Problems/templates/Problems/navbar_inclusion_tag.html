@@ -4,32 +4,45 @@
     Has problem_sets element of type ProblemSets. Set by navbar_inclusion_tag.py
 {% endcomment %}
 
-<div class="container">
-    <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-        </button>
-    </div>
-    <div id="navbar" class="navbar-collapse" aria-expanded="false">
-        <ul class="nav nav-pills">
-            <li><a class = "{% check_active request 'announcements' %}" href="{% url 'announcements' %}">Announcements</a></li>
-            <li class="dropdown">
-            <a class="{% check_active request 'problem_set' %}" href="javascript:void(0)" data-toggle="dropdown" class="dropdown-toggle">Problem Sets<b class="caret"></b></a>
-                <ul class="dropdown-menu">
-                    {% for ps in problem_sets %}
-                    <li><a href="{% url 'list_problem_set' pk=ps.pk %}">{{ ps.title }}</a></li>
-                    {% endfor %}
-                </ul>
-                <li><a class="{% check_active request 'syllabus' %}" href="{% url 'syllabus' %}" >Syllabus</a></li>
-                <li><a class="{% check_active request 'calendar' %}" href="{% url 'calendar' %}" >Calendar</a></li>
-                <li><a class="{% check_active request 'notes' %}" href="{% url 'notes' %}" >Notes</a></li>
-                <li><a class="{% check_active request 'poll' %}" href="{% url 'polls' %}" >Polls</a></li>
-                {% if request.user.is_staff %}
-                <li><a class="{% check_active request 'administrative' %}" href="{% url 'administrative' %}">Administration</a></li>
+<nav class="navbar navbar-default navbar-fixed-top"> 
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand">Mat237!</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><a class = "{% check_active request 'announcements' %}" href="{% url 'announcements' %}">Announcements</a></li>
+                <li class="dropdown">
+                <a class="{% check_active request 'problem_set' %}" href="javascript:void(0)" data-toggle="dropdown" class="dropdown-toggle">Problem Sets<b class="caret"></b></a>
+                    <ul class="dropdown-menu">
+                        {% for ps in problem_sets %}
+                        <li><a href="{% url 'list_problem_set' pk=ps.pk %}">{{ ps.title }}</a></li>
+                        {% endfor %}
+                    </ul>
+                    <li><a class="{% check_active request 'syllabus' %}" href="{% url 'syllabus' %}" >Syllabus</a></li>
+                    <li><a class="{% check_active request 'calendar' %}" href="{% url 'calendar' %}" >Calendar</a></li>
+                    <li><a class="{% check_active request 'notes' %}" href="{% url 'notes' %}" >Notes</a></li>
+                    <li><a class="{% check_active request 'poll' %}" href="{% url 'polls' %}" >Polls</a></li>
+                    {% if request.user.is_staff %}
+                    <li><a class="{% check_active request 'administrative' %}" href="{% url 'administrative' %}">Administration</a></li>
+                    {% endif %}
+            </ul>
+            <div class="navbar-right">
+                {% if request.user.is_authenticated %}
+                    <p class="top-menu">Hello {{ request.user.username }}<small> (<a href="{% url 'django.contrib.auth.views.logout' %}">Log out</a>)<br> (<a href="{% url 'password_change' %}">Change Password</a>)</small></p>
+                    {% else %}
+                    <div class="top-menu">
+                        <a href="{% url 'login' %}" class="top-menu"><span class="glyphicon glyphicon-lock"></span>Log In</a>
+                        <br>
+                    </div>
                 {% endif %}
-        </ul>
+            </div>
+        </div>
     </div>
-</div>
+</nav>

@@ -12,7 +12,7 @@ a, a:hover {
 .page-header {
     width: 86%;
     background-color: #e6e6e6;
-    margin: 10px 0px 0px 30px;
+    margin: 10px 0px 30px 30px;
     border-radius: 10px;
 }
 
@@ -57,7 +57,7 @@ h1 a {
 
 ul li a.active, ul li a.active:hover, ul li a.active:focus {
     background-color: #1a75ff;
-    border-radius: 20px;
+    border-radius: 15px;
     color: #e6f0ff;
 }
 
@@ -398,3 +398,19 @@ dd {
     margin-bottom: 10pt;
     font-weight: bold;
 }
+
+.navbar-nav>li>a, .navbar-nav>li>a.active {
+    margin-top: 5px;
+    line-height: 10px;
+    color: #e6f0ff;
+}
+
+.navbar-right {
+    margin-top: 5px;
+}
+
+.navbar-default {
+    background-color: #e6e6e6;
+}
+
+
