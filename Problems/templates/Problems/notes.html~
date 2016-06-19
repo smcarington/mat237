@@ -2,6 +2,7 @@
 
 {% comment %}
     Context has array of LinkedDocument elements called 'docs'
+    Context has array of String elements called 'cats' containing the category names
 {% endcomment %}
 
 {% block title %}
@@ -19,10 +20,15 @@
 </div>
 {% endblock %}
 
-{% block sidebar %}
-    <ul>
-    {% for doc in docs %}
-        <li><a href={{doc.doc_file.url}}>{{doc.link_name}}</a> </li>
+{% block sidenote %}
+    {% for cat in cats %}
+        <h5> {{cat}} </h5>
+        <ul>
+        {% for doc in docs %}
+            {% if doc.category.cat_name == cat %}
+                <li><a href={{doc.doc_file.url}}>{{doc.link_name}}</a> </li>
+            {% endif %}
+        {% endfor %}
+        </ul>
     {% endfor %}
-    </ul>
 {% endblock %}

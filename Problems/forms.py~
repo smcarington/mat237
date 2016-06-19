@@ -37,4 +37,4 @@ class LinkedDocumentForm(forms.ModelForm):
 
 class TextFieldForm(forms.Form):
     attrs = {'cols': '150', 'rows': '30'}
-    text_field = forms.CharField(widget=forms.Textarea(attrs)(attrs)(attrs)(attrs)(attrs)(attrs)(attrs)(attrs)(attrs))
+    text_field = forms.CharField(widget=forms.Textarea(attrs))

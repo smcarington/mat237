@@ -183,8 +183,9 @@ def calendar(request):
 @login_required
 def notes(request):
     # Post links in the sidebar
-    docs = LinkedDocument.objects.all()
-    return render(request, 'Problems/notes.html', {'docs':docs})
+    docs = LinkedDocument.objects.select_related('category').all().order_by('category')
+    cat_names = docs.values_list('category__cat_name', flat=True).distinct()
+    return render(request, 'Problems/notes.html', {'docs':docs, 'cats':cat_names})
 
 @staff_required()
 def administrative(request):

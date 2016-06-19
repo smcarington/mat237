@@ -33,7 +33,7 @@ class PollForm(forms.ModelForm):
 class LinkedDocumentForm(forms.ModelForm):
     class Meta:
         model  = LinkedDocument
-        fields = ('link_name', 'doc_file',)
+        fields = ('link_name', 'doc_file', 'category')
 
 class TextFieldForm(forms.Form):
     attrs = {'cols': '150', 'rows': '30'}

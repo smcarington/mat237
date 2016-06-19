@@ -167,7 +167,7 @@ def edit_syllabus(request):
     """
     if request.method == "POST":
         new_text = request.POST['text_field']
-        response_string = get_syllabus(new_text)
+        success_string  = get_syllabus(new_text)
         redirect_string = '<a href="{url}">Visit Syllabus Page</a>'.format(url=reverse('syllabus'))
         return render(request, 'Problems/success.html', {'success_string': success_string, 'redirect_string': redirect_string})
     else:
@@ -183,8 +183,9 @@ def calendar(request):
 @login_required
 def notes(request):
     # Post links in the sidebar
-    docs = LinkedDocument.objects.all()
-    return render(request, 'Problems/notes.html', {'docs':docs})
+    docs = LinkedDocument.objects.select_related('category').all().order_by('category')
+    cat_names = docs.values_list('category__cat_name', flat=True)
+    return render(request, 'Problems/notes.html', {'docs':docs, 'cats':cat_names})
 
 @staff_required()
 def administrative(request):

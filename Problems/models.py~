@@ -208,8 +208,15 @@ class PollChoice(models.Model):
 def content_file_name(instance, filename):
     return '/'.join(['content', filename])
 
+class DocumentCategory(models.Model):
+    cat_name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return cat_name
+
 class LinkedDocument(models.Model):
     link_name = models.CharField(max_length=200)
+    category  = models.ForeignKey(DocumentCategory, null=True, related_name="docs")
     user      = models.ForeignKey(User)
     doc_file  = models.FileField()
 
