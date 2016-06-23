@@ -471,18 +471,23 @@ def live_question(request):
         #
         # As of June 15, 2015, moved reset() to stop.
         if status == 'start':
-            # On 'start' we reset the poll. However, to avoid saving a bunch of empty polls
-            # we first check to see if any votes have been cast.
-            choices  = question.pollchoice_set.filter(cur_poll=question.num_poll)
-            num_votes = sum(choices.values_list('num_votes', flat=True))
+            # It is possible that the administrator accidentally hit the start button again.
+            # We check to see if this is the case, and return an error message if so.
+            if question.can_vote:
+                response_data = {'response': 'This question is already active'}
+            else: 
+                # On 'start' we reset the poll. However, to avoid saving a bunch of empty polls
+                # we first check to see if any votes have been cast.
+                choices  = question.pollchoice_set.filter(cur_poll=question.num_poll)
+                num_votes = sum(choices.values_list('num_votes', flat=True))
 
-            response_data = {'response': 'Question pushed to live page'}
-            if num_votes != 0:
-                pk_map = question.reset()
-                response_data['pkMap'] = pk_map
+                response_data = {'response': 'Question pushed to live page'}
+                if num_votes != 0:
+                    pk_map = question.reset()
+                    response_data['pkMap'] = pk_map
 
-            PollQuestion.objects.filter(visible=True).update(visible=False, can_vote=False)
-            question.start()
+                PollQuestion.objects.filter(visible=True).update(visible=False, can_vote=False)
+                question.start()
         elif status == 'stop':
             if not question.can_vote:
                 response_data = {'response': 'This question is not live.'}
