@@ -40,14 +40,18 @@ class QuestionStatus(models.Model):
     difficulty = models.IntegerField(choices=STUD_DIFF_CHOICES, default=1)
     solution   = models.TextField(default='');
 
+# Localtime function to pass to DateTimeField callable
+def get_localtime():
+    return timezone.localtime(timezone.now())
+
 # For staff to make announcements
 class Announcement(models.Model):
     author   = models.ForeignKey(User)
     title    = models.CharField(max_length=30)
     text     = models.TextField()
     stickied = models.BooleanField(default=False)
-    created_date   = models.DateTimeField(
-                        default=timezone.now)
+
+    created_date   = models.DateTimeField(default=get_localtime)
     published_date = models.DateTimeField(
                         blank=True, null=True)
     expires        = models.DateField(blank=True, null=True, default=timezone.now()+timedelta(days=21))
@@ -93,7 +97,7 @@ class Announcement(models.Model):
                     </div>
                 </div>
             </div>
-        """.format(extra=stclass, title=sticktitle, date=self.published_date.strftime("%A, %B %d, %I:%M%p"), text=self.text, author=full_name)
+        """.format(extra=stclass, title=sticktitle, date=timezone.localtime(self.published_date).strftime("%A, %B %d, %I:%M%p"), text=self.text, author=full_name)
 
     def __str__(self):
         return self.title
