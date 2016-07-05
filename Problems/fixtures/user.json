@@ -1,0 +1,38 @@
+[
+{
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$24000$rETChD4fg4WU$/QvmOanlALB0gIYTYIn2/QoiF+0aohO50pOb2N7uRDk=",
+        "last_login": "2016-07-05T20:43:07.010Z",
+        "is_superuser": true,
+        "username": "tholden",
+        "first_name": "Tyler",
+        "last_name": "Holden",
+        "email": "tholden@math.toronto.edu",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2016-05-20T16:30:27Z",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {
+        "password": "pbkdf2_sha256$24000$krYIKXBIficP$l4qMyCm+6lPb7zU6JIkHUS8KvQRY7c9BtSUq4Cvg4jU=",
+        "last_login": "2016-06-15T19:38:26Z",
+        "is_superuser": false,
+        "username": "pgadey",
+        "first_name": "Parker",
+        "last_name": "Glynn-Adey",
+        "email": "tholden@math.toronto.edu",
+        "is_staff": false,
+        "is_active": true,
+        "date_joined": "2016-05-20T19:35:40Z",
+        "groups": [],
+        "user_permissions": []
+    }
+}
+]

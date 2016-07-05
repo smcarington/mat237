@@ -1,0 +1,720 @@
+[
+{
+    "model": "Problems.problemset",
+    "pk": 1,
+    "fields": {
+        "title": "PS 1",
+        "visible": true
+    }
+},
+{
+    "model": "Problems.problemset",
+    "pk": 2,
+    "fields": {
+        "title": "PS 2",
+        "visible": true
+    }
+},
+{
+    "model": "Problems.question",
+    "pk": 1,
+    "fields": {
+        "problem_set": 1,
+        "text": "Here is some mathematics for you \\( \\displaystyle \\sum_{k=1}^\\infty \\frac1{k^2} = \\frac{\\pi^2}6\\).",
+        "difficulty": 1,
+        "attempts": 0,
+        "solved": 0,
+        "stud_diff": 1
+    }
+},
+{
+    "model": "Problems.question",
+    "pk": 2,
+    "fields": {
+        "problem_set": 1,
+        "text": "Here is an ordered list.\r\n<ol>\r\n<li> The first item \\(\\frac{d}{dx} f(x) = f'(x) \\)\r\n<li> The second \\(\\displaystyle \\int_a^b f(x) \\mathrm dx \\)\r\n</ol>",
+        "difficulty": 3,
+        "attempts": 0,
+        "solved": 0,
+        "stud_diff": 1
+    }
+},
+{
+    "model": "Problems.question",
+    "pk": 3,
+    "fields": {
+        "problem_set": 1,
+        "text": "Some <i>italic</i> and some <b>bold words</b>!",
+        "difficulty": 1,
+        "attempts": 0,
+        "solved": 0,
+        "stud_diff": 1
+    }
+},
+{
+    "model": "Problems.question",
+    "pk": 4,
+    "fields": {
+        "problem_set": 2,
+        "text": "A question",
+        "difficulty": 1,
+        "attempts": 0,
+        "solved": 0,
+        "stud_diff": 1
+    }
+},
+{
+    "model": "Problems.questionstatus",
+    "pk": 1,
+    "fields": {
+        "user": 1,
+        "question": 4,
+        "attempt": false,
+        "solved": false,
+        "difficulty": 1,
+        "solution": ""
+    }
+},
+{
+    "model": "Problems.announcement",
+    "pk": 1,
+    "fields": {
+        "author": 1,
+        "title": "Old Announcement",
+        "text": "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content here, content here', making it look like readable English. Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy. Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).",
+        "stickied": false,
+        "created_date": "2016-06-17T19:12:28Z",
+        "published_date": "2016-06-17T19:12:28Z",
+        "expires": "2016-07-08"
+    }
+},
+{
+    "model": "Problems.announcement",
+    "pk": 2,
+    "fields": {
+        "author": 1,
+        "title": "New announcement",
+        "text": "Recommendations\r\n\r\nPages optimized to display well on mobile devices should include a meta viewport in the head of the document specifying width=device-width, initial-scale=1.\r\n\r\n<meta name=viewport content=\"width=device-width, initial-scale=1\">\r\nAdditional information\r\n\r\nTerms:\r\n\r\nHardware pixel: A physical pixel on the display. For example, an iPhone 5 has a screen with 640 horizontal hardware pixels.\r\nDevice-independent pixel (dip): A scaling of device pixels to match a uniform reference pixel at a normal viewing distance, which should be approximately the same size on all devices. An iPhone 5 is 320 dips wide.\r\nCSS pixel: The unit used for page layout controlled by the viewport. Pixel dimensions in styles such as width: 100px are specified in CSS pixels. The ratio of CSS pixels to device independent pixels is the page's scale factor, or zoom.",
+        "stickied": false,
+        "created_date": "2016-06-17T19:12:43Z",
+        "published_date": "2016-06-17T19:12:43Z",
+        "expires": "2016-07-08"
+    }
+},
+{
+    "model": "Problems.poll",
+    "pk": 1,
+    "fields": {
+        "title": "The test poll"
+    }
+},
+{
+    "model": "Problems.poll",
+    "pk": 2,
+    "fields": {
+        "title": "Poll 2"
+    }
+},
+{
+    "model": "Problems.poll",
+    "pk": 3,
+    "fields": {
+        "title": "Poll 3"
+    }
+},
+{
+    "model": "Problems.pollquestion",
+    "pk": 2,
+    "fields": {
+        "poll": 1,
+        "text": "Suppose for some fixed \\(x\\) we are told that \\(x \\leq\\epsilon + 1\\) for all \\(\\epsilon > 0\\). Which of  following <b>must</b> be a true statement about \\(x\\)?",
+        "live": false,
+        "num_poll": 10,
+        "visible": false,
+        "can_vote": false,
+        "position": 0
+    }
+},
+{
+    "model": "Problems.pollquestion",
+    "pk": 54,
+    "fields": {
+        "poll": 1,
+        "text": "A model question",
+        "live": false,
+        "num_poll": 7,
+        "visible": true,
+        "can_vote": false,
+        "position": 1
+    }
+},
+{
+    "model": "Problems.pollquestion",
+    "pk": 66,
+    "fields": {
+        "poll": 1,
+        "text": "Blah blah blah",
+        "live": false,
+        "num_poll": 1,
+        "visible": false,
+        "can_vote": false,
+        "position": 2
+    }
+},
+{
+    "model": "Problems.pollquestion",
+    "pk": 67,
+    "fields": {
+        "poll": 1,
+        "text": "Blah test",
+        "live": false,
+        "num_poll": 1,
+        "visible": false,
+        "can_vote": false,
+        "position": 3
+    }
+},
+{
+    "model": "Problems.pollquestion",
+    "pk": 68,
+    "fields": {
+        "poll": 1,
+        "text": "Blah blah blah new model test blah",
+        "live": false,
+        "num_poll": 2,
+        "visible": false,
+        "can_vote": false,
+        "position": 4
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 5,
+    "fields": {
+        "question": 2,
+        "text": "\\(x \\leq 1\\)",
+        "num_votes": 1,
+        "cur_poll": 1
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 6,
+    "fields": {
+        "question": 2,
+        "text": "\\(0 < x\\)",
+        "num_votes": 1,
+        "cur_poll": 1
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 7,
+    "fields": {
+        "question": 2,
+        "text": "\\(x = 0\\)",
+        "num_votes": 0,
+        "cur_poll": 1
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 17,
+    "fields": {
+        "question": 54,
+        "text": "A choice",
+        "num_votes": 2,
+        "cur_poll": 1
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 18,
+    "fields": {
+        "question": 54,
+        "text": "Another Choice",
+        "num_votes": 1,
+        "cur_poll": 1
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 19,
+    "fields": {
+        "question": 66,
+        "text": "Blah the blah baby.",
+        "num_votes": 0,
+        "cur_poll": 1
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 20,
+    "fields": {
+        "question": 2,
+        "text": "\\(x \\leq 1\\)",
+        "num_votes": 5,
+        "cur_poll": 2
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 21,
+    "fields": {
+        "question": 2,
+        "text": "\\(0 < x\\)",
+        "num_votes": 0,
+        "cur_poll": 2
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 22,
+    "fields": {
+        "question": 2,
+        "text": "\\(x = 0\\)",
+        "num_votes": 2,
+        "cur_poll": 2
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 23,
+    "fields": {
+        "question": 54,
+        "text": "A choice",
+        "num_votes": 1,
+        "cur_poll": 2
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 24,
+    "fields": {
+        "question": 54,
+        "text": "Another Choice",
+        "num_votes": 1,
+        "cur_poll": 2
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 25,
+    "fields": {
+        "question": 54,
+        "text": "A choice",
+        "num_votes": 1,
+        "cur_poll": 3
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 26,
+    "fields": {
+        "question": 54,
+        "text": "Another Choice",
+        "num_votes": 0,
+        "cur_poll": 3
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 27,
+    "fields": {
+        "question": 54,
+        "text": "A choice",
+        "num_votes": 4,
+        "cur_poll": 4
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 28,
+    "fields": {
+        "question": 54,
+        "text": "Another Choice",
+        "num_votes": 0,
+        "cur_poll": 4
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 29,
+    "fields": {
+        "question": 54,
+        "text": "A choice",
+        "num_votes": 6,
+        "cur_poll": 5
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 30,
+    "fields": {
+        "question": 54,
+        "text": "Another Choice",
+        "num_votes": 0,
+        "cur_poll": 5
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 31,
+    "fields": {
+        "question": 2,
+        "text": "\\(x \\leq 1\\)",
+        "num_votes": 1,
+        "cur_poll": 3
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 32,
+    "fields": {
+        "question": 2,
+        "text": "\\(0 < x\\)",
+        "num_votes": 1,
+        "cur_poll": 3
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 33,
+    "fields": {
+        "question": 2,
+        "text": "\\(x = 0\\)",
+        "num_votes": 0,
+        "cur_poll": 3
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 34,
+    "fields": {
+        "question": 2,
+        "text": "\\(x \\leq 1\\)",
+        "num_votes": 2,
+        "cur_poll": 4
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 35,
+    "fields": {
+        "question": 2,
+        "text": "\\(0 < x\\)",
+        "num_votes": 1,
+        "cur_poll": 4
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 36,
+    "fields": {
+        "question": 2,
+        "text": "\\(x = 0\\)",
+        "num_votes": 1,
+        "cur_poll": 4
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 37,
+    "fields": {
+        "question": 2,
+        "text": "\\(x \\leq 1\\)",
+        "num_votes": 1,
+        "cur_poll": 5
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 38,
+    "fields": {
+        "question": 2,
+        "text": "\\(0 < x\\)",
+        "num_votes": 0,
+        "cur_poll": 5
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 39,
+    "fields": {
+        "question": 2,
+        "text": "\\(x = 0\\)",
+        "num_votes": 0,
+        "cur_poll": 5
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 40,
+    "fields": {
+        "question": 67,
+        "text": "Test again",
+        "num_votes": 0,
+        "cur_poll": 1
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 41,
+    "fields": {
+        "question": 2,
+        "text": "\\(x \\leq 1\\)",
+        "num_votes": 4,
+        "cur_poll": 6
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 42,
+    "fields": {
+        "question": 2,
+        "text": "\\(0 < x\\)",
+        "num_votes": 0,
+        "cur_poll": 6
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 43,
+    "fields": {
+        "question": 2,
+        "text": "\\(x = 0\\)",
+        "num_votes": 0,
+        "cur_poll": 6
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 44,
+    "fields": {
+        "question": 2,
+        "text": "\\(x \\leq 1\\)",
+        "num_votes": 3,
+        "cur_poll": 7
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 45,
+    "fields": {
+        "question": 2,
+        "text": "\\(0 < x\\)",
+        "num_votes": 0,
+        "cur_poll": 7
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 46,
+    "fields": {
+        "question": 2,
+        "text": "\\(x = 0\\)",
+        "num_votes": 3,
+        "cur_poll": 7
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 47,
+    "fields": {
+        "question": 2,
+        "text": "\\(x \\leq 1\\)",
+        "num_votes": 2,
+        "cur_poll": 8
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 48,
+    "fields": {
+        "question": 2,
+        "text": "\\(0 < x\\)",
+        "num_votes": 2,
+        "cur_poll": 8
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 49,
+    "fields": {
+        "question": 2,
+        "text": "\\(x = 0\\)",
+        "num_votes": 2,
+        "cur_poll": 8
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 50,
+    "fields": {
+        "question": 2,
+        "text": "\\(x \\leq 1\\)",
+        "num_votes": 5,
+        "cur_poll": 9
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 51,
+    "fields": {
+        "question": 2,
+        "text": "\\(0 < x\\)",
+        "num_votes": 0,
+        "cur_poll": 9
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 52,
+    "fields": {
+        "question": 2,
+        "text": "\\(x = 0\\)",
+        "num_votes": 0,
+        "cur_poll": 9
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 53,
+    "fields": {
+        "question": 68,
+        "text": "Hi you",
+        "num_votes": 2,
+        "cur_poll": 1
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 54,
+    "fields": {
+        "question": 68,
+        "text": "And again",
+        "num_votes": 2,
+        "cur_poll": 1
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 55,
+    "fields": {
+        "question": 68,
+        "text": "Hi you",
+        "num_votes": 2,
+        "cur_poll": 2
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 56,
+    "fields": {
+        "question": 68,
+        "text": "And again",
+        "num_votes": 0,
+        "cur_poll": 2
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 57,
+    "fields": {
+        "question": 2,
+        "text": "\\(x \\leq 1\\)",
+        "num_votes": 0,
+        "cur_poll": 10
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 58,
+    "fields": {
+        "question": 2,
+        "text": "\\(0 < x\\)",
+        "num_votes": 0,
+        "cur_poll": 10
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 59,
+    "fields": {
+        "question": 2,
+        "text": "\\(x = 0\\)",
+        "num_votes": 0,
+        "cur_poll": 10
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 60,
+    "fields": {
+        "question": 54,
+        "text": "A choice",
+        "num_votes": 4,
+        "cur_poll": 6
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 61,
+    "fields": {
+        "question": 54,
+        "text": "Another Choice",
+        "num_votes": 1,
+        "cur_poll": 6
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 62,
+    "fields": {
+        "question": 54,
+        "text": "A choice",
+        "num_votes": 4,
+        "cur_poll": 7
+    }
+},
+{
+    "model": "Problems.pollchoice",
+    "pk": 63,
+    "fields": {
+        "question": 54,
+        "text": "Another Choice",
+        "num_votes": 1,
+        "cur_poll": 7
+    }
+},
+{
+    "model": "Problems.linkeddocument",
+    "pk": 4,
+    "fields": {
+        "link_name": "Midterm Solutions",
+        "category": null,
+        "user": 1,
+        "doc_file": "content/TT1.pdf"
+    }
+},
+{
+    "model": "Problems.linkeddocument",
+    "pk": 5,
+    "fields": {
+        "link_name": "Midterm Solutions",
+        "category": null,
+        "user": 1,
+        "doc_file": "./Test1.pdf"
+    }
+},
+{
+    "model": "Problems.linkeddocument",
+    "pk": 6,
+    "fields": {
+        "link_name": "Worksheet 1a",
+        "category": null,
+        "user": 1,
+        "doc_file": "./week-1a-worksheet.pdf"
+    }
+}
+]
