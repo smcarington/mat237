@@ -1,5 +1,5 @@
 from django import forms
-from .models import Announcement, Question, ProblemSet, Poll, PollQuestion, PollChoice, LinkedDocument
+from .models import Announcement, Question, ProblemSet, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion
 from django.contrib.admin import widgets
 
 class AnnouncementForm(forms.ModelForm):
@@ -38,3 +38,13 @@ class LinkedDocumentForm(forms.ModelForm):
 class TextFieldForm(forms.Form):
     attrs = {'cols': '150', 'rows': '30'}
     text_field = forms.CharField(widget=forms.Textarea(attrs))
+
+class QuizForm(forms.ModelForm):
+    class Meta:
+        model = Quiz
+        exclude = ['out_of']
+
+class MarkedQuestionForm(forms.ModelForm):
+    class Meta:
+        model = MarkedQuestion
+        exclude = ['choices']

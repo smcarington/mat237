@@ -414,6 +414,11 @@ dd {
     background-color: #e6e6e6;
 }
 
+.quiz-divs {
+    margin: 20px 0 40px 20px;
+    font-family: 'Source Sans Pro';
+}
+
 @media (max-width: 1200px) {
    .navbar-header {
        float: none;

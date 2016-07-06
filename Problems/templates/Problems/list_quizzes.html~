@@ -1,0 +1,34 @@
+{% extends 'Problems/base.html' %}
+{% load navbar_inclusion_tag %}
+
+{% comment %}
+    Has context live_quiz which is a list of Quiz elements which are currently active
+    Has context all_quizzes which is a list of Quiz elements
+{% endcomment %}
+
+{% block title %}
+<title>Quizzes-Mat237!</title>
+{% endblock %}
+
+{% block content %}
+    <h1>Quizzes</h1>
+
+    <div class="quiz-divs">
+        <h3>Live Quizzes</h3>
+
+        <ul>
+        {% for quiz in live_quiz %}
+        <li> <a class="btn btn-default" href="#">Start Quiz</a>  <b>{{quiz.name}}.</b> <small>(Out of {{quiz.out_of}})</small> 
+        {% empty %}
+            <p> There are currently no live quizzes.</p>
+        {% endfor %}
+        </ul>
+    </div>
+
+    <div>
+        <h3>Previous Quiz Results</h3>
+
+            <p> Insert table here</p>
+    </div>
+{% endblock %}
+ 

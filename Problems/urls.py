@@ -35,4 +35,6 @@ urlpatterns = [
     url(r'^pdflatex/$', views.pdflatex, name='pdflatex'),
     url(r'^history/(?P<questionpk>\d+)/(?P<poll_num>-?\d+)/$', views.poll_history, name='poll_history'),
     url(r'^upload_file/', views.upload_file, name='upload_file'),
+    url(r'^quiz/add_new', views.new_quiz, name='new_quiz'),
+    url(r'^quiz/list', views.quizzes, name='quizzes'),
 ]

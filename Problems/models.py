@@ -54,7 +54,7 @@ class Announcement(models.Model):
     created_date   = models.DateTimeField(default=get_localtime)
     published_date = models.DateTimeField(
                         blank=True, null=True)
-    expires        = models.DateField(blank=True, null=True, default=timezone.now()+timedelta(days=21))
+    expires        = models.DateField(blank=True, null=True, default=timezone.now()+timedelta(days=7))
 
     def publish(self):
         self.published_date = timezone.now()
@@ -229,3 +229,55 @@ class LinkedDocument(models.Model):
 
     def __str__(self):
         return self.user.username + ' ' + self.doc_file.name
+
+class Quiz(models.Model):
+    name    = models.CharField(max_length=200)
+    # Number of tries a student is allowed. A value of category=0 is equivalent to infinity.
+    tries   = models.IntegerField(default=0)
+    live    = models.DateTimeField()
+    expires = models.DateTimeField()
+    out_of  = models.IntegerField(default=1)
+
+    # Determines how many questions are in the current quiz.
+    def update_out_of(self):
+        self.out_of = self.markedquestion_set.count()
+        self.save()
+
+    def __str__(self):
+        return self.name
+
+class MarkedQuestion(models.Model):
+    quiz        = models.ForeignKey(Quiz, null=True)
+    # Keeps track of the global category, so that multiple questions can be used
+    category    = models.IntegerField(default=1)
+    problem_str = models.TextField()
+    choices     = models.TextField()
+
+    def __str__(self):
+        return self.problem_str
+
+class StudentQuizResult(models.Model):
+    student   = models.ForeignKey(User)
+    quiz      = models.ForeignKey(Quiz)
+    attempt   = models.IntegerField(null=True) #track which attempt this is
+    #track which question the student is on if they leave. If cur_question = 0 then completed
+    cur_quest = models.IntegerField(null=True) 
+
+    # The result is a json string which serializes the question data. For example
+    # result = {
+    #           '13': {
+    #                   'inputs': [1,2,3], 
+    #                   'score': '0'
+    #                 },
+    #           '52': {
+    #                   'inputs': [8,-2], 
+    #                   'score': '1'
+    #                 },
+    #          }
+    #          Indicates that the first question is a MarkedQuestion with pk=13, the inputs to
+    #          this question were v=[1,2,3], and the student got the question wrong
+    result  = models.TextField()
+    score   = models.IntegerField(null=True)
+
+    def __str__(self):
+        return self.user.username + self.quiz.name + self.score

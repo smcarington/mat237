@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ProblemSet, Question, QuestionStatus, Announcement, Poll, PollQuestion, PollChoice, LinkedDocument, DocumentCategory
+from .models import ProblemSet, Question, QuestionStatus, Announcement, Poll, PollQuestion, PollChoice, LinkedDocument, DocumentCategory, Quiz, MarkedQuestion, StudentQuizResult
 
 # Register your models here.
 admin.site.register(ProblemSet)
@@ -11,3 +11,6 @@ admin.site.register(PollQuestion)
 admin.site.register(PollChoice)
 admin.site.register(LinkedDocument)
 admin.site.register(DocumentCategory)
+admin.site.register(Quiz)
+admin.site.register(MarkedQuestion)
+admin.site.register(StudentQuizResult)

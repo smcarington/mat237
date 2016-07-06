@@ -16,8 +16,8 @@ import os
 import re
 
 from django.contrib.auth.models import User
-from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument
-from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm
+from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult
+from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, QuizForm, MarkedQuestionForm
 
 # Create your views here.
 
@@ -721,6 +721,7 @@ def compile_and_email(latex_source, user):
 
 ## ----------------- HISTORY ----------------------- ## 
 
+@staff_required
 def poll_history(request, questionpk, poll_num=None):
     """ A view handler for a staff member to view poll question histories.
         Input: questionpk - an integer corresponding to the primary key for the pollquestion
@@ -754,6 +755,7 @@ def poll_history(request, questionpk, poll_num=None):
 
 ## ----------------- HISTORY ----------------------- ## 
 
+@staff_required
 def upload_file(request):
     if request.method == "POST":
         form = LinkedDocumentForm(request.POST, request.FILES)
@@ -767,3 +769,27 @@ def upload_file(request):
     else:
         form = LinkedDocumentForm()
         return render(request, 'Problems/edit_announcement.html', {'form' : form})
+
+## ----------------- MARKED QUESTIONS ----------------------- ## 
+
+def new_quiz(request):
+    if request.method == "POST":
+        form = QuizForm(request.POST)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.update_out_of()
+            return redirect(administrative)
+    else:
+        form = QuizForm()
+
+    return render(request, 'Problems/edit_announcement.html', {'form' : form})
+
+@login_required
+def quizzes(request):
+    # Retrieve the live quizzes
+    live_quiz = Quiz.objects.filter(live__lte=timezone.now(), expires__gt=timezone.now())
+
+    # Get this specific user's previous quiz results
+    all_quizzes = StudentQuizResult.objects.filter(student=request.user).order_by('quiz')
+
+    return render(request, 'Problems/list_quizzes.html', {'live_quiz': live_quiz, 'all_quizzes': all_quizzes});
