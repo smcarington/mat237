@@ -201,6 +201,9 @@ class PollChoice(models.Model):
     num_votes = models.IntegerField(default=0)
     cur_poll  = models.IntegerField(default=1)
 
+    class Meta:
+        ordering = ['pk']
+
     def add_vote(self):
         self.num_votes = self.num_votes+1
         self.save()
