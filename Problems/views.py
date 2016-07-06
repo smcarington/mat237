@@ -560,7 +560,6 @@ def query_live(request):
 
         except Exception as e:
             response_data = {'state': "-1"}
-            print(e)
 
     return HttpResponse(json.dumps(response_data))
 
