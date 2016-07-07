@@ -10,6 +10,8 @@ from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.db.models import Max
 
+from django_tables2 import RequestConfig
+
 import json
 import subprocess
 import os
@@ -18,6 +20,7 @@ import re
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult
 from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, QuizForm, MarkedQuestionForm
+from .tables import MarkedQuestionTable
 
 # Create your views here.
 
@@ -721,7 +724,7 @@ def compile_and_email(latex_source, user):
 
 ## ----------------- HISTORY ----------------------- ## 
 
-@staff_required
+@staff_required()
 def poll_history(request, questionpk, poll_num=None):
     """ A view handler for a staff member to view poll question histories.
         Input: questionpk - an integer corresponding to the primary key for the pollquestion
@@ -755,7 +758,7 @@ def poll_history(request, questionpk, poll_num=None):
 
 ## ----------------- HISTORY ----------------------- ## 
 
-@staff_required
+@staff_required()
 def upload_file(request):
     if request.method == "POST":
         form = LinkedDocumentForm(request.POST, request.FILES)
@@ -787,9 +790,62 @@ def new_quiz(request):
 @login_required
 def quizzes(request):
     # Retrieve the live quizzes
-    live_quiz = Quiz.objects.filter(live__lte=timezone.now(), expires__gt=timezone.now())
+    all_quizzes = Quiz.objects.all()
+    live_quiz   = all_quizzes.filter(live__lte=timezone.now(), expires__gt=timezone.now())
 
     # Get this specific user's previous quiz results
-    all_quizzes = StudentQuizResult.objects.filter(student=request.user).order_by('quiz')
+    student_quizzes = StudentQuizResult.objects.filter(student=request.user).order_by('quiz')
 
-    return render(request, 'Problems/list_quizzes.html', {'live_quiz': live_quiz, 'all_quizzes': all_quizzes});
+    return render(request, 'Problems/list_quizzes.html', 
+            {'live_quiz': live_quiz, 
+             'all_quizzes': all_quizzes,
+             'student_quizzes': student_quizzes
+            });
+
+@staff_required()
+def quiz_admin(request, quizpk):
+    quiz      = get_object_or_404(Quiz,pk=quizpk)
+
+    questions = MarkedQuestionTable(quiz.markedquestion_set.all())
+    RequestConfig(request, paginate={'per_page': 25}).configure(questions)
+#    questions = quiz.markedquestion_set.all()
+
+    return render(request, 'Problems/quiz_admin.html',
+            {
+             'quiz': quiz,
+             'questions': questions
+            });
+
+@staff_required()
+def edit_quiz_question(request, quizpk, mpk=None):
+    """
+        View designed to add/edit a question. If mpk is None then we make the question, otherwise
+        we design the form to be edited.
+    """
+
+    quiz = get_object_or_404(Quiz, pk=quizpk)
+
+    if mpk is None: # Adding a new question, so create the form.
+        if request.method == "POST":
+            form = MarkedQuestionForm(request.POST)
+            if form.is_valid():
+                mquestion = form.save(commit=False)
+                mquestion.quiz = quiz
+                mquestion.save()
+                return redirect('edit_choices', quizpk=quiz.pk)
+        else:
+            form = MarkedQuestionForm()
+    else: # Editing a question, so populate with current question
+        mquestion = get_object_or_404(MarkedQuestion, pk=mpk)
+        if request.method == "POST":
+            form = MarkedQuestionForm(request.POST, instance=post)
+            if form.is_valid():
+                mquestion = form.save()
+                return redirect('quiz_admin', quizpk=quiz.pk)
+        else:
+            form = MarkedQuestionForm(instance=mquestion)
+
+    return render(request, 'Problems/edit_announcement.html', {'form': form})
+
+@staff_required()
+def edit_choices(request, mpk)

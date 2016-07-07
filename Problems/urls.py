@@ -37,4 +37,6 @@ urlpatterns = [
     url(r'^upload_file/', views.upload_file, name='upload_file'),
     url(r'^quiz/add_new', views.new_quiz, name='new_quiz'),
     url(r'^quiz/list', views.quizzes, name='quizzes'),
+    url(r'^quiz/admin/(?P<quizpk>\d+)/$', views.quiz_admin, name='quiz_admin'),
+    url(r'^quiz/admin/(?P<quizpk>\d+)/edit_question/$', views.edit_quiz_question, name='edit_quiz_question'),
 ]

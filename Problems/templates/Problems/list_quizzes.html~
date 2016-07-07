@@ -1,9 +1,9 @@
 {% extends 'Problems/base.html' %}
-{% load navbar_inclusion_tag %}
 
 {% comment %}
     Has context live_quiz which is a list of Quiz elements which are currently active
-    Has context all_quizzes which is a list of Quiz elements
+    Has context all_quizzes which is a list of all Quiz elements
+    Has context student_quizzes which is a list of StudentQuizResult elements
 {% endcomment %}
 
 {% block title %}
@@ -12,6 +12,20 @@
 
 {% block content %}
     <h1>Quizzes</h1>
+
+    {% if user.is_staff %}
+        <div class="quiz-divs">
+            <h3>Administration</h3>
+
+            <ul>
+            {% for quiz in all_quizzes %}
+            <li> <a class="quiz-link" href="{% url 'quiz_admin' quizpk=quiz.pk"><b>{{quiz.name}}</b> <small>({{quiz.markedquestion_set.count}} questions)</small></a>
+            {% empty %}
+                <p> There are no quizzes. <a href="{% url 'new_quiz'%}">Click here</a> to create a new quiz.</p>
+            {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
 
     <div class="quiz-divs">
         <h3>Live Quizzes</h3>
@@ -25,7 +39,7 @@
         </ul>
     </div>
 
-    <div>
+    <div class="quiz-divs">
         <h3>Previous Quiz Results</h3>
 
             <p> Insert table here</p>

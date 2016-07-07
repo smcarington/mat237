@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import IntegerField
 from .models import Announcement, Question, ProblemSet, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion
 from django.contrib.admin import widgets
 
@@ -45,6 +46,25 @@ class QuizForm(forms.ModelForm):
         exclude = ['out_of']
 
 class MarkedQuestionForm(forms.ModelForm):
+#    category = IntegerField(min_value=1, initial=1)
+#
+#    problem_str = forms.CharField(widget=forms.Textarea(text_area_attrs))
+
     class Meta:
+        text_area_attrs = {'cols':'100', 'rows': '10'}
         model = MarkedQuestion
-        exclude = ['choices']
+        fields = ['category', 'problem_str']
+        help_texts = {
+            'problem_str': 'Use {v[0]}, {v[1]}, ... to indicate variables.',
+            'category': 'Used to group several questions into the same category for randomization'
+        }
+        labels = {
+            'problem_str': 'Problem',
+            'category': 'Category',
+        }
+        widgets = {
+            'problem_str': forms.Textarea(text_area_attrs),
+        }
+        field_classes = {
+            'category': forms.IntegerField
+        }

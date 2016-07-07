@@ -247,11 +247,14 @@ class Quiz(models.Model):
         return self.name
 
 class MarkedQuestion(models.Model):
-    quiz        = models.ForeignKey(Quiz, null=True)
+    quiz        = models.ForeignKey("Quiz", Quiz, null=True)
     # Keeps track of the global category, so that multiple questions can be used
-    category    = models.IntegerField(default=1)
-    problem_str = models.TextField()
-    choices     = models.TextField()
+    category    = models.IntegerField("Category", default=1)
+    problem_str = models.TextField("Problem")
+    choices     = models.TextField("Choices", null=True)
+
+    class Meta:
+        ordering = ['quiz', 'category']
 
     def __str__(self):
         return self.problem_str
