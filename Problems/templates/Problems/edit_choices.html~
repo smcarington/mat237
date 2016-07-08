@@ -1,0 +1,36 @@
+{% extends 'Problems/base.html' %}
+
+{% comment %}
+    Has context {{mquestion}} which is a MarkedQuestion element
+    Has context {{choices}} which is a deserialized list of lists corresponding to input choices
+    Has context {{error_message}} which is a string with an error message
+{% endcomment %}
+
+{% block title %}
+    <title>Edit Choices-Mat237!</title>
+{% endblock %}
+
+{% block content %}
+    <h1> Add and Edit Choices</h1>
+    <a href="{% url 'quizzes' %}">&#171; Return to Quizzes</a>
+
+    <form method="POST">{% csrf_token %}
+        <div>
+            <h3> Add Choice </h3>
+            <p id="error-message">{{error_message}}</p>
+            <input name="new_choice" type="text" size="50">
+        </div>
+
+        <div>
+            <h3> Current Choices </h3>
+            <ul>
+            {% for choice in choices %}
+                <li><input name="old_choice_{{forloop.counter}}" type="text" size="50" value="{{choice}}">
+            {% empty %}
+                <p> There are currently no choices for this question. Please add at least one choice.</p>
+            {% endfor %}
+            </ul>
+        </div>
+        <input class="btn btn-default" type="submit" value="Submit" />
+    </form>
+{% endblock %}

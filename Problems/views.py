@@ -830,9 +830,8 @@ def edit_quiz_question(request, quizpk, mpk=None):
             form = MarkedQuestionForm(request.POST)
             if form.is_valid():
                 mquestion = form.save(commit=False)
-                mquestion.quiz = quiz
-                mquestion.save()
-                return redirect('edit_choices', quizpk=quiz.pk)
+                mquestion.update(quiz)
+                return redirect('edit_choices', mpk=mquestion.pk)
         else:
             form = MarkedQuestionForm()
     else: # Editing a question, so populate with current question
@@ -847,6 +846,69 @@ def edit_quiz_question(request, quizpk, mpk=None):
 
     return render(request, 'Problems/edit_announcement.html', {'form': form})
 
+def deserialize(s_str):
+    """
+        Helper function. Takes a string which embodies a list of choices for the variable
+        inputs and returns the python object.
+        
+        Input: s_str (String) - A string serializing the list of choices
+        Output: list object which contains the possible choices.
+    """
+
+    if s_str is None:
+        return []
+
+    prelist = s_str.replace(' ','') # Kill all extra whitespace
+    split_list = prelist.split(';') # Semi-colons separate list elements
+    choices = []
+    for index, sublist in enumerate(split_list):
+        choices.append(sublist.split(',')) # Commas separate elements which each list
+
+    return choices
+
 @staff_required()
 def edit_choices(request, mpk):
-    pass
+    """
+        View which handles the ability to add/edit choices.
+        Input: mpk - (integer) the marked question primary key
+    """
+
+    mquestion = get_object_or_404(MarkedQuestion, pk=mpk)
+    error_message = ''
+
+    if request.method == "POST":
+        form_data = request.POST
+        try:
+            updated_choices = []
+            for field, data in form_data.items():
+                if 'choice' in field:
+                    cur_choice = form_data[field]
+                    # check to make sure we have the right number of variables
+                    if len(cur_choice.split(";")) != mquestion.num_vars:
+                        error_message = "Incorrect number of variables"
+                        raise Exception("Incorrect number of variables")
+                    else:
+                        # We do not want extraneous semi-colons, so we have to check to see if we are
+                        # first element of updated choices
+                        if len(updated_choices) == 0:
+                            updated_choices = cur_choice
+                        else:
+                            updated_choices = updated_choices + ":" + cur_choice
+
+            mquestion.choices = updated_choices
+            mquestion.save()
+        except Exception as e:
+            error_message = e
+            print(e)
+
+    if mquestion.choices is None:
+        choices = ""
+    else:
+        choices = mquestion.choices.split(":")
+
+    return render(request, 'Problems/edit_choices.html',
+            {
+                "question": mquestion,
+                "choices": choices,
+                "error_message": error_message,
+            })

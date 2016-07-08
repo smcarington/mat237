@@ -4,6 +4,8 @@ from django.utils import timezone
 
 from datetime import timedelta
 
+import re
+
 # Problem sets and questions. Note that questions should be
 # Many2One.
 
@@ -252,9 +254,15 @@ class MarkedQuestion(models.Model):
     category    = models.IntegerField("Category", default=1)
     problem_str = models.TextField("Problem")
     choices     = models.TextField("Choices", null=True)
+    num_vars    = models.IntegerField(null=True)
 
     class Meta:
         ordering = ['quiz', 'category']
+
+    def update(self, quiz):
+        self.quiz = quiz
+        self.num_vars = len(re.findall(r'{v\[\d+\]}', self.problem_str))
+        self.save()
 
     def __str__(self):
         return self.problem_str
