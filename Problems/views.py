@@ -14,9 +14,10 @@ import json
 import subprocess
 import os
 import re
+import itertools
 
 from django.contrib.auth.models import User
-from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument
+from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, StudentVote
 from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm
 
 # Create your views here.
@@ -539,7 +540,17 @@ def query_live(request):
         choicepk = int(request.POST['pk'])
         choice   = get_object_or_404(PollChoice, pk=choicepk)
 
-        choice.add_vote()
+        # Get or create a StudentVote object
+        # In particular, check to see if the student has voted in the current poll.
+        svote, created = StudentVote.objects.get_or_create(student=request.user, cur_poll = choice.cur_poll, question=choice.question)
+
+        if created: # First vote
+            svote.choice = choice;
+            svote.add_choice(choice)
+        else: # Revoting, so change the vote
+            if svote.vote != choice:
+                svote.change_vote(choice)
+
         response_data = {'status': 'success'}
     else:
         try: 
@@ -751,6 +762,34 @@ def poll_history(request, questionpk, poll_num=None):
 
 #    except Exception as e:
 #        raise Http404('An error occured in processing your request. Exception: ' + str(e))
+
+@staff_required()
+def who_voted(request, questionpk, poll_num):
+    """ Post the usernames of the students who voted in the given question, and how they voted
+        Input: questionpk (integer) - Number corresponding to the question primary key
+                 poll_num (integer) - The current poll number
+        Output: HttpResponse
+        Context: List of tuples (username, vote_id)
+    """
+
+    question = get_object_or_404(PollQuestion, pk=questionpk)
+    choices  = question.pollchoice_set.filter(cur_poll=int(poll_num))
+
+    student_votes = StudentVote.objects.filter(question=question, cur_poll=poll_num).values_list('student__username', 'vote__pk')
+
+#    iterators = []
+#    # For each choice correspond to the question, generate the list of students who voted on that question.
+#    # The for loop creates an iterator, then we chain together the iterators at the end.
+#    for choice in choices:
+#        student_voters = choice.student_set.all().values_list('username', flat=True)
+#        iterators.append(itertools.product(student_voters, [choice.pk]))
+#
+#    student_list = itertools.chain.from_iterable(iterators)
+
+    return render(request, 'Problems/who_voted.html', 
+            {
+                'list': student_votes,
+            })
 
 ## ----------------- HISTORY ----------------------- ## 
 

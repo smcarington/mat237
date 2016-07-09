@@ -208,8 +208,46 @@ class PollChoice(models.Model):
         self.num_votes = self.num_votes+1
         self.save()
 
+    def sub_vote(self):
+        if self.num_votes == 0:
+            raise Exception('Already zero votes')
+        else:
+            self.num_votes = self.num_votes-1
+            self.save()
+
     def __str__(self):
         return self.text
+
+class StudentVote(models.Model):
+    student  = models.ForeignKey(User)
+    question = models.ForeignKey(PollQuestion, null=True)
+    vote     = models.ForeignKey(PollChoice, related_name="votes", null=True)
+    cur_poll = models.IntegerField(default=1)
+
+    def add_choice(self, choice):
+        """ In a new vote, and the choice, save it, and increment the PollChoice object
+            Input: vote (PollChoice) - The choice to add to the StudentVote element
+            Return: void
+        """
+        self.vote = choice;
+        self.save()
+        choice.add_vote()
+
+    def change_vote(self, new_vote):
+        """ Changes the vote element.
+            Input: new_vote (PollChoice) - The new vote
+            Return: void
+        """
+
+        old_vote = self.vote
+        old_vote.sub_vote() 
+        # Now that we've remove the last vote, we change the vote element and update it's count
+        self.vote = new_vote
+        self.save()
+        new_vote.add_vote()
+
+    def __str__(self):
+        return self.student.username + ' vote '
 
 # User uploads go to a special file in MEDIA_ROOT
 def content_file_name(instance, filename):

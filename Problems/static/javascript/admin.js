@@ -42,6 +42,21 @@ $(document).ready(function() {
                     });
                 }
 
+                // To make the 'voters' anchor work, we need to update to the current poll whenever we hit start
+                // Look for the anchor whose data-id matches the question primary key
+                if (action == 'start') {
+                    $anchor = $("a.voters[data-id="+pk+"]");
+                    url_string = $anchor.attr("href");
+
+                    // Need to do some regex magix
+                    re = /(\d+)\/(\d+)\//;
+                    match=re.exec(url_string);
+                    new_poll = (parseInt(match[2]) + 1).toString();
+                    new_url = url_string.replace(match[0], match[1]+"/"+new_poll+"/");
+
+                    $anchor.attr("href", new_url);
+                }
+
                 //if (action=='reset') {
                 //    pkMap = data['pkMap'];
                 //    $("#"+pk+"-choices>ol>li>p>small").each( function() {
@@ -126,4 +141,10 @@ $(document).ready(function() {
     $("#slides_live").click( function() {
         $('[type="checkbox"]').click();
     });
+
+    $("a.voters").click(function() {
+        window.open(this.href, "popupWindow", "width=600, height=600, scrollbars=yes");
+        return false;
+    });
+
 });

@@ -21,7 +21,12 @@
         <div class="row div-{{question.pk}}" {% if question.can_vote %}style="background-color: #c2c2c2"{% endif %}>
             <div class="poll-title col-md-6">
                 <p class="diff"><b>[{{forloop.counter}}/{{questions.count}}]</b> {{question.text| safe}}</p>
-                <small> <a href="{% url 'edit_pollquestion' questionpk=question.pk %}">Edit</a> <a href="{% url 'delete_item' pk=question.pk objectStr='pollquestion' %}">Delete</a> <a href=javascript:void(0) id="open-{{question.pk}}">Choices</a> <a href="{% url 'poll_history' questionpk=question.pk poll_num=question.num_poll %}">History</a></small>
+                <small> <a href="{% url 'edit_pollquestion' questionpk=question.pk %}">Edit</a> 
+                        <a href="{% url 'delete_item' pk=question.pk objectStr='pollquestion' %}">Delete</a> 
+                        <a href=javascript:void(0) id="open-{{question.pk}}">Choices</a> 
+                        <a href="{% url 'poll_history' questionpk=question.pk poll_num=question.num_poll %}">History</a>
+                        <a class="voters" href="{% url 'who_voted' questionpk=question.pk poll_num=question.num_poll %}">Voters</a>
+                </small>
             </div>
             {% if user.is_staff %}
             <div class = "col-md-4" style="padding:0">
@@ -58,7 +63,6 @@
         <li> Use the 'Stop' button to stop voting and display results.
         <li> The 'Reset' button clears the current poll results and resets votes to zero. The data from the
              previous vote is preserved.
-        <li> 
     </ul>
     <div class="button-div">
         <a href="{% url 'new_pollquestion' pollpk=poll.pk %}" class="btn btn-default">New Question</a>
