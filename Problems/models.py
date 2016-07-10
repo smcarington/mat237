@@ -233,12 +233,16 @@ class LinkedDocument(models.Model):
         return self.user.username + ' ' + self.doc_file.name
 
 class Quiz(models.Model):
-    name    = models.CharField(max_length=200)
+    name    = models.CharField("Name", max_length=200)
     # Number of tries a student is allowed. A value of category=0 is equivalent to infinity.
-    tries   = models.IntegerField(default=0)
-    live    = models.DateTimeField()
-    expires = models.DateTimeField()
-    out_of  = models.IntegerField(default=1)
+    tries   = models.IntegerField("Tries", default=0)
+    live    = models.DateTimeField("Live on")
+    expires = models.DateTimeField("Expires on")
+    out_of  = models.IntegerField("Points", default=1)
+
+    class Meta:
+        verbose_name = "Quiz"
+        verbose_name_plural = "Quizzes"
 
     # Determines how many questions are in the current quiz.
     def update_out_of(self):
@@ -258,11 +262,13 @@ class MarkedQuestion(models.Model):
 
     class Meta:
         ordering = ['quiz', 'category']
+        verbose_name = "Question"
 
     def update(self, quiz):
         self.quiz = quiz
         self.num_vars = len(re.findall(r'{v\[\d+\]}', self.problem_str))
         self.save()
+        quiz.update_out_of()
 
     def __str__(self):
         return self.problem_str

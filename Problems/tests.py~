@@ -10,6 +10,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+class ChociesTest(TestCase):
+
 class AnnouncementTest(StaticLiveServerTestCase):
     fixtures = ['user.json', 'Problems.json', ]
 
@@ -41,6 +43,6 @@ class AnnouncementTest(StaticLiveServerTestCase):
         # Retrieve the old announcement and check that they appear
         self.browser.find_element_by_id('get_old').click()
         body = WebDriverWait(self.browser, 1000).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".old-ann>div")))
-        self.assertNotIn('Old Announcement', body.text)
+        self.assertIn('Old Announcement', body.text)
 
 # Create your tests here.

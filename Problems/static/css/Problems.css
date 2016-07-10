@@ -428,6 +428,12 @@ dd {
     font-size: 13pt;
 }
 
+label.diff {
+    display: inline-block;
+    width: 200px;
+    text-align: left;
+}
+
 @media (max-width: 1200px) {
    .navbar-header {
        float: none;

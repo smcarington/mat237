@@ -1,4 +1,5 @@
 {% extends 'Problems/base.html' %}
+{% load navbar_inclusion_tag %}
 
 {% comment %}
     Has context {{mquestion}} which is a MarkedQuestion element
@@ -14,6 +15,10 @@
     <h1> Add and Edit Choices</h1>
     <a href="{% url 'quizzes' %}">&#171; Return to Quizzes</a>
 
+    <div class="diff quiz-divs question-detail">
+        {{mquestion.problem_str}}
+    </div>
+
     <form method="POST">{% csrf_token %}
         <div>
             <h3> Add Choice </h3>
@@ -25,7 +30,10 @@
             <h3> Current Choices </h3>
             <ul>
             {% for choice in choices %}
-                <li><input name="old_choice_{{forloop.counter}}" type="text" size="50" value="{{choice}}">
+            <li data-id="{{forloop.counter}}">
+                {% mathify_choice choice %} {# Returns label html with 'choice' nicely formatted #}
+                <input data-id="{{forloop.counter}}" name="old_choice_{{forloop.counter}}" type="text" size="50" value="{{choice}}">
+                <span data-id="{{forloop.counter}}" class="choice-remove glyphicon glyphicon-remove arrow"></span>
             {% empty %}
                 <p> There are currently no choices for this question. Please add at least one choice.</p>
             {% endfor %}

@@ -20,7 +20,7 @@ import re
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult
 from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, QuizForm, MarkedQuestionForm
-from .tables import MarkedQuestionTable
+from .tables import MarkedQuestionTable, AllQuizTable
 
 # Create your views here.
 
@@ -779,8 +779,8 @@ def new_quiz(request):
     if request.method == "POST":
         form = QuizForm(request.POST)
         if form.is_valid():
-            post = form.save(commit=False)
-            post.update_out_of()
+            quiz = form.save(commit=False)
+            quiz.update_out_of()
             return redirect(administrative)
     else:
         form = QuizForm()
@@ -791,6 +791,10 @@ def new_quiz(request):
 def quizzes(request):
     # Retrieve the live quizzes
     all_quizzes = Quiz.objects.all()
+    if request.user.is_staff:
+        all_quizzes_table = AllQuizTable(all_quizzes)
+        RequestConfig(request, paginate={'per_page', 10}).configure(all_quizzes_table)
+
     live_quiz   = all_quizzes.filter(live__lte=timezone.now(), expires__gt=timezone.now())
 
     # Get this specific user's previous quiz results
@@ -799,7 +803,8 @@ def quizzes(request):
     return render(request, 'Problems/list_quizzes.html', 
             {'live_quiz': live_quiz, 
              'all_quizzes': all_quizzes,
-             'student_quizzes': student_quizzes
+             'student_quizzes': student_quizzes,
+             'all_quizzes_table': all_quizzes_table,
             });
 
 @staff_required()
@@ -837,7 +842,7 @@ def edit_quiz_question(request, quizpk, mpk=None):
     else: # Editing a question, so populate with current question
         mquestion = get_object_or_404(MarkedQuestion, pk=mpk)
         if request.method == "POST":
-            form = MarkedQuestionForm(request.POST, instance=post)
+            form = MarkedQuestionForm(request.POST, instance=mquestion)
             if form.is_valid():
                 mquestion = form.save()
                 return redirect('quiz_admin', quizpk=quiz.pk)
@@ -866,6 +871,46 @@ def deserialize(s_str):
 
     return choices
 
+def choice_is_valid(string, num_vars):
+    """ Determine whether input string is a valid choice; that is, either an integer or
+        a correctly formatting randomization string.
+        Input: string (String) - to be validated
+               num_vars - (Integer) - necessary number of variables
+        Output: Boolean - indicating whether the string is valid
+                err_msg - error message
+    """
+    parts = string.replace(' ', '').split(';')
+    return_value = True
+    error_message = "Choice is valid"
+
+    if len(parts) != num_vars:
+        return False, "Incorrect number of variables. Given {}, expected {}".format(len(parts), num_vars)
+
+    for part in parts:
+        match = re.match(r'[zZ](-?\d+),(-?\d+)',part)
+        if is_integer(part):
+            return_value*= True
+        elif match:
+            if int(match.group(1))<int(match.group(2)):
+                return_value*= True
+            else:
+                return_value*= False
+                error_message = "Integer range out of order."
+        else:
+            error_message = "Invalid input. Please insert the current number of variables, with appropriate range."
+            return_value*= False
+
+    return return_value, error_message
+
+
+def is_integer(string):
+    try:
+        int(string)
+        return True
+    except:
+        return False
+
+
 @staff_required()
 def edit_choices(request, mpk):
     """
@@ -879,21 +924,26 @@ def edit_choices(request, mpk):
     if request.method == "POST":
         form_data = request.POST
         try:
-            updated_choices = []
+            updated_choices = ''
             for field, data in form_data.items():
                 if 'choice' in field:
                     cur_choice = form_data[field]
-                    # check to make sure we have the right number of variables
-                    if len(cur_choice.split(";")) != mquestion.num_vars:
-                        error_message = "Incorrect number of variables"
-                        raise Exception("Incorrect number of variables")
-                    else:
+                    
+                    # If cur_choice is empty, it's likely a delete-submission, so we skip it
+                    if cur_choice == '':
+                        continue
+
+                    # Verify that our choices are correctly formatted
+                    is_valid, msg = choice_is_valid(cur_choice, mquestion.num_vars)
+                    if is_valid:
                         # We do not want extraneous semi-colons, so we have to check to see if we are
                         # first element of updated choices
                         if len(updated_choices) == 0:
                             updated_choices = cur_choice
                         else:
                             updated_choices = updated_choices + ":" + cur_choice
+                    else:
+                        raise Exception(msg)
 
             mquestion.choices = updated_choices
             mquestion.save()
@@ -901,14 +951,14 @@ def edit_choices(request, mpk):
             error_message = e
             print(e)
 
-    if mquestion.choices is None:
+    if mquestion.choices is None or mquestion.choices == "":
         choices = ""
     else:
         choices = mquestion.choices.split(":")
 
     return render(request, 'Problems/edit_choices.html',
             {
-                "question": mquestion,
+                "mquestion": mquestion,
                 "choices": choices,
                 "error_message": error_message,
             })

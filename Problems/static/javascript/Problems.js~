@@ -69,6 +69,7 @@ $(document).ready(function() {
 
     // adds a datepicker jquery ui element to dates
     $('#id_expires').datepicker()
+    $('#id_live').datepicker()
 
     // gets old announcements and inserts them into the page
     $('#get_old').click( function() {
@@ -122,5 +123,9 @@ $(document).ready(function() {
         "json");
     });
 
+    $('span.choice-remove').click( function() {
+        data_id = $this.attr('data-id');
+        $('[data-id='+data_id+']').remove();
+        $('form').submit();
+    });
 });
-

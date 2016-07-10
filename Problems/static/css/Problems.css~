@@ -22,6 +22,7 @@ h1 a {
 
 h4 {
     margin-top: 20px;
+    text-decoration: underline;
 }
 
 .top-menu, .top-menu:hover, .top-menu:visited {
@@ -425,6 +426,12 @@ dd {
 
 .quiz-link {
     font-size: 13pt;
+}
+
+label.diff {
+    display: inline-block;
+    width: 200px;
+    text-align: right;
 }
 
 @media (max-width: 1200px) {

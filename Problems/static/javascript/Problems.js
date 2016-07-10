@@ -123,5 +123,9 @@ $(document).ready(function() {
         "json");
     });
 
+    $('span.choice-remove').click( function() {
+        data_id = $(this).attr('data-id');
+        $('[data-id='+data_id+']').remove();
+        $('form').submit();
+    });
 });
-

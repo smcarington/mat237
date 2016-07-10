@@ -2,6 +2,7 @@ from django import template
 from Problems.models import ProblemSet, PollQuestion, PollChoice
 from django.core.urlresolvers import resolve, Resolver404
 from django.utils.safestring import mark_safe
+from django.utils.html import format_html
 
 register = template.Library()
 
@@ -61,6 +62,44 @@ def total_votes(questionpk, cur_poll):
     q = PollQuestion.objects.get(pk=questionpk)
     choices = q.pollchoice_set.filter(cur_poll=cur_poll)
     return sum(choices.values_list('num_votes', flat=True))
+
+@register.simple_tag
+def mathify_choice(choice):
+    """ Takes a choice list from a MarkedQuestion element and outputs the math friendly html. Currently only
+        supports integers.
+        Input: choice (list of strings) -
+        Output: KaTeX renderable HTML.
+    """
+    mathstring = '\(\{'
+    for element in choice.replace(' ', '').split(';'):
+        if is_integer(element):
+            mathstring += element + ','
+        else:
+            try:
+                lower,upper = element[1:].split(',')
+                integer = '\mathbb Z'
+
+                if element[0].istitle():
+                    integer +='^*'
+
+                mathstring += '{integer}({low}..{upp}),'.format(integer=integer, low=lower, upp=upper)
+
+            except ValueError as error:
+                print(error)
+                return ''
+
+    # Remove the final unnecessary ','
+    mathstring = mathstring[0:-1]
+    mathstring += '\}\)'
+
+    return format_html('<label class="diff">{}</label>', mathstring)
+
+def is_integer(string):
+    try:
+        int(string)
+        return True
+    except ValueError:
+        return False;
 
 @register.filter
 def filter_poll_choice(query_set, poll=None):
