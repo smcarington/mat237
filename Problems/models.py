@@ -269,6 +269,8 @@ class MarkedQuestion(models.Model):
     problem_str = models.TextField("Problem")
     choices     = models.TextField("Choices", null=True)
     num_vars    = models.IntegerField(null=True)
+    answer      = models.TextField("Answer")
+    functions   = models.TextField("Functions", default='{}')
 
     class Meta:
         ordering = ['quiz', 'category']

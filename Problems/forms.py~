@@ -53,10 +53,12 @@ class MarkedQuestionForm(forms.ModelForm):
     class Meta:
         text_area_attrs = {'cols':'100', 'rows': '10'}
         model = MarkedQuestion
-        fields = ['category', 'problem_str']
+        fields = ['category', 'problem_str', 'answer', 'functions']
         help_texts = {
             'problem_str': 'Use {v[0]}, {v[1]}, ... to indicate variables.',
-            'category': 'Used to group several questions into the same category for randomization'
+            'category': 'Used to group several questions into the same category for randomization',
+            'answer': 'Use the same variables as in problem. Use python calculate the answer.<br> For example, myfun({v[0]},{v[1]}).',
+            'functions': 'Define custom functions using a dictionary. For example, {"myfun": lambda x,y: max(x,y)} '
         }
         labels = {
             'problem_str': 'Problem',
@@ -64,4 +66,9 @@ class MarkedQuestionForm(forms.ModelForm):
         }
         widgets = {
             'problem_str': forms.Textarea(text_area_attrs),
+            'answer': forms.Textarea(text_area_attrs),
+            'functions': forms.Textarea(text_area_attrs),
+        }
+        field_classes = {
+            'category': forms.IntegerField
         }

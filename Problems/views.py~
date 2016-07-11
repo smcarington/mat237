@@ -16,6 +16,7 @@ import json
 import subprocess
 import os
 import re
+import random
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult
@@ -1063,6 +1064,38 @@ def generate_next_question(sqr):
     sqr.update_result(result)
 
     return get_return_string(question,choices)
+
+def parse_abstract_choice(abstract_choice):
+    """ Parses an abstract choice into a concrete choice. Expects a single choice input. Currently can
+        only handle integer ranges.
+        Input: abstract_choice (String) - Used to indicate an abstract choice, separated by ';'
+        Output: (String) A concrete choice 
+    """
+    choice = ''
+    for part in abstract_choice.replace(' ', '').split(';'):
+        if is_integer(part): # If already a number
+            choice += part
+        elif part[0] in 'zZ':
+            lower, upper = [int(x) for x in part[1:].split(',')]
+            if upper==lower: # Ensures we can't accidentally enter an infinite loop on Z0,0
+                concrete = str(upper) + ";"
+            else:
+                concrete = random.randint(lower,upper)
+                if part[0].istitle(): # Range specifies non-zero number using capital letter
+                    while concrete == 0:
+                        concrete = random.randint(lower,upper)
+            choice += str(concrete) + ";"
+
+    # At the end, we need to cut off the trailing semi-colon
+    return choice[0:-1]
+
+def get_answer(question, choices):
+    """
+        NTS: functions = eval(fun_string) where fun_string is 'functions' from form
+             simple_eval(answer_str, functions=functions)
+    """
+
+    pass
 
 @login_required
 def display_question(request, sqrpk, submit=None):

@@ -269,6 +269,8 @@ class MarkedQuestion(models.Model):
     problem_str = models.TextField("Problem")
     choices     = models.TextField("Choices", null=True)
     num_vars    = models.IntegerField(null=True)
+    answer      = models.TextField("Answer")
+    functions   = models.TextField("Functions", default='{}')
 
     class Meta:
         ordering = ['quiz', 'category']
@@ -340,7 +342,7 @@ class StudentQuizResult(models.Model):
             Output: is_last (Boolean) - indicated whether the cur_quest field has been set to 0
         """
         num_quests = self.quiz.out_of
-        if self.cur_quest == num_quests
+        if self.cur_quest == num_quests:
             is_last = True
             cur_quest = 0
         else:
