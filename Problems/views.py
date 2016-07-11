@@ -962,3 +962,147 @@ def edit_choices(request, mpk):
                 "choices": choices,
                 "error_message": error_message,
             })
+
+@login_required
+def start_quiz(request, quizpk):
+    """ View to handle when a student begins a quiz.
+        Input: quizpk (integer) - corresponding to the primary key of the quiz
+        Output: HttpResponse object. Renders Problems/start_quiz.html or redirects 
+                                     to display_question
+    """
+
+    # The user may be allowed several attempts. We need to determine what attempt the 
+    # user is on, and whether they are in the middle of a quiz
+   
+    this_quiz = get_object_or_404(Quiz, pk=quizpk)
+    
+    student = request.user
+    quizzes = StudentQuizResult.objects.filter(student=student, quiz=this_quiz)
+   
+    is_new = False;
+    if quizzes is None: # First attempt
+        cur_quiz = StudentQuizResult(student=student, quiz=this_quiz)
+        is_new = True
+    else:
+        # Determine the most recent attempt
+        most_recent_attempt = quizzes.aggregate(Max('attempt'))
+        cur_quiz = quizzes.get(attempt=most_recent_attempt)
+        # Now we need to check if this attempt was finished. Recall that if cur_quest = 0
+        # then all questions are finished. If all questions are finished, we must also check
+        # if the student is allowed any more attempts
+        if (cur_quiz.cur_quest == 0) and (most_recent_attempt < quiz.tries):
+            cur_quiz = StudentQuizResult(student=student, quiz=this_quiz, attempt=most_recent_attempt+1)
+            is_new = True
+
+    if is_new:
+        # Need to genererate the first question
+        return render(request, 'Problems/start_quiz.html', {'record': cur_quiz})
+    else:
+        return redirect('display_question', quizpk=quizpk)
+
+def get_return_string(question,choice):
+    """ Renders a math-readable string for displaying to a student.
+        Input:  question (MarkedQuestion) object 
+                choice (string) for the choices to insert into the question text
+        Output: A string rendered correctly.
+    """
+    problem = question.problem_str
+    numbers = [ int(x) for x in choices.replace(' ', '').split(';') ]
+
+    return problem.format(v=numbers)
+
+def mark_question(sqr, student_ans, accuracy=10e-5):
+    """ Helper question to check if the answers are the same.
+        Input: sqr (StudentQuizRecord) - the quiz record
+               student_ans (string) - the correct answer
+               accuracy (float) - The desired accuracy. Default is 10e-5;
+                                  that is, four decimal places.
+        Output: is_last (Boolean) - indicates if the last question has been marked
+    """
+    result, qnum = sqr.get_result()
+
+    correct = float(result[qnum]['answer'])
+    guess   = float(student_ans)
+
+    if (abs(correct-guess)<accuracy): # Correct answer
+        result[qnum]['score']='1'
+    else:
+        result[qnum]['score']='0'
+    sqr.update_result(result)
+    is_last = sqr.add_question_number()
+
+def generate_next_question(sqr):
+    """ Given a StudentQuizRecord, creates a new question. Most often this function will be called
+        after a question has been marked and a new one needs to be created. However, it is also used
+        to instantiate the first question of a quiz.
+        Input: sqr (StudentQuizRecord) - contains all the appropriate information for generating a new
+                                         question
+        Output: q_string (String) - The generated question, formated in a math renderable way
+    """
+    result, qnum = sqr.get_result()
+
+    # the cur_quest value of sqr should always correspond to the new question, as it is updated before
+    # calling this function. We randomly choose an element from quiz.category = sqr.cur_quest, and from
+    # that question we then choose a random choice, possibly randomizing yet a third time of the choices
+    # are also random
+    
+    question = sqr.quiz.get_random_question(cur_quest)
+    # From this question, we now choose a random input choice
+    a_choice = question.get_random_choice()
+    # This choice could either be a tuple of numbers, a randomizer, or a mix. We need to parse these into
+    # actual numbers
+    choices = parse_abtract_choice(a_choice)
+    answer = get_answer(question, choices)
+    
+    #Feed this into the result dictionary, and pass it back to the model
+    result[qnum] = {
+            'pk': str(question.pk),
+            'inputs': choices,
+            'score': '0',
+            'answer': answer}
+    sqr.update_result(result)
+
+    return get_return_string(question,choices)
+
+def parse_abstract_choice(abstract_choice):
+    pass
+
+def get_answer(question, choices):
+    pass
+
+@login_required
+def display_question(request, sqrpk, submit=None):
+    """ Shows the current question quiz-question. Is almost a redirect which handles the question.
+        Input: sqrpk (integer) - indicating the StudentQuizRecord primary key
+        Output: HttpResponse - renders the quiz question
+
+        Depends: get_return_string, mark_question, generate_next_question
+    """
+
+    sqr = StudentQuizRecord.object.get(pk=sqrpk).select_related('quiz')
+    error_message = ''
+    # Start by doing some validation to make sure only the correct student has access to this page
+    if sqr.student != request.user:
+        return HttpResponseForbidden()
+
+    # Just display the current question
+    if submit is None:
+        result, qnum = sqr.get_result()
+        # result[qnum] has fields (MarkedQuestion) pk, inputs, and score, 
+        question = MarkedQuestion.objects.get(pk=int(result[qnum]['pk']))
+        choices  = result[qnum]['inputs']
+        q_string = get_return_string(question, choices)
+    else: # We need to mark the question and generate the next question
+        q_string = request.POST['problem'] # Grab this in case we need to return the question on error
+        try:
+            answer = float(request.POST['answer'])
+            is_last = mark_question(sqr, answer)
+            if not is_last: # There are more questions, so make the next one
+                q_string = generate_next_question(sqr)
+        except ValueError as e:
+            error_message = "Given answer was not a number. Please try again"
+
+        if is_last:
+            return render(request, 'Problems/completed_quiz.html')
+
+    return render(request, 'Problems/display_question.html', {'question': q_string, 'sqrpk': sqrpk})
