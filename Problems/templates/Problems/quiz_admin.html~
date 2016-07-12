@@ -3,7 +3,7 @@
 
 {% comment %}
     Has context quiz which is a Quiz element
-    Has context questions which is an MarkedQuestionsTable corresponding to Quiz
+    Has context questions which is an MarkedQuestionsTable element corresponding to quiz's MarkedQuestion set.
 {% endcomment %}
 
 {% block title %}
@@ -32,5 +32,6 @@
             <li> Instructions
         </ul>
         <a class="btn btn-default" href="{% url 'edit_quiz_question' quizpk=quiz.pk %}">Add Question</a>
+        <a class="btn btn-default" href="{% url 'edit_quiz' quizpk=quiz.pk %}">Add Question</a>
     </div>
 {% endblock %}

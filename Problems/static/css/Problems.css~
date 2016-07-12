@@ -431,7 +431,37 @@ dd {
 label.diff {
     display: inline-block;
     width: 200px;
-    text-align: right;
+    text-align: left;
+}
+
+#quiz_start {
+    position: absolute;
+    left: 20%;
+}
+
+#quiz_start h1 {
+    font-size: 40pt;
+    font-family: Geneva, Times, Georgia, serif; 
+    margin-bottom: 50px;
+}
+
+#quiz_start span {
+    font-size: 20pt
+}
+
+#quiz_start ul {
+    font-size: 15pt;
+    padding-left: 20%;
+
+}
+
+#quiz_start a {
+    margin-left: 50%;
+    font-size: 20pt;
+}
+
+#quiz_start ul li {
+    padding: 10px 0 10px 0;
 }
 
 @media (max-width: 1200px) {

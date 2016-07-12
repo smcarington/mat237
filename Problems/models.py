@@ -351,4 +351,4 @@ class StudentQuizResult(models.Model):
         self.save()
 
     def __str__(self):
-        return self.user.username + self.quiz.name + self.score
+        return self.student.username + self.quiz.name + str(self.score)

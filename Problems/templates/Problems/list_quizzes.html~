@@ -26,7 +26,7 @@
 
         <ul>
         {% for quiz in live_quiz %}
-        <li> <a class="btn btn-default" href="#">Start {{quiz.name}}</a> <small>({{quiz.out_of}} questions.)</small> 
+        <li> <a class="btn btn-default" href="{% url 'start_quiz' quizpk=quiz.pk %}">Start {{quiz.name}}</a> <small>({{quiz.out_of}} questions.)</small> 
         {% empty %}
             <p> There are currently no live quizzes.</p>
         {% endfor %}

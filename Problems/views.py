@@ -17,6 +17,7 @@ import subprocess
 import os
 import re
 import random
+from simpleeval import simple_eval
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult
@@ -776,6 +777,7 @@ def upload_file(request):
 
 ## ----------------- MARKED QUESTIONS ----------------------- ## 
 
+@staff_required()
 def new_quiz(request):
     if request.method == "POST":
         form = QuizForm(request.POST)
@@ -788,6 +790,20 @@ def new_quiz(request):
 
     return render(request, 'Problems/edit_announcement.html', {'form' : form})
 
+@staff_required()
+def edit_quiz(request, quizpk):
+    """ Fetches a quiz instance to populate an editable form."""
+
+    quiz = get_object_or_404(Quiz, pk=quizpk)
+    if request.method == "POST":
+        form = QuizForm(request.POST, instance=quiz)
+        if form.is_valid():
+            quiz = form.save()
+            return redirect('quiz_admin', quizpk=quiz.pk)
+    else:
+        form = QuizForm(instance=quiz)
+        return render(request, 'Problems/edit_announcement.html', {'form' : form})
+
 @login_required
 def quizzes(request):
     # Retrieve the live quizzes
@@ -795,6 +811,8 @@ def quizzes(request):
     if request.user.is_staff:
         all_quizzes_table = AllQuizTable(all_quizzes)
         RequestConfig(request, paginate={'per_page', 10}).configure(all_quizzes_table)
+    else:
+        all_quizzes_table = ''
 
     live_quiz   = all_quizzes.filter(live__lte=timezone.now(), expires__gt=timezone.now())
 
@@ -978,26 +996,34 @@ def start_quiz(request, quizpk):
     this_quiz = get_object_or_404(Quiz, pk=quizpk)
     
     student = request.user
-    quizzes = StudentQuizResult.objects.filter(student=student, quiz=this_quiz)
+    quiz_results = StudentQuizResult.objects.filter(student=student, quiz=this_quiz, attempt=1, score=0)
+    high_score = -1
    
     is_new = False;
-    if quizzes is None: # First attempt
-        cur_quiz = StudentQuizResult(student=student, quiz=this_quiz)
+    if len(quiz_results) == 0: # First attempt
+        cur_quiz_res = StudentQuizResult(student=student, quiz=this_quiz, attempt=1)
+        cur_quiz_res.save()
         is_new = True
     else:
         # Determine the most recent attempt
-        most_recent_attempt = quizzes.aggregate(Max('attempt'))
-        cur_quiz = quizzes.get(attempt=most_recent_attempt)
+        most_recent_attempt = quiz_results.aggregate(Max('attempt'))
+        high_score = quiz_results.aggregate(Max('score'))
+        cur_quiz_res = quiz_results.get(attempt=most_recent_attempt)
         # Now we need to check if this attempt was finished. Recall that if cur_quest = 0
         # then all questions are finished. If all questions are finished, we must also check
         # if the student is allowed any more attempts
-        if (cur_quiz.cur_quest == 0) and (most_recent_attempt < quiz.tries):
-            cur_quiz = StudentQuizResult(student=student, quiz=this_quiz, attempt=most_recent_attempt+1)
+        if (cur_quiz_res.cur_quest == 0) and (most_recent_attempt < quiz.tries):
+            cur_quiz_res = StudentQuizResult(student=student, quiz=this_quiz, attempt=most_recent_attempt+1)
+            cur_quiz_res.save()
             is_new = True
 
     if is_new:
         # Need to genererate the first question
-        return render(request, 'Problems/start_quiz.html', {'record': cur_quiz})
+        return render(request, 'Problems/start_quiz.html', 
+                {'record': cur_quiz_res, 
+                 'quiz': this_quiz,
+                 'high_score': high_score,
+                 })
     else:
         return redirect('display_question', quizpk=quizpk)
 
@@ -1090,12 +1116,22 @@ def parse_abstract_choice(abstract_choice):
     return choice[0:-1]
 
 def get_answer(question, choices):
-    """
-        NTS: functions = eval(fun_string) where fun_string is 'functions' from form
-             simple_eval(answer_str, functions=functions)
-    """
+    """ Evaluates the mathematical expression to compute the answer.
+        Input: question (MarkedQuestion) - the object containing the question
+               choices (String) - String containing *concrete* choices
+        Return: (Integer) - The answer, to be saved
 
-    pass
+        Depends: simpleeval.simple_eval
+    """
+    answer = question.answer
+    try:
+        # Substitute the variables into the string and evaluate the functions dictionary
+        eval_string = answer.format(v=choice.split(';'))
+        functions = eval(question.functions)
+
+        return simple_eval(eval_string, functions=functions)
+    except Exception as e:
+        raise e
 
 @login_required
 def display_question(request, sqrpk, submit=None):

@@ -318,6 +318,8 @@ class StudentQuizResult(models.Model):
     result  = models.TextField(default='{}')
     score   = models.IntegerField(null=True)
 
+    @classmethod
+
     def update_result(self, result):
         """ Takes a python dictionary, serializes it, and stores it in the result column.
             Input: result (dict) - the python dictionary.
@@ -351,4 +353,4 @@ class StudentQuizResult(models.Model):
         self.save()
 
     def __str__(self):
-        return self.user.username + self.quiz.name + self.score
+        return self.student.username + self.quiz.name + str(self.score)
