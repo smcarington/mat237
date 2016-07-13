@@ -320,6 +320,9 @@ class StudentQuizResult(models.Model):
     result  = models.TextField(default='{}')
     score   = models.IntegerField(null=True)
 
+    class Meta:
+        verbose_name = "Quiz Result"
+
     def update_score(self):
         """ Adds one to the overall score """
         self.score += 1

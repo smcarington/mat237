@@ -3,7 +3,7 @@ from django_tables2 import tables, Column, Table
 from django.utils.html import format_html
 from django.core.urlresolvers import reverse
 
-from .models import MarkedQuestion, Quiz
+from .models import MarkedQuestion, Quiz, StudentQuizResult
 
 class MathColumn(Column):
     def render(self, value, record):
@@ -36,6 +36,23 @@ class AllQuizTable(Table):
 
     def render_name(self, value, record):
         return format_html('<a href={}>{}</a>', reverse('quiz_admin', args=(record.pk,)), value )
+
+class SQRTable(Table):
+    quiz      = Column("Quiz")
+    attempt   = Column("Attempt")
+    cur_quest = Column("Question")
+    score     = Column("Score")
+    class Meta:
+        model = StudentQuizResult
+        attrs = {'class': 'paleblue'}
+        fields = ['quiz', 'attempt', 'cur_quest', 'score']
+
+    def render_cur_quest(self, value, record):
+        if value == 0:
+            return "Completed"
+        else:
+            return value
+
 
 class QuizResultTable(Table):
     q_num   = Column(verbose_name="Question")

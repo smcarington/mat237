@@ -2,9 +2,10 @@
 {% load render_table from django_tables2 %}
 
 {% comment %}
-    Has context live_quiz which is a list of Quiz elements which are currently active
-    Has context all_quizzes which is a list of all Quiz elements
-    Has context student_quizzes which is a list of StudentQuizResult elements
+    Has context {{live_quiz}} which is a list of Quiz elements which are currently active
+    Has context {{all_quizzes}} which is a list of all Quiz elements
+    Has context {{student_quizzes}} which is a list of StudentQuizResult elements
+    Has context {{message}} which is a String
 {% endcomment %}
 
 {% block title %}
@@ -13,6 +14,8 @@
 
 {% block content %}
     <h1>Quizzes</h1>
+
+    <p class="warning">{{message}}</p>
 
     {% if user.is_staff %}
         <div class="quiz-divs">
@@ -26,7 +29,7 @@
 
         <ul>
         {% for quiz in live_quiz %}
-        <li> <a class="btn btn-default" href="{% url 'start_quiz' quizpk=quiz.pk %}">Start {{quiz.name}}</a> <small>({{quiz.out_of}} questions.)</small> 
+        <li> <a class="btn btn-default" href="{% url 'start_quiz' quizpk=quiz.pk %}">Start {{quiz.name}}</a> <small>({{quiz.out_of}} questions) Ends {{quiz.expires}}</small> 
         {% empty %}
             <p> There are currently no live quizzes.</p>
         {% endfor %}
@@ -35,8 +38,7 @@
 
     <div class="quiz-divs">
         <h3>Previous Quiz Results</h3>
-
-            <p> Insert table here</p>
+            {% render_table student_quizzes %}
     </div>
 {% endblock %}
  

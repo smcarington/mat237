@@ -2,8 +2,9 @@
 
 {% comment %}
     Context contains StudentQuizRecord element called {{record}} 
-    Context contains StudentQuizRecord element called {{quiz}} 
+    Context contains Quiz element called {{quiz}} 
     Context contains Integer element called {{high_score}} 
+    Context contains String element called {{message}}
 {% endcomment %}
 
 {% block title %}
@@ -13,6 +14,8 @@
 {% block content %}
     <div id="quiz_start">
         <h1>{{quiz.name}} <span> - Ends {{quiz.expires}}</span></h1>
+
+        <p class="warning">{{message}}</p>
 
         <ul>
             <li>This quiz contains {{quiz.out_of}} questions.

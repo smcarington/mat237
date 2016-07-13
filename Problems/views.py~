@@ -22,7 +22,7 @@ from simpleeval import simple_eval
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult
 from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, QuizForm, MarkedQuestionForm
-from .tables import MarkedQuestionTable, AllQuizTable, QuizResultTable
+from .tables import MarkedQuestionTable, AllQuizTable, QuizResultTable, SQRTable
 
 # Create your views here.
 
@@ -805,8 +805,11 @@ def edit_quiz(request, quizpk):
         return render(request, 'Problems/edit_announcement.html', {'form' : form})
 
 @login_required
-def quizzes(request):
-    # Retrieve the live quizzes
+def quizzes(request, message=''):
+    """ Show the list of all quizzes, including the live ones. Includes an adminstrative
+    portion for staff. Can be redirected to when max-attempts on a live quiz is reached
+    Input: message (String) default = '' A message to return to the student
+    """
     all_quizzes = Quiz.objects.all()
     if request.user.is_staff:
         all_quizzes_table = AllQuizTable(all_quizzes)
@@ -817,13 +820,15 @@ def quizzes(request):
     live_quiz   = all_quizzes.filter(live__lte=timezone.now(), expires__gt=timezone.now())
 
     # Get this specific user's previous quiz results
-    student_quizzes = StudentQuizResult.objects.filter(student=request.user).order_by('quiz')
+    student_quizzes = SQRTable(StudentQuizResult.objects.filter(student=request.user).order_by('quiz'))
+    RequestConfig(request, paginate={'per_page': 3}).configure(student_quizzes)
 
     return render(request, 'Problems/list_quizzes.html', 
             {'live_quiz': live_quiz, 
              'all_quizzes': all_quizzes,
              'student_quizzes': student_quizzes,
              'all_quizzes_table': all_quizzes_table,
+             'message': message,
             });
 
 @staff_required()
@@ -1021,17 +1026,21 @@ def start_quiz(request, quizpk):
         # Now we need to check if this attempt was finished. Recall that if cur_quest = 0
         # then all questions are finished. If all questions are finished, we must also check
         # if the student is allowed any more attempts
-        if (cur_quiz_res.cur_quest == 0) and (most_recent_attempt < this_quiz.tries or this_quiz.tries == 0):
-            cur_quiz_res = StudentQuizResult(
+        if (cur_quiz_res.cur_quest == 0): # Current attempt is over.
+            if (most_recent_attempt < this_quiz.tries or this_quiz.tries == 0): # Allowed more tries
+                cur_quiz_res = StudentQuizResult(
                     student=student, 
                     quiz=this_quiz, 
                     attempt=most_recent_attempt+1,
                     score=0,
                     result='{}',
                     cur_quest=1)
-            cur_quiz_res.save()
-            generate_next_question(cur_quiz_res) #Should make this a model method
-            is_new = True
+                cur_quiz_res.save()
+                generate_next_question(cur_quiz_res) #Should make this a model method
+                is_new = True
+            else: # No more tries allowed
+                message = "Maximum number of attempts reached for {quiz_name}.".format(quiz_name=this_quiz.name)
+                return quizzes(request, message)
 
     # Need to genererate the first question
     return render(request, 'Problems/start_quiz.html', 
@@ -1173,6 +1182,14 @@ def display_question(request, sqrpk, submit=None):
     # Just display the current question
     if submit is None:
         result, qnum = sqr.get_result()
+        # Asked to display a quiz which has already been finished
+        if qnum == '0':
+            result_table = get_result_table(sqr.result)
+            return render(request, 'Problems/completed_quiz.html', 
+                    {   'sqr': sqr,
+                        'result_table': result_table,
+                    })
+
         # result[qnum] has fields (MarkedQuestion) pk, inputs, and score, 
         question = MarkedQuestion.objects.get(pk=int(result[qnum]['pk']))
         choices  = result[qnum]['inputs']
@@ -1198,7 +1215,8 @@ def display_question(request, sqrpk, submit=None):
             {'sqr': sqr,
              'question': q_string, 
              'sqrpk': sqrpk,
-             'error_message': error_message})
+             'error_message': error_message
+             })
 
 def get_result_table(result):
     """ Turns the (string) StudentQuizResults.results into a table.

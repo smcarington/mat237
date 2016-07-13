@@ -352,7 +352,7 @@ class StudentQuizResult(models.Model):
         num_quests = self.quiz.out_of
         if self.cur_quest == num_quests:
             is_last = True
-            cur_quest = 0
+            self.cur_quest = 0
         else:
             is_last = False
             self.cur_quest += 1
