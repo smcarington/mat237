@@ -79,7 +79,7 @@ def mathify_choice(choice):
                 lower,upper = element[1:].split(',')
                 integer = '\mathbb Z'
 
-                if element[0].istitle:
+                if element[0].istitle():
                     integer +='^*'
 
                 mathstring += '{integer}({low}..{upp}),'.format(integer=integer, low=lower, upp=upper)
@@ -115,3 +115,8 @@ def filter_poll_choice(query_set, poll=None):
 def get_range(value):
     "Generates a range for numeric for loops"
     return range(value)
+
+@register.simple_tag
+def load_results(results):
+    """ Takes StudentQuizResults element results and outputs an ordered list."""
+    

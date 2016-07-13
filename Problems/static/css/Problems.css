@@ -328,6 +328,10 @@ ul li a {
     font-size:10pt;
 }
 
+.poll-title a{
+    font-size: 12pt;
+}
+
 .multiplechoice, .multiplechoice button, .multiplechoice p {
     display: inline-block;
     min-width: 50px;
@@ -436,7 +440,7 @@ label.diff {
 
 #quiz_start {
     position: absolute;
-    left: 20%;
+    left: 10%;
 }
 
 #quiz_start h1 {
@@ -462,6 +466,11 @@ label.diff {
 #quiz_start ul li {
     padding: 10px 0 10px 0;
 }
+
+.quiz_end {
+    margin: 30px 0 30px 30px;
+}
+
 
 @media (max-width: 1200px) {
    .navbar-header {

@@ -115,3 +115,4 @@ def filter_poll_choice(query_set, poll=None):
 def get_range(value):
     "Generates a range for numeric for loops"
     return range(value)
+

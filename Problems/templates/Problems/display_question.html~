@@ -1,0 +1,27 @@
+{% extends 'Problems/base.html' %}
+
+{% comment %}
+    Has context {{question}} which is a String object with the question statement
+    Has context {{sqr}} which is a StudentQuizResult object
+    Has context {{sqrpk}} which is an integer corresponding to the StudentQuizRecord primary key
+    Has context {{error_message}} which is a String with an error
+{% endcomment %}
+
+{% block title %}
+    <title>{{sqr.quiz.name}}: Question {{sqr.cur_quest}}-Mat237!</title>
+{% endblock %}
+
+{% block content %}
+    <h1>{{sqr.quiz.name}}: Question {{sqr.cur_quest}}</h1>
+
+    <form method="POST" action="{% url 'display_question' sqrpk=sqrpk submit='submit'%}">{% csrf_token %}
+        <div class="diff quiz-divs question-detail">
+            {{question}}
+            <input type="hidden" value="{{question}}" name="problem">
+        </div>
+
+        <p id="warning"> {{error_message}}</p>
+        <label>Your answer: </label> <input type="text" size="50" name="answer">
+        <input class="btn btn-default" type="submit" value="Submit" />
+    </form>
+{% endblock %}

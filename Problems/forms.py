@@ -58,7 +58,8 @@ class MarkedQuestionForm(forms.ModelForm):
             'problem_str': 'Use {v[0]}, {v[1]}, ... to indicate variables.',
             'category': 'Used to group several questions into the same category for randomization',
             'answer': 'Use the same variables as in problem. Use python calculate the answer.<br> For example, myfun({v[0]},{v[1]}).',
-            'functions': 'Define custom functions using a dictionary. For example, {"myfun": lambda x,y: max(x,y)} '
+            'functions': 'Define custom functions using a dictionary. For example, {"myfun": lambda x,y: max(x,y)}.<br>'
+                         'Your answer must contain all variables. The "gobble" function returns 1, and can be used as such.'
         }
         labels = {
             'problem_str': 'Problem',

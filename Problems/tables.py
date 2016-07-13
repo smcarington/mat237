@@ -36,3 +36,12 @@ class AllQuizTable(Table):
 
     def render_name(self, value, record):
         return format_html('<a href={}>{}</a>', reverse('quiz_admin', args=(record.pk,)), value )
+
+class QuizResultTable(Table):
+    q_num   = Column(verbose_name="Question")
+    correct = Column(verbose_name="Correct Answer")
+    guess   = Column(verbose_name="Your Answer")
+    score   = Column(verbose_name="Score")
+
+    class Meta:
+        attrs = {'class': 'paleblue'}

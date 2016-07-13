@@ -2,7 +2,7 @@
 
 {% comment %}
     Context contains StudentQuizRecord element called {{record}} 
-    Context contains StudentQuizRecord element called {{quiz}} 
+    Context contains Quiz element called {{quiz}} 
     Context contains Integer element called {{high_score}} 
 {% endcomment %}
 
@@ -31,7 +31,7 @@
             {% endif %}
         </ul>
 
-        <a class="btn btn-default" href="#">Begin Quiz</a>
+        <a class="btn btn-default" href="{% url 'display_question' sqrpk=record.pk %}">Begin Quiz</a>
     </div>
 {% endblock %}
 

@@ -22,7 +22,7 @@ from simpleeval import simple_eval
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult
 from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, QuizForm, MarkedQuestionForm
-from .tables import MarkedQuestionTable, AllQuizTable
+from .tables import MarkedQuestionTable, AllQuizTable, QuizResultTable
 
 # Create your views here.
 
@@ -996,51 +996,64 @@ def start_quiz(request, quizpk):
     this_quiz = get_object_or_404(Quiz, pk=quizpk)
     
     student = request.user
-    quiz_results = StudentQuizResult.objects.filter(student=student, quiz=this_quiz, attempt=1, score=0)
+    quiz_results = StudentQuizResult.objects.filter(student=student, quiz=this_quiz)
     high_score = -1
    
     is_new = False;
     if len(quiz_results) == 0: # First attempt
-        cur_quiz_res = StudentQuizResult(student=student, quiz=this_quiz, attempt=1)
+        cur_quiz_res = StudentQuizResult(
+                student=student, 
+                quiz=this_quiz, 
+                attempt=1, 
+                score=0, 
+                result='{}',
+                cur_quest = 1
+                )
         cur_quiz_res.save()
+        generate_next_question(cur_quiz_res)
         is_new = True
     else:
         # Determine the most recent attempt
-        most_recent_attempt = quiz_results.aggregate(Max('attempt'))
-        high_score = quiz_results.aggregate(Max('score'))
+        quiz_aggregate = quiz_results.aggregate(Max('attempt'), Max('score'))
+        most_recent_attempt = quiz_aggregate['attempt__max']
+        high_score = quiz_aggregate['score__max']
         cur_quiz_res = quiz_results.get(attempt=most_recent_attempt)
         # Now we need to check if this attempt was finished. Recall that if cur_quest = 0
         # then all questions are finished. If all questions are finished, we must also check
         # if the student is allowed any more attempts
-        if (cur_quiz_res.cur_quest == 0) and (most_recent_attempt < quiz.tries):
-            cur_quiz_res = StudentQuizResult(student=student, quiz=this_quiz, attempt=most_recent_attempt+1)
+        if (cur_quiz_res.cur_quest == 0) and (most_recent_attempt < this_quiz.tries or this_quiz.tries == 0):
+            cur_quiz_res = StudentQuizResult(
+                    student=student, 
+                    quiz=this_quiz, 
+                    attempt=most_recent_attempt+1,
+                    score=0,
+                    result='{}',
+                    cur_quest=1)
             cur_quiz_res.save()
+            generate_next_question(cur_quiz_res) #Should make this a model method
             is_new = True
 
-    if is_new:
-        # Need to genererate the first question
-        return render(request, 'Problems/start_quiz.html', 
-                {'record': cur_quiz_res, 
-                 'quiz': this_quiz,
-                 'high_score': high_score,
-                 })
-    else:
-        return redirect('display_question', quizpk=quizpk)
+    # Need to genererate the first question
+    return render(request, 'Problems/start_quiz.html', 
+            {'record': cur_quiz_res, 
+             'quiz': this_quiz,
+             'high_score': high_score,
+             })
 
-def get_return_string(question,choice):
+def get_return_string(question,choices):
     """ Renders a math-readable string for displaying to a student.
         Input:  question (MarkedQuestion) object 
-                choice (string) for the choices to insert into the question text
+                choices (string) for the choices to insert into the question text
         Output: A string rendered correctly.
     """
     problem = question.problem_str
     numbers = [ int(x) for x in choices.replace(' ', '').split(';') ]
-
+    
     return problem.format(v=numbers)
 
 def mark_question(sqr, student_ans, accuracy=10e-5):
     """ Helper question to check if the answers are the same.
-        Input: sqr (StudentQuizRecord) - the quiz record
+        Input: sqr (StudentQuizResult) - the quiz record
                student_ans (string) - the correct answer
                accuracy (float) - The desired accuracy. Default is 10e-5;
                                   that is, four decimal places.
@@ -1050,19 +1063,22 @@ def mark_question(sqr, student_ans, accuracy=10e-5):
 
     correct = float(result[qnum]['answer'])
     guess   = float(student_ans)
+    result[qnum]['guess'] = guess
 
     if (abs(correct-guess)<accuracy): # Correct answer
         result[qnum]['score']='1'
+        sqr.update_score()
     else:
         result[qnum]['score']='0'
     sqr.update_result(result)
     is_last = sqr.add_question_number()
+    return is_last
 
 def generate_next_question(sqr):
-    """ Given a StudentQuizRecord, creates a new question. Most often this function will be called
+    """ Given a StudentQuizResult, creates a new question. Most often this function will be called
         after a question has been marked and a new one needs to be created. However, it is also used
         to instantiate the first question of a quiz.
-        Input: sqr (StudentQuizRecord) - contains all the appropriate information for generating a new
+        Input: sqr (StudentQuizResult) - contains all the appropriate information for generating a new
                                          question
         Output: q_string (String) - The generated question, formated in a math renderable way
     """
@@ -1073,12 +1089,12 @@ def generate_next_question(sqr):
     # that question we then choose a random choice, possibly randomizing yet a third time of the choices
     # are also random
     
-    question = sqr.quiz.get_random_question(cur_quest)
+    question = sqr.quiz.get_random_question(sqr.cur_quest)
     # From this question, we now choose a random input choice
     a_choice = question.get_random_choice()
     # This choice could either be a tuple of numbers, a randomizer, or a mix. We need to parse these into
     # actual numbers
-    choices = parse_abtract_choice(a_choice)
+    choices = parse_abstract_choice(a_choice)
     answer = get_answer(question, choices)
     
     #Feed this into the result dictionary, and pass it back to the model
@@ -1086,7 +1102,9 @@ def generate_next_question(sqr):
             'pk': str(question.pk),
             'inputs': choices,
             'score': '0',
-            'answer': answer}
+            'answer': answer,
+            'guess': None
+            }
     sqr.update_result(result)
 
     return get_return_string(question,choices)
@@ -1100,7 +1118,7 @@ def parse_abstract_choice(abstract_choice):
     choice = ''
     for part in abstract_choice.replace(' ', '').split(';'):
         if is_integer(part): # If already a number
-            choice += part
+            choice += part + ";"
         elif part[0] in 'zZ':
             lower, upper = [int(x) for x in part[1:].split(',')]
             if upper==lower: # Ensures we can't accidentally enter an infinite loop on Z0,0
@@ -1126,23 +1144,27 @@ def get_answer(question, choices):
     answer = question.answer
     try:
         # Substitute the variables into the string and evaluate the functions dictionary
-        eval_string = answer.format(v=choice.split(';'))
+        eval_string = answer.format(v=choices.split(';'))
         functions = eval(question.functions)
+        functions['gobble'] = gobble_vars
 
         return simple_eval(eval_string, functions=functions)
     except Exception as e:
         raise e
 
+def gobble_vars(*args):
+    return 1
+
 @login_required
 def display_question(request, sqrpk, submit=None):
     """ Shows the current question quiz-question. Is almost a redirect which handles the question.
-        Input: sqrpk (integer) - indicating the StudentQuizRecord primary key
+        Input: sqrpk (integer) - indicating the StudentQuizResult primary key
         Output: HttpResponse - renders the quiz question
 
         Depends: get_return_string, mark_question, generate_next_question
     """
 
-    sqr = StudentQuizRecord.object.get(pk=sqrpk).select_related('quiz')
+    sqr = StudentQuizResult.objects.select_related('quiz').get(pk=sqrpk)
     error_message = ''
     # Start by doing some validation to make sure only the correct student has access to this page
     if sqr.student != request.user:
@@ -1162,10 +1184,34 @@ def display_question(request, sqrpk, submit=None):
             is_last = mark_question(sqr, answer)
             if not is_last: # There are more questions, so make the next one
                 q_string = generate_next_question(sqr)
+            else:
+                result_table = get_result_table(sqr.result)
+                return render(request, 'Problems/completed_quiz.html', 
+                        {   'sqr': sqr,
+                            'result_table': result_table,
+                        })
+
         except ValueError as e:
             error_message = "Given answer was not a number. Please try again"
 
-        if is_last:
-            return render(request, 'Problems/completed_quiz.html')
+    return render(request, 'Problems/display_question.html', 
+            {'sqr': sqr,
+             'question': q_string, 
+             'sqrpk': sqrpk,
+             'error_message': error_message
+             })
 
-    return render(request, 'Problems/display_question.html', {'question': q_string, 'sqrpk': sqrpk})
+def get_result_table(result):
+    """ Turns the (string) StudentQuizResults.results into a table.
+    """
+    
+    ret_data = []
+    res_dict = json.loads(result)
+    for field, data in res_dict.items():
+        part = {'q_num': field, 
+                'correct': str(data['answer']), 
+                'guess': str(data['guess']),
+                'score': data['score']}
+        ret_data.append(part)
+    
+    return QuizResultTable(ret_data)
