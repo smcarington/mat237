@@ -5,6 +5,7 @@
     Has context {{sqr}} which is a StudentQuizResult object
     Has context {{sqrpk}} which is an integer corresponding to the StudentQuizRecord primary key
     Has context {{error_message}} which is a String with an error
+    Has context {{string_answer}} which is a String with the original answer, if error-returned
 {% endcomment %}
 
 {% block title %}
@@ -20,8 +21,19 @@
             <input type="hidden" value="{{question}}" name="problem">
         </div>
 
-        <p id="warning"> {{error_message}}</p>
-        <label>Your answer: </label> <input type="text" size="50" name="answer">
+        <p class="warning"> {{error_message}}</p>
+        <label>Your answer: </label> <input type="text" size="50" name="answer" value="{{string_answer}}">
         <input class="btn btn-default" type="submit" value="Submit" />
     </form>
+{% endblock %}
+
+{% block sidenote %}
+<h4>Notes:</h4>
+<ul class="diff">
+     <li>You may use mathematical symbols, such as +,-,*,/ in your answer.
+     <li>Exponentiation is indicated by using a**b; for example, \(2^3\) may be entered as 2**3
+     <li>You may use the functions \(\sin, \cos,\tan, \ln\) in your answer.
+     <li>You may use the constants pi and e for  \(\pi\)  and \(e\).
+ </ul>
+
 {% endblock %}

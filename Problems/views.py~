@@ -17,6 +17,7 @@ import subprocess
 import os
 import re
 import random
+import math
 from simpleeval import simple_eval
 
 from django.contrib.auth.models import User
@@ -821,7 +822,7 @@ def quizzes(request, message=''):
 
     # Get this specific user's previous quiz results
     student_quizzes = SQRTable(StudentQuizResult.objects.filter(student=request.user).order_by('quiz'))
-    RequestConfig(request, paginate={'per_page': 3}).configure(student_quizzes)
+    RequestConfig(request, paginate={'per_page': 10}).configure(student_quizzes)
 
     return render(request, 'Problems/list_quizzes.html', 
             {'live_quiz': live_quiz, 
@@ -873,7 +874,19 @@ def edit_quiz_question(request, quizpk, mpk=None):
         else:
             form = MarkedQuestionForm(instance=mquestion)
 
-    return render(request, 'Problems/edit_announcement.html', {'form': form})
+    sidenote = """
+    <h4> Notes </h4>
+    <ul class="diff">
+        <li>You may use mathematical symbols, such as +,-,*,/ in your answer.
+        <li>Exponentiation is indicated by using a**b; for example, \(2^3\) may be entered as 2**3
+        <li>You may use the functions \(\sin, \cos,\\tan, \ln\) in your answer.
+        <li>You may use the constants pi and e for  \(\pi\)  and \(e\).
+        <li>You may use the python math package in your functions. For example, <code>{"f": lambda x: math.sqrt(x) }</code>
+    </ul>"""
+
+    return render(request, 'Problems/edit_announcement.html', 
+            {'form': form,
+             'sidenote': sidenote})
 
 def deserialize(s_str):
     """
@@ -995,15 +1008,15 @@ def start_quiz(request, quizpk):
                                      to display_question
     """
 
-    # The user may be allowed several attempts. We need to determine what attempt the 
-    # user is on, and whether they are in the middle of a quiz
-   
-    this_quiz = get_object_or_404(Quiz, pk=quizpk)
+    this_quiz = get_object_or_404(Quiz, pk=quizpk, live__lte=timezone.now(), expires__gt=timezone.now())
     
     student = request.user
     quiz_results = StudentQuizResult.objects.filter(student=student, quiz=this_quiz)
     high_score = -1
    
+    # The user may be allowed several attempts. We need to determine what attempt the 
+    # user is on, and whether they are in the middle of a quiz
+    
     is_new = False;
     if len(quiz_results) == 0: # First attempt
         cur_quiz_res = StudentQuizResult(
@@ -1060,25 +1073,39 @@ def get_return_string(question,choices):
     
     return problem.format(v=numbers)
 
-def mark_question(sqr, student_ans, accuracy=10e-5):
+def mark_question(sqr, string_answer, accuracy=10e-5):
     """ Helper question to check if the answers are the same.
         Input: sqr (StudentQuizResult) - the quiz record
-               student_ans (string) - the correct answer
+               string_answer (string) - the correct answer
                accuracy (float) - The desired accuracy. Default is 10e-5;
                                   that is, four decimal places.
         Output: is_last (Boolean) - indicates if the last question has been marked
     """
     result, qnum = sqr.get_result()
 
+    if qnum=='0':
+        return True
+
     correct = float(result[qnum]['answer'])
-    guess   = float(student_ans)
-    result[qnum]['guess'] = guess
+    names = {"pi": math.pi, "e": math.e}
+    functions = {"sin": lambda x: math.sin(x),
+                 "cos": lambda x: math.cos(x),
+                 "tan": lambda x: math.tan(x),
+                 "ln": lambda x: math.log(x, math.e)}
+    
+    try:
+        guess   = round(simple_eval(string_answer, names=names, functions=functions),4) #numeric input
+        result[qnum]['guess'] = guess
+        result[qnum]['guess_string'] = string_answer
+    except Exception as e:
+        raise ValueError('Input could not be mathematically parsed.')
 
     if (abs(correct-guess)<accuracy): # Correct answer
         result[qnum]['score']='1'
         sqr.update_score()
     else:
         result[qnum]['score']='0'
+
     sqr.update_result(result)
     is_last = sqr.add_question_number()
     return is_last
@@ -1174,6 +1201,7 @@ def display_question(request, sqrpk, submit=None):
     """
 
     sqr = StudentQuizResult.objects.select_related('quiz').get(pk=sqrpk)
+    string_answer = ''
     error_message = ''
     # Start by doing some validation to make sure only the correct student has access to this page
     if sqr.student != request.user:
@@ -1197,8 +1225,8 @@ def display_question(request, sqrpk, submit=None):
     else: # We need to mark the question and generate the next question
         q_string = request.POST['problem'] # Grab this in case we need to return the question on error
         try:
-            answer = float(request.POST['answer'])
-            is_last = mark_question(sqr, answer)
+            string_answer = request.POST['answer'] #string input
+            is_last       = mark_question(sqr, string_answer)
             if not is_last: # There are more questions, so make the next one
                 q_string = generate_next_question(sqr)
             else:
@@ -1209,13 +1237,14 @@ def display_question(request, sqrpk, submit=None):
                         })
 
         except ValueError as e:
-            error_message = "Given answer was not a number. Please try again"
+            error_message = "The expression '{}' did not parse to a valid mathematical expression. Please try again".format(string_answer)
 
     return render(request, 'Problems/display_question.html', 
             {'sqr': sqr,
              'question': q_string, 
              'sqrpk': sqrpk,
-             'error_message': error_message
+             'error_message': error_message,
+             'string_answer': string_answer,
              })
 
 def get_result_table(result):

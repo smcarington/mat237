@@ -44,3 +44,10 @@ class AnnouncementTest(StaticLiveServerTestCase):
         self.assertIn('Old Announcement', body.text)
 
 # Create your tests here.
+#
+# Quiz Tests:
+# 0. Test quiz question validation for random ranges
+# 1. Test student answer input validation
+# 2. display_question/submit when already last question (ie referesh at terminal page)
+# 3. Students not allowed to vote more times that allowed
+# 4. Students leaving a quiz then resuming

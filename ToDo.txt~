@@ -4,5 +4,5 @@ an arbitrary difficulty. Also need to check this server side.
 Quizzes:
 
 XXXX 1. Allow Students to insert math as an answer
-XXXX 2. Ensure that students cannot access a quiz before it's live.
+2. Ensure that students cannot access a quiz before it's live.
 3. Subclass MarkedQuestion to allow multiple choice

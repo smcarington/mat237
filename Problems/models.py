@@ -364,4 +364,4 @@ class StudentQuizResult(models.Model):
         return is_last
 
     def __str__(self):
-        return self.student.username + " - " + self.quiz.name + " - " + str(self.score)
+        return self.student.username + " - " + self.quiz.name + " - Attempt: " + str(self.attempt)

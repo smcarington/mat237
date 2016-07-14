@@ -68,8 +68,15 @@ $(document).ready(function() {
     });
 
     // adds a datepicker jquery ui element to dates
-    $('#id_expires').datepicker()
-    $('#id_live').datepicker()
+    //$('#id_expires').datepicker()
+    //$('#id_live').datepicker()
+    jQuery('#id_expires').datetimepicker(
+            { format:'Y-m-d H:i',
+            });
+    jQuery('#id_live').datetimepicker(
+            { format:'Y-m-d H:i',
+            });
+    
 
     // gets old announcements and inserts them into the page
     $('#get_old').click( function() {
