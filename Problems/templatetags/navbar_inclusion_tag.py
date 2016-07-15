@@ -4,6 +4,8 @@ from django.core.urlresolvers import resolve, Resolver404
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
 
+import re
+
 register = template.Library()
 
 @register.inclusion_tag('Problems/navbar_inclusion_tag.html', takes_context = True)
@@ -76,13 +78,24 @@ def mathify_choice(choice):
             mathstring += element + ','
         else:
             try:
-                lower,upper = element[1:].split(',')
-                integer = '\mathbb Z'
+                match1 = re.match(r'rand\((-?\d+),(-?\d+)\)',element)
+                match2 = re.match(r'uni\((-?\d+),(-?\d+),(\d+)\)',element)
 
-                if element[0].istitle():
-                    integer +='^*'
+                if match1:
+                    field = '\mathbb Z'
+                    lower,upper = match1.groups(0)
+                    acc = ''
+                elif match2:
+                    field = '\mathbb R'
+                    lower,upper,acc = match2.groups(0)
 
-                mathstring += '{integer}({low}..{upp}),'.format(integer=integer, low=lower, upp=upper)
+            #    lower,upper = element[1:].split(',')
+            #    integer = '\mathbb Z'
+
+            #    if element[0].istitle():
+            #        integer +='^*'
+
+                mathstring += ' {field}_{{ {acc} }}({low},{upp}), '.format(field=field, low=lower, upp=upper, acc=acc)
 
             except ValueError as error:
                 print(error)

@@ -328,7 +328,11 @@ ul li a {
     font-size:10pt;
 }
 
-.poll-title a{
+/*.poll-title a {
+    font-size: 12pt;
+}*/
+
+.font12 {
     font-size: 12pt;
 }
 

@@ -328,9 +328,9 @@ ul li a {
     font-size:10pt;
 }
 
-.poll-title a{
+/*.poll-title a {
     font-size: 12pt;
-}
+}*/
 
 .multiplechoice, .multiplechoice button, .multiplechoice p {
     display: inline-block;
@@ -440,7 +440,7 @@ label.diff {
 
 #quiz_start {
     position: absolute;
-    left: 20%;
+    left: 10%;
 }
 
 #quiz_start h1 {

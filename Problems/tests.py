@@ -49,6 +49,12 @@ from selenium.webdriver.support import expected_conditions as EC
 class QuizParserTest(TestCase):
     fixtures = ['user.json', 'Quiz.json']
 
+    def test_parse_abstract_choice(self):
+        import Problems.views
+        choice = "14; rand(0,100); uni(0,1,2)"
+        output = Problems.views.parse_abstract_choice(choice)
+        self.assertEqual(len(output.split(';')),3)
+
 # Create your tests here.
 #
 # Quiz Tests:

@@ -912,7 +912,7 @@ def deserialize(s_str):
 
 def choice_is_valid(string, num_vars):
     """ Determine whether input string is a valid choice; that is, either an integer or
-        a correctly formatting randomization string.
+        a correctly formatted randomization string.
         Input: string (String) - to be validated
                num_vars - (Integer) - necessary number of variables
         Output: Boolean - indicating whether the string is valid
@@ -925,26 +925,34 @@ def choice_is_valid(string, num_vars):
     if len(parts) != num_vars:
         return False, "Incorrect number of variables. Given {}, expected {}".format(len(parts), num_vars)
 
-    for part in parts:
-        match = re.match(r'[zZ](-?\d+),(-?\d+)',part)
-        if is_integer(part):
-            return_value*= True
-        elif match:
-            if int(match.group(1))<int(match.group(2)):
-                return_value*= True
-            else:
-                return_value*= False
-                error_message = "Integer range out of order."
-        else:
-            error_message = "Invalid input. Please insert the current number of variables, with appropriate range."
-            return_value*= False
+    # We run the function parse_abstract_choice. If it works then the input is valid, otherwise it's not
+
+    try:
+        parse_abstract_choice(string)
+    except:
+        error_message = "Invalid input. Please insert the current number of variables, with appropriate range."
+        return_value = False
+
+#    for part in parts:
+#        match = re.match(r'[zZ](-?\d+),(-?\d+)',part)
+#        if isnumber(part):
+#            return_value*= True
+#        elif match:
+#            if int(match.group(1))<int(match.group(2)):
+#                return_value*= True
+#            else:
+#                return_value*= False
+#                error_message = "Integer range out of order."
+#        else:
+#            error_message = "Invalid input. Please insert the current number of variables, with appropriate range."
+#            return_value*= False
 
     return return_value, error_message
 
 
-def is_integer(string):
+def isnumber(string):
     try:
-        int(string)
+        float(string)
         return True
     except:
         return False
@@ -1071,9 +1079,11 @@ def get_return_string(question,choices):
         Output: A string rendered correctly.
     """
     problem = question.problem_str
-    numbers = [ int(x) for x in choices.replace(' ', '').split(';') ]
-    
-    return problem.format(v=numbers)
+    return problem.format(v=choices.replace(' ', '').split(';'))
+
+    #numbers = [ float(x) for x in choices.replace(' ', '').split(';') ]
+    #
+    #return problem.format(v=numbers)
 
 def mark_question(sqr, string_answer, accuracy=10e-5):
     """ Helper question to check if the answers are the same.
@@ -1152,18 +1162,24 @@ def parse_abstract_choice(abstract_choice):
     """
     choice = ''
     for part in abstract_choice.replace(' ', '').split(';'):
-        if is_integer(part): # If already a number
+        if isnumber(part): # If already a number
             choice += part + ";"
-        elif part[0] in 'zZ':
-            lower, upper = [int(x) for x in part[1:].split(',')]
-            if upper==lower: # Ensures we can't accidentally enter an infinite loop on Z0,0
-                concrete = str(upper) + ";"
-            else:
-                concrete = random.randint(lower,upper)
-                if part[0].istitle(): # Range specifies non-zero number using capital letter
-                    while concrete == 0:
-                        concrete = random.randint(lower,upper)
-            choice += str(concrete) + ";"
+        else: # it must be a command, one of 'rand' or 'uni'
+            pre_choice = simple_eval(part, 
+                                 names=settings.UNIVERSAL_CONSTANTS,
+                                 functions=settings.PREDEFINED_FUNCTIONS)
+            choice += str(pre_choice)+";"
+
+#        elif part[0] in 'zZ':
+#            lower, upper = [int(x) for x in part[1:].split(',')]
+#            if upper==lower: # Ensures we can't accidentally enter an infinite loop on Z0,0
+#                concrete = str(upper) + ";"
+#            else:
+#                concrete = random.randint(lower,upper)
+#                if part[0].istitle(): # Range specifies non-zero number using capital letter
+#                    while concrete == 0:
+#                        concrete = random.randint(lower,upper)
+#            choice += str(concrete) + ";"
 
     # At the end, we need to cut off the trailing semi-colon
     return choice[0:-1]

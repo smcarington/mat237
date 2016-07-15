@@ -16,7 +16,7 @@
         <a href="{% url 'quizzes' %}">&#171; Return to Quizzes</a>
     </div>
 
-    <div class="quiz-end">
+    <div class="quiz_end">
         <p>You scored {{sqr.score}} out of {{sqr.quiz.out_of}}.</p>
         {% render_table result_table %}
     </div>
