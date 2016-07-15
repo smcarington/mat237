@@ -52,14 +52,17 @@ class MarkedQuestionForm(forms.ModelForm):
 
     class Meta:
         text_area_attrs = {'cols':'100', 'rows': '5'}
+        mc_attrs = dict(text_area_attrs, **{'visible': 'false'})
         model = MarkedQuestion
-        fields = ['category', 'problem_str', 'answer', 'functions']
+        fields = ['category', 'problem_str', 'answer', 'q_type', 'mc_choices', 'functions']
         help_texts = {
             'problem_str': 'Use {v[0]}, {v[1]}, ... to indicate variables.',
             'category': 'Used to group several questions into the same category for randomization',
             'answer': 'Use the same variables as in problem. Use python calculate the answer.<br> For example, myfun({v[0]},{v[1]}).',
             'functions': 'Define custom functions using a dictionary. For example, {"myfun": lambda x,y: max(x,y)}.<br>'
-                         'Your answer must contain all variables. The "gobble" function returns 1, and can be used as such.'
+                         'Your answer must contain all variables. The "gobble" function returns 1, and can be used as such.',
+            'mc_choices': 'Enter a list with possible values. For example, ["13", "{v[0]*v[1]}", "rand(1,10)"]. Any functions '
+                          'you define can be used here, for example {"rand": lambda x: math.randint(1,10)}',
         }
         labels = {
             'problem_str': 'Problem',
@@ -69,6 +72,7 @@ class MarkedQuestionForm(forms.ModelForm):
             'problem_str': forms.Textarea(text_area_attrs),
             'answer': forms.Textarea(text_area_attrs),
             'functions': forms.Textarea(text_area_attrs),
+            'mc_choices': forms.Textarea(mc_attrs),
         }
         field_classes = {
             'category': forms.IntegerField

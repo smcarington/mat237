@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
-import os, socket
+import os, socket, math, random
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -168,3 +168,12 @@ with open('/etc/gmailsettings.txt') as f:
 EMAIL_USE_TLS = True
 
 MEDIA_URL  = '/media/'
+
+UNIVERSAL_CONSTANTS =  {"pi": math.pi, "e": math.e}
+PREDEFINED_FUNCTIONS = {"sin": lambda x: math.sin(x),
+                        "cos": lambda x: math.cos(x),
+                        "tan": lambda x: math.tan(x),
+                        "ln": lambda x: math.log(x, math.e),
+                        "rand": lambda x,y: random.randint(x,y),
+                        "uni": lambda x,y,z: round(random.uniform(x,y),z),
+                        }

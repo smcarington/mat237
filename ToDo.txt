@@ -6,3 +6,7 @@ Quizzes:
 XXXX 1. Allow Students to insert math as an answer
 XXXX 2. Ensure that students cannot access a quiz before it's live.
 3. Subclass MarkedQuestion to allow multiple choice
+XXXX 4. Make rand a built in function, and Rand the non-zero version. Add float version
+4.5 Change Za,b format to allow for rand and uni functions (parse_abstract_choice)
+5. Remodel the quiz-answer section to allow for multiple choice. 
+6. Make a view that allows a question to be tested by random simulating it many times.

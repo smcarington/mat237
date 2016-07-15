@@ -250,7 +250,6 @@ class Quiz(models.Model):
     # Determines how many questions are in the current quiz.
     def update_out_of(self):
         # Important to base this on the max category, rather than number of questions
-        max
         self.out_of = self.markedquestion_set.aggregate(Max('category'))['category__max']
         self.save()
 
@@ -274,6 +273,19 @@ class MarkedQuestion(models.Model):
     num_vars    = models.IntegerField(null=True)
     answer      = models.TextField("Answer")
     functions   = models.TextField("Functions", default='{}')
+    # Allows for multiple kinds of questions
+    QUESTION_CHOICES = ( 
+            ('D', 'Direct Entry'),
+            ('MC', 'Multiple Choice'),
+            ('TF', 'True/False'),
+        )
+
+    q_type      = models.CharField("Question Type",
+                    max_length=2, 
+                    choices=QUESTION_CHOICES,
+                    default='D',
+                  )
+    mc_choices = models.TextField("Multiple Choice", default ='[]', null=True)
 
     class Meta:
         ordering = ['quiz', 'category']
@@ -294,6 +306,7 @@ class MarkedQuestion(models.Model):
     def __str__(self):
         return self.problem_str
 
+
 class StudentQuizResult(models.Model):
     student   = models.ForeignKey(User)
     quiz      = models.ForeignKey(Quiz)
@@ -308,6 +321,7 @@ class StudentQuizResult(models.Model):
     #                   'inputs': '1;2;3', 
     #                   'score': '0',
     #                   'answer': 22.3,
+    #                   'guess_string': '-22.3*cos(pi)'
     #                   'guess': 15.7
     #                 },
     #           '2': {
@@ -316,6 +330,7 @@ class StudentQuizResult(models.Model):
     #                   'score': '1',
     #                   'answer': 3.226
     #                   'guess': '3.226'
+    #                   'guess_string': '3.226'
     #                 },
     #          }
     #          Indicates that the first question is a MarkedQuestion with pk=13, the inputs to

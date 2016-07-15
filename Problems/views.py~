@@ -800,6 +800,7 @@ def edit_quiz(request, quizpk):
         form = QuizForm(request.POST, instance=quiz)
         if form.is_valid():
             quiz = form.save()
+            quiz.update_out_of()
             return redirect('quiz_admin', quizpk=quiz.pk)
     else:
         form = QuizForm(instance=quiz)
@@ -870,6 +871,7 @@ def edit_quiz_question(request, quizpk, mpk=None):
             form = MarkedQuestionForm(request.POST, instance=mquestion)
             if form.is_valid():
                 mquestion = form.save()
+                mquestion.quiz.update_out_of()
                 return redirect('quiz_admin', quizpk=quiz.pk)
         else:
             form = MarkedQuestionForm(instance=mquestion)
@@ -1087,14 +1089,11 @@ def mark_question(sqr, string_answer, accuracy=10e-5):
         return True
 
     correct = float(result[qnum]['answer'])
-    names = {"pi": math.pi, "e": math.e}
-    functions = {"sin": lambda x: math.sin(x),
-                 "cos": lambda x: math.cos(x),
-                 "tan": lambda x: math.tan(x),
-                 "ln": lambda x: math.log(x, math.e)}
     
     try:
-        guess   = round(simple_eval(string_answer, names=names, functions=functions),4) #numeric input
+        guess   = round(simple_eval(string_answer, 
+                            names=settings.UNIVERSAL_CONSTANTS, 
+                            functions=settings.PREDEFINED_FUNCTIONS),4) #numeric input
         result[qnum]['guess'] = guess
         result[qnum]['guess_string'] = string_answer
     except Exception as e:
@@ -1182,9 +1181,9 @@ def get_answer(question, choices):
         # Substitute the variables into the string and evaluate the functions dictionary
         eval_string = answer.format(v=choices.split(';'))
         functions = eval(question.functions)
-        functions['gobble'] = gobble_vars
+        functions.update(settings.PREDEFINED_FUNCTIONS)
 
-        return simple_eval(eval_string, functions=functions)
+        return simple_eval(eval_string, functions=functions, names=settings.UNIVERSAL_CONSTANTS)
     except Exception as e:
         raise e
 
@@ -1223,6 +1222,15 @@ def display_question(request, sqrpk, submit=None):
         choices  = result[qnum]['inputs']
         q_string = get_return_string(question, choices)
     else: # We need to mark the question and generate the next question
+
+        if request.method == "GET": # Refreshed the page/sorted the table
+            result_table = get_result_table(sqr.result)
+            RequestConfig(request, paginate={'per_page', 10}).configure(result_table)
+            return render(request, 'Problems/completed_quiz.html', 
+                    {   'sqr': sqr,
+                        'result_table': result_table,
+                    })
+
         q_string = request.POST['problem'] # Grab this in case we need to return the question on error
         try:
             string_answer = request.POST['answer'] #string input
@@ -1232,6 +1240,7 @@ def display_question(request, sqrpk, submit=None):
                 string_answer = ''
             else:
                 result_table = get_result_table(sqr.result)
+                RequestConfig(request, paginate={'per_page', 10}).configure(result_table)
                 return render(request, 'Problems/completed_quiz.html', 
                         {   'sqr': sqr,
                             'result_table': result_table,
