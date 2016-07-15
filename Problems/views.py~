@@ -1229,6 +1229,7 @@ def display_question(request, sqrpk, submit=None):
             is_last       = mark_question(sqr, string_answer)
             if not is_last: # There are more questions, so make the next one
                 q_string = generate_next_question(sqr)
+                string_answer = ''
             else:
                 result_table = get_result_table(sqr.result)
                 return render(request, 'Problems/completed_quiz.html', 

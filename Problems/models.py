@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.db.models import Max
 
 from datetime import timedelta
 
@@ -248,7 +249,9 @@ class Quiz(models.Model):
 
     # Determines how many questions are in the current quiz.
     def update_out_of(self):
-        self.out_of = self.markedquestion_set.count()
+        # Important to base this on the max category, rather than number of questions
+        max
+        self.out_of = self.markedquestion_set.aggregate(Max('category'))['category__max']
         self.save()
 
     def get_random_question(self, category):
