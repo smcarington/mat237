@@ -870,8 +870,11 @@ def edit_quiz_question(request, quizpk, mpk=None):
         if request.method == "POST":
             form = MarkedQuestionForm(request.POST, instance=mquestion)
             if form.is_valid():
-                mquestion = form.save()
+                mquestion = form.save(commit=False)
+                mquestion.update(quiz)
                 mquestion.quiz.update_out_of()
+
+                # Check to see if there are any possible issues with the format of the question
                 return redirect('quiz_admin', quizpk=quiz.pk)
         else:
             form = MarkedQuestionForm(instance=mquestion)
@@ -1079,7 +1082,6 @@ def get_return_string(question,choices):
         Output: A string rendered correctly.
     """
     problem = question.problem_str
-    import pdb; pdb.set_trace()
     return problem.format(v=choices.replace(' ', '').split(';'))
 
     #numbers = [ float(x) for x in choices.replace(' ', '').split(';') ]
@@ -1104,7 +1106,7 @@ def mark_question(sqr, string_answer, accuracy=10e-5):
 
     # For multiple choice questions, we do not want to evaluate, just compare strings
     if result[qnum]['type'] == "MC":
-        if correct == string_answer:
+        if str(correct) == string_answer:
             result[qnum]['score']='1'
             sqr.update_score()
         else:
@@ -1142,8 +1144,11 @@ def generate_next_question(sqr):
         Input: sqr (StudentQuizResult) - contains all the appropriate information for generating a new
                                          question
         Output: q_string (String) - The generated question, formated in a math renderable way
+               mc_choices (String) - The multiple choice options
     """
     result, qnum = sqr.get_result()
+    # The following is defined so it can be returned, but is only ever used if question type is MC
+    mc_choices = ''
 
     # the cur_quest value of sqr should always correspond to the new question, as it is updated before
     # calling this function. We randomly choose an element from quiz.category = sqr.cur_quest, and from
@@ -1175,7 +1180,7 @@ def generate_next_question(sqr):
     
     sqr.update_result(result)
 
-    return get_return_string(question,choices)
+    return get_return_string(question,choices), mc_choices
 
 def get_mc_choices(question, choices, answer):
     """ Given a question and a choice for the variable inputs, get the multiple choice options.
@@ -1186,13 +1191,15 @@ def get_mc_choices(question, choices, answer):
     """
     split_choices = choices.split(';')
     mc_choices = []
-    for part in eval(question.mc_choices):
+
+    for part in question.mc_choices.replace(' ','').split(';'):
         try:
-            if re.findall(r'{v\[\d+\]}', part):
+            if re.findall(r'{v\[\d+\]}', part): # matches no variables
                 eval_string = part.format(v=split_choices)
             else:
-                eval_string = part
+                eval_string = part #could be an evaluable string, or a sentence
             value = round(simple_eval(eval_string, functions=settings.PREDEFINED_FUNCTIONS,names=settings.UNIVERSAL_CONSTANTS),4)
+                
             mc_choices.append(str(value))
         except: #If not an exectuable string, then it must be a hardcoded answer
             mc_choices.append(part)
@@ -1248,7 +1255,7 @@ def get_answer(question, choices):
         functions = eval(question.functions)
         functions.update(settings.PREDEFINED_FUNCTIONS)
 
-        return simple_eval(eval_string, functions=functions, names=settings.UNIVERSAL_CONSTANTS)
+        return round(simple_eval(eval_string, functions=functions, names=settings.UNIVERSAL_CONSTANTS),4)
     except (SyntaxError, NameNotDefined,) as e:
         # Enter this exception if the answer is not one that can be evaluated.
         # In that case, the answer is just the answer
@@ -1312,7 +1319,7 @@ def display_question(request, sqrpk, submit=None):
             is_last       = mark_question(sqr, string_answer)
 
             if not is_last: # There are more questions, so make the next one
-                q_string = generate_next_question(sqr)
+                q_string, mc_choices = generate_next_question(sqr)
                 string_answer = ''
             else:
                 result_table = get_result_table(sqr.result)
@@ -1359,3 +1366,64 @@ def get_result_table(result):
         ret_data.append(part)
     
     return QuizResultTable(ret_data)
+
+@staff_required()
+def test_quiz_question(request, mpk):
+    """ Generates many examples of the given question for testing purpose.
+        Input: mpk (Integer) MarkedQuestion primary key
+    """
+    mquestion = get_object_or_404(MarkedQuestion, pk=mpk)
+
+    if request.method == "POST":
+        num_tests = request.POST['num_tests']
+        html = ''
+
+        try:
+            for k in range(0,int(num_tests)):
+                choice = parse_abstract_choice(mquestion.get_random_choice())
+                answer = get_answer(mquestion, choice)
+
+                if mquestion.q_type == "MC":
+                    mc_choices = get_mc_choices(mquestion, choices, answer)
+                else:
+                    mc_choices = ''
+
+                problem = get_return_string(mquestion, choice)
+                
+                html += render_html_for_question(problem, answer, choice, mc_choices)
+        except Exception as e:
+            html = e
+
+        return HttpResponse(html)
+
+    else:
+        return render(request, 'Problems/test_quiz_question.html',
+                {'mquestion':mquestion,
+                })
+
+def render_html_for_question(problem, answer, choice, mc_choices):
+    """ Takes in question elements and returns the corresponding html.
+        Input: problem (String) The problem 
+               answer  (float) the correct answer
+               choice  (String) a ';' separated tuple of variable choices
+               mc_choices (string) a list of multiple choice options
+    """
+
+    template = """
+               <div class = "diff quiz-divs question-detail">
+                   {problem}
+               </div>
+               
+               <ul>
+                   <li><b>Answer:</b> {answer}
+                   <li><b>Choice:</b> {choice}
+               </ul>
+               """.format(problem=problem, answer=answer, choice=choice)
+    if mc_choices:
+        template += "<ul>\n"
+        for choice in mc_choices:
+            template+= "<li>{choice}</li>\n".format(choice=choice)
+
+        template +="</ul>\n"
+
+    return template

@@ -332,6 +332,10 @@ ul li a {
     font-size: 12pt;
 }*/
 
+.font12 {
+    font-size: 12pt;
+}
+
 .multiplechoice, .multiplechoice button, .multiplechoice p {
     display: inline-block;
     min-width: 50px;

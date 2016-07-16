@@ -7,7 +7,7 @@
         "tries": 9,
         "live": "2016-07-01T04:00:00Z",
         "expires": "2016-07-31T04:00:00Z",
-        "out_of": 2
+        "out_of": 3
     }
 },
 {
@@ -79,6 +79,21 @@
         "functions": "{}",
         "q_type": "D",
         "mc_choices": ""
+    }
+},
+{
+    "model": "Problems.markedquestion",
+    "pk": 22,
+    "fields": {
+        "quiz": 1,
+        "category": 3,
+        "problem_str": "What is the limit \\( \\displaystyle \\lim_{{x\\to 0}} \\frac{{ \\sin({v[0]}x) }}{{ {v[1]}x }} \\)?",
+        "choices": "rand(1,100); rand(1,100)",
+        "num_vars": 2,
+        "answer": "{v[0]}/{v[1]}",
+        "functions": "{}",
+        "q_type": "MC",
+        "mc_choices": "[\"rand(1,10)\", \"1/({v[0]}*{v[1]})\", \"{v[1]}/{v[0]}\"]"
     }
 }
 ]

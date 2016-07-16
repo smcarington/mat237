@@ -251,6 +251,8 @@ class Quiz(models.Model):
     def update_out_of(self):
         # Important to base this on the max category, rather than number of questions
         self.out_of = self.markedquestion_set.aggregate(Max('category'))['category__max']
+        if not self.out_of: # New quiz, so markedquestion_set is empty
+            self.out_of = 0
         self.save()
 
     def get_random_question(self, category):

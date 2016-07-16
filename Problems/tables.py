@@ -20,6 +20,7 @@ class MathColumn(Column):
 class MarkedQuestionTable(Table):
     problem_str = MathColumn()
     choices = Column(empty_values=())
+    test = Column(empty_values=())
     class Meta:
         attrs = {'class': 'paleblue'}
         model = MarkedQuestion
@@ -27,6 +28,9 @@ class MarkedQuestionTable(Table):
 
     def render_choices(self, value, record):
         return format_html('<a href={}>Edit Choices</a>', reverse('edit_choices', args=(record.pk,)) )
+
+    def render_test(self,value,record):
+        return format_html('<a href={}>Test</a>', reverse('test_quiz_question', args=(record.pk,)) )
 
 class AllQuizTable(Table):
     class Meta:
@@ -53,7 +57,6 @@ class SQRTable(Table):
         else:
             return value
 
-
 class QuizResultTable(Table):
     q_num   = Column(verbose_name="Question")
     correct = Column(verbose_name="Correct Answer")
@@ -62,3 +65,4 @@ class QuizResultTable(Table):
 
     class Meta:
         attrs = {'class': 'paleblue'}
+        order_by = 'q_num'
