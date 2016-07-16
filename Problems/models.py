@@ -289,7 +289,7 @@ class MarkedQuestion(models.Model):
 
     class Meta:
         ordering = ['quiz', 'category']
-        verbose_name = "Question"
+        verbose_name = "Marked Question"
 
     def update(self, quiz):
         """ Updates the quiz to which this belongs, and updates that quiz's attributes as well
@@ -321,16 +321,19 @@ class StudentQuizResult(models.Model):
     #                   'inputs': '1;2;3', 
     #                   'score': '0',
     #                   'answer': 22.3,
-    #                   'guess_string': '-22.3*cos(pi)'
-    #                   'guess': 15.7
+    #                   'guess_string': '-22.3*cos(pi)',
+    #                   'guess': 15.7,
+    #                   'type': 'D',
     #                 },
     #           '2': {
     #                   'pk: '52'
     #                   'inputs': '8;-2', 
     #                   'score': '1',
-    #                   'answer': 3.226
-    #                   'guess': '3.226'
-    #                   'guess_string': '3.226'
+    #                   'answer': 3.226,
+    #                   'guess': '3.226',
+    #                   'guess_string': '3.226',
+    #                   'type': 'MC',
+    #                   'mc_choices': ['3.226', '14', '23', '5.22'],
     #                 },
     #          }
     #          Indicates that the first question is a MarkedQuestion with pk=13, the inputs to

@@ -176,4 +176,5 @@ PREDEFINED_FUNCTIONS = {"sin": lambda x: math.sin(x),
                         "ln": lambda x: math.log(x, math.e),
                         "rand": lambda x,y: random.randint(x,y),
                         "uni": lambda x,y,z: round(random.uniform(x,y),z),
+                        "gobble": lambda *args: 1,
                         }

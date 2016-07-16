@@ -31,7 +31,7 @@
             <ul>
             {% for choice in choices %}
             <li data-id="{{forloop.counter}}">
-                <label>{% mathify_choice choice %} </label> 
+                {% mathify_choice choice %} {# Returns label html with 'choice' nicely formatted #}
                 <input data-id="{{forloop.counter}}" name="old_choice_{{forloop.counter}}" type="text" size="50" value="{{choice}}">
                 <span data-id="{{forloop.counter}}" class="choice-remove glyphicon glyphicon-remove arrow"></span>
             {% empty %}

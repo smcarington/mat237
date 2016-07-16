@@ -18,7 +18,7 @@ import os
 import re
 import random
 import math
-from simpleeval import simple_eval
+from simpleeval import simple_eval, NameNotDefined
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult
@@ -1095,25 +1095,40 @@ def mark_question(sqr, string_answer, accuracy=10e-5):
     """
     result, qnum = sqr.get_result()
 
+    # Already the last question, so don't check anything and return true
     if qnum=='0':
         return True
 
-    correct = float(result[qnum]['answer'])
-    
-    try:
-        guess   = round(simple_eval(string_answer, 
-                            names=settings.UNIVERSAL_CONSTANTS, 
-                            functions=settings.PREDEFINED_FUNCTIONS),4) #numeric input
-        result[qnum]['guess'] = guess
-        result[qnum]['guess_string'] = string_answer
-    except Exception as e:
-        raise ValueError('Input could not be mathematically parsed.')
+    correct = result[qnum]['answer']
 
-    if (abs(correct-guess)<accuracy): # Correct answer
-        result[qnum]['score']='1'
-        sqr.update_score()
+    # For multiple choice questions, we do not want to evaluate, just compare strings
+    if result[qnum]['type'] == "MC":
+        if correct == string_answer:
+            result[qnum]['score']='1'
+            sqr.update_score()
+        else:
+            result[qnum]['score']='0'
+
+        result[qnum]['guess']        = string_answer 
+        result[qnum]['guess_string'] = string_answer 
+
     else:
-        result[qnum]['score']='0'
+        correct = float(correct) # Recast to float for numeric comparison
+        
+        try:
+            guess   = round(simple_eval(string_answer, 
+                                names=settings.UNIVERSAL_CONSTANTS, 
+                                functions=settings.PREDEFINED_FUNCTIONS),4) #numeric input
+            result[qnum]['guess'] = guess
+            result[qnum]['guess_string'] = string_answer
+        except Exception as e:
+            raise ValueError('Input could not be mathematically parsed.')
+
+        if (abs(correct-guess)<accuracy): # Correct answer
+            result[qnum]['score']='1'
+            sqr.update_score()
+        else:
+            result[qnum]['score']='0'
 
     sqr.update_result(result)
     is_last = sqr.add_question_number()
@@ -1141,18 +1156,51 @@ def generate_next_question(sqr):
     # actual numbers
     choices = parse_abstract_choice(a_choice)
     answer = get_answer(question, choices)
-    
+
     #Feed this into the result dictionary, and pass it back to the model
     result[qnum] = {
             'pk': str(question.pk),
             'inputs': choices,
             'score': '0',
             'answer': answer,
-            'guess': None
+            'guess': None,
+            'type': question.q_type
             }
+    
+    # If the question we grabbed is multiple choice, then we must also generate the multiple choice options.
+    if question.q_type == "MC":
+        mc_choices = get_mc_choices(question, choices, answer)
+        result[qnum].update({'mc_choices': mc_choices})
+    
     sqr.update_result(result)
 
     return get_return_string(question,choices)
+
+def get_mc_choices(question, choices, answer):
+    """ Given a question and a choice for the variable inputs, get the multiple choice options.
+        Input: question (MarkedQuestion)
+               choices  (String) corresponding to the concrete choices for the v[0],...,v[n]
+               answer   (String) to concatenate to the choices list
+        Output: A list of strings with numeric values. For example ['13', '24', '52.3', 'None of the above']
+    """
+    split_choices = choices.split(';')
+    mc_choices = []
+    for part in eval(question.mc_choices):
+        try:
+            if re.findall(r'{v\[\d+\]}', part):
+                eval_string = part.format(v=split_choices)
+            else:
+                eval_string = part
+            value = round(simple_eval(eval_string, functions=settings.PREDEFINED_FUNCTIONS,names=settings.UNIVERSAL_CONSTANTS),4)
+            mc_choices.append(str(value))
+        except: #If not an exectuable string, then it must be a hardcoded answer
+            mc_choices.append(part)
+
+    mc_choices.append(str(answer))
+    random.shuffle(mc_choices)
+
+    # Now shuffle them.
+    return mc_choices
 
 def parse_abstract_choice(abstract_choice):
     """ Parses an abstract choice into a concrete choice. Expects a single choice input. Currently can
@@ -1200,11 +1248,16 @@ def get_answer(question, choices):
         functions.update(settings.PREDEFINED_FUNCTIONS)
 
         return simple_eval(eval_string, functions=functions, names=settings.UNIVERSAL_CONSTANTS)
-    except Exception as e:
-        raise e
+    except (SyntaxError, NameNotDefined,) as e:
+        # Enter this exception if the answer is not one that can be evaluated.
+        # In that case, the answer is just the answer
+        if question.q_type == "MC":
+            return answer
+        else:
+            raise e
 
-def gobble_vars(*args):
-    return 1
+    except Exception as e: 
+        raise e
 
 @login_required
 def display_question(request, sqrpk, submit=None):
@@ -1218,6 +1271,7 @@ def display_question(request, sqrpk, submit=None):
     sqr = StudentQuizResult.objects.select_related('quiz').get(pk=sqrpk)
     string_answer = ''
     error_message = ''
+    mc_choices = None
     # Start by doing some validation to make sure only the correct student has access to this page
     if sqr.student != request.user:
         return HttpResponseForbidden()
@@ -1233,10 +1287,14 @@ def display_question(request, sqrpk, submit=None):
                         'result_table': result_table,
                     })
 
-        # result[qnum] has fields (MarkedQuestion) pk, inputs, and score, 
+        # result[qnum] has fields (MarkedQuestion) pk, inputs, score, type, (mc_choices)
         question = MarkedQuestion.objects.get(pk=int(result[qnum]['pk']))
         choices  = result[qnum]['inputs']
         q_string = get_return_string(question, choices)
+        
+        if result[qnum]['type'] == "MC":
+            mc_choices = result[qnum]['mc_choices']
+
     else: # We need to mark the question and generate the next question
 
         if request.method == "GET": # Refreshed the page/sorted the table
@@ -1251,6 +1309,7 @@ def display_question(request, sqrpk, submit=None):
         try:
             string_answer = request.POST['answer'] #string input
             is_last       = mark_question(sqr, string_answer)
+
             if not is_last: # There are more questions, so make the next one
                 q_string = generate_next_question(sqr)
                 string_answer = ''
@@ -1261,9 +1320,20 @@ def display_question(request, sqrpk, submit=None):
                         {   'sqr': sqr,
                             'result_table': result_table,
                         })
+                        
+#            # For MC, this is ajax, so check
+#            if request.is_ajax():
+#                if not is_last:
+#                    return_data = {'next_url': reverse('display_question', args=(sqrpk,))}
+#                else:
+#                    return_data = 
+#                return HttpResponse(json.dumps(return_data))
+
 
         except ValueError as e:
             error_message = "The expression '{}' did not parse to a valid mathematical expression. Please try again".format(string_answer)
+            # Technically if we get here, we do not have the mc_choices to return if it was a multiple choice
+            # question; however, this should never happen as it should be impossible to pass a bad input with mc
 
     return render(request, 'Problems/display_question.html', 
             {'sqr': sqr,
@@ -1271,6 +1341,7 @@ def display_question(request, sqrpk, submit=None):
              'sqrpk': sqrpk,
              'error_message': error_message,
              'string_answer': string_answer,
+             'mc_choices': mc_choices,
              })
 
 def get_result_table(result):

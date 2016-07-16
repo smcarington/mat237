@@ -136,7 +136,10 @@ $(document).ready(function() {
         $('form').submit();
     });
 
-    $("#id_mc_choices").prop("disabled", true);
+
+    if ($("#id_q_type option:selected").text() != "Multiple Choice") {
+        $("#id_mc_choices").prop("disabled", true);
+    }
 
     $("#id_q_type").change( function() {
         if ($(this).find("option:selected").text() == 'Multiple Choice') {

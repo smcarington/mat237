@@ -6,6 +6,7 @@
     Has context {{sqrpk}} which is an integer corresponding to the StudentQuizRecord primary key
     Has context {{error_message}} which is a String with an error
     Has context {{string_answer}} which is a String with the original answer, if error-returned
+    Has context {{mc_choices}} which is a list of strings with multiple choice answers
 {% endcomment %}
 
 {% block title %}
@@ -14,17 +15,30 @@
 
 {% block content %}
     <h1>{{sqr.quiz.name}}: Question {{sqr.cur_quest}}</h1>
-
-    <form method="POST" action="{% url 'display_question' sqrpk=sqrpk submit='submit'%}">{% csrf_token %}
-        <div class="diff quiz-divs question-detail">
-            {{question}}
-            <input type="hidden" value="{{question}}" name="problem">
+   
+    {% if mc_choices %} {# We'll let ajax handle multiple choice #}
+        <div class="diff quiz-divs question-detail" data-id="{{question}}">
+            {{question | safe}}
         </div>
+        <div class="diff multiplechoice">
+        {% for mc_choice in mc_choices %}
+            <button class="btn btn-primary quiz_mc" data-id="{{mc_choice}}">{{forloop.counter}}</button> 
+            <p>{{mc_choice}}</p> 
+            <br>
+        {% endfor %}
+        </div>
+    {% else %}
+        <form method="POST" action="{% url 'display_question' sqrpk=sqrpk submit='submit'%}">{% csrf_token %}
+            <div class="diff quiz-divs question-detail">
+                {{question | safe}}
+                <input type="hidden" value="{{question}}" name="problem">
+            </div>
 
-        <p class="warning"> {{error_message|safe}}</p>
-        <label>Your answer: </label> <input type="text" size="50" name="answer" value="{{string_answer}}">
-        <input class="btn btn-default" type="submit" value="Submit" />
-    </form>
+            <p class="warning"> {{error_message|safe}}</p>
+            <label>Your answer: </label> <input type="text" size="50" name="answer" value="{{string_answer}}">
+            <input class="btn btn-default" type="submit" value="Submit" />
+        </form>
+    {% endif %}
 {% endblock %}
 
 {% block sidenote %}
@@ -35,5 +49,24 @@
      <li>You may use the functions \(\sin, \cos,\tan, \ln\) in your answer.
      <li>You may use the constants pi and e for  \(\pi\)  and \(e\).
  </ul>
+{% endblock %}
 
+{% block script %}
+    <script>
+    $('document').ready( function() {
+        $('.quiz_mc').click( function() {
+            answer = $(this).attr('data-id');
+            problem = $(".question-detail").attr("data-id");
+            $.post("{% url 'display_question' sqrpk=sqrpk submit='submit'%}", 
+                {answer: answer,
+                 problem: problem,
+                }, 
+                function(data) {
+                    document.write(data),
+                    renderMathInElement( $(".diff")[0] );
+                }, 
+            "text");
+        });
+    });
+    </script>
 {% endblock %}
