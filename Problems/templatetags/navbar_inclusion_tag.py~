@@ -42,6 +42,7 @@ def to_percent(num, den):
 
 @register.simple_tag
 def score_div(num, den):
+    import pdb; pdb.set_trace()
     div_str = '<div class="{cl}" style="width: {widthperc}%; margin-left:30px">{perc}% <small>({num_votes} votes)</small></div>'
 
     if den == 0:

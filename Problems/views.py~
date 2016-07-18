@@ -6,6 +6,7 @@ from django.contrib.auth.views import password_change
 from django.http import HttpResponse, Http404, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_protect
 from django.core.mail import send_mail, EmailMessage
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.db.models import Max
@@ -15,6 +16,7 @@ import subprocess
 import os
 import re
 import itertools
+import math
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, StudentVote
@@ -788,7 +790,7 @@ def who_voted(request, questionpk, poll_num):
 
     return render(request, 'Problems/who_voted.html', 
             {
-                'list': student_list,
+                'list': student_votes,
             })
 
 ## ----------------- HISTORY ----------------------- ## 
@@ -806,3 +808,55 @@ def upload_file(request):
     else:
         form = LinkedDocumentForm()
         return render(request, 'Problems/edit_announcement.html', {'form' : form})
+
+## ------------------ ENTROPY ---------------------- ##
+
+@staff_required()
+def dump_polls(request):
+    """ Private view for seeing all polls, ordered according to their Shannon entropy"""
+    
+    all_poll_questions = PollQuestion.objects.all()
+    
+    # Create a list, each of whose element is a dictionary containing the problem statement and the choices.
+    # We will later sort this last based on the Shannon entropy of each pairing
+    ret_polls = []
+    for question in all_poll_questions:
+        for cur_poll_num in range(question.num_poll):
+            this_poll_choices = question.pollchoice_set.filter(cur_poll=int(cur_poll_num))
+
+            if len(this_poll_choices) == 0:
+                continue
+
+            total_votes = sum(this_poll_choices.values_list('num_votes', flat=True))
+            temp_dict = {'question_statement': question.text,
+                         'choices': this_poll_choices,
+                         'votes': total_votes,
+                        }
+            ret_polls.append(temp_dict)
+    ret_polls = sorted(ret_polls, key=lambda choice: compute_entropy(choice),reverse=True)
+    
+    paginator = Paginator(ret_polls, 50)
+    page = request.GET.get('page')
+    try:
+        polls = paginator.page(page)
+    except PageNotAnInteger:
+        polls = paginator.page(1)
+    except EmptyPage:
+        polls = paginator.page(paginator.num_pages)
+
+    return render(request, 'Problems/dump_polls.html',
+            {'polls': polls}
+            )
+
+def compute_entropy(question_dictionary):
+    """ Takes a dictionary element from 'dump_polls' and computes its Shannon Entropy """
+    choices     = question_dictionary['choices']
+    total_votes = sum(choices.values_list('num_votes', flat=True))
+        
+    entropy = 0;
+    for choice in choices:
+        if choice.num_votes != 0:
+            norm_prob = float(choice.num_votes)/float(total_votes)
+            entropy  -= norm_prob*math.log(norm_prob,2)
+
+    return entropy
