@@ -17,6 +17,7 @@ import os
 import re
 import itertools
 import math
+from operator import attrgetter
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, StudentVote
@@ -821,7 +822,7 @@ def dump_polls(request):
     # We will later sort this last based on the Shannon entropy of each pairing
     ret_polls = []
     for question in all_poll_questions:
-        for cur_poll_num in range(question.num_poll):
+        for cur_poll_num in range(1,question.num_poll+1):
             this_poll_choices = question.pollchoice_set.filter(cur_poll=int(cur_poll_num))
 
             if len(this_poll_choices) == 0:
@@ -831,9 +832,13 @@ def dump_polls(request):
             temp_dict = {'question_statement': question.text,
                          'choices': this_poll_choices,
                          'votes': total_votes,
+                         'poll_question': question,
                         }
+            entropy = compute_entropy(temp_dict)
+            temp_dict.update({'entropy': entropy})
             ret_polls.append(temp_dict)
-    ret_polls = sorted(ret_polls, key=lambda choice: compute_entropy(choice),reverse=True)
+
+    ret_polls = sorted(ret_polls, key= lambda choice: compute_entropy(choice) , reverse=True)
     
     paginator = Paginator(ret_polls, 50)
     page = request.GET.get('page')

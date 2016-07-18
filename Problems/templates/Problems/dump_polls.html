@@ -13,6 +13,7 @@
     <div class="diff question-detail live-poll">
         {{poll.question_statement | safe}}
     </div>
+    <p> <b>Entropy:</b> {{poll.entropy}}, <b>Poll: </b> {{poll.poll_question.poll.title}} </p>
     <ul>
         {% for choice in poll.choices %}
             <dt class="diff">{{choice.text}}</dt>
