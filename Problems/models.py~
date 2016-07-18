@@ -193,7 +193,12 @@ class PollQuestion(models.Model):
         return 1
 
     def __str__(self):
-        return "Poll {number}: {text}".format(number=self.poll.pk, text=self.text[0:20])
+        try:
+            return "Poll {number}: {text}".format(number=self.poll.pk, text=self.text[0:20])
+        except Exception as e:
+            import pdb; pdb.set_trace()
+            return "Error"
+
 
 class PollChoice(models.Model):
     question  = models.ForeignKey(PollQuestion)

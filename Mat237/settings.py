@@ -83,7 +83,7 @@ WSGI_APPLICATION = 'Mat237.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
-if socket.gethostname() == 'dobox':
+if socket.gethostname() == 'dobox' or socket.gethostname() == 'TyLaptop' :
     with open('/etc/dbpasswd.txt') as f:
         dbpasswd = f.read().strip()
 

@@ -11,7 +11,7 @@ class ProblemSet(models.Model):
     title   = models.CharField(max_length=20)
     visible = models.BooleanField(default=True)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title;
 
 class Question(models.Model):
@@ -28,7 +28,7 @@ class Question(models.Model):
     solved      = models.IntegerField(default=0)
     stud_diff   = models.IntegerField(default=1)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.text[0:20]
 
 class QuestionStatus(models.Model):
@@ -99,18 +99,18 @@ class Announcement(models.Model):
             </div>
         """.format(extra=stclass, title=sticktitle, date=timezone.localtime(self.published_date).strftime("%A, %B %d, %I:%M%p"), text=self.text, author=full_name)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
 class Poll(models.Model):
     title = models.CharField(max_length=200)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.title
 
 class PollQuestion(models.Model):
     poll     = models.ForeignKey(Poll)
-    text     = models.TextField(blank=True,null=True)
+    text     = models.TextField(blank=True)
     live     = models.BooleanField(default=False)
     num_poll = models.IntegerField(default=1)
     visible  = models.BooleanField(default=False)
@@ -192,8 +192,13 @@ class PollQuestion(models.Model):
 
         return 1
 
-    def __unicode__(self):
-        return "Poll {number}: {text}".format(number=self.poll.pk, text=self.text[0:20])
+    def __str__(self):
+        try:
+            return "Poll {number}: {text}".format(number=self.poll.pk, text=self.text[0:20])
+        except Exception as e:
+            import pdb; pdb.set_trace()
+            return "Error"
+
 
 class PollChoice(models.Model):
     question  = models.ForeignKey(PollQuestion)
@@ -215,7 +220,7 @@ class PollChoice(models.Model):
             self.num_votes = self.num_votes-1
             self.save()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.text
 
 class StudentVote(models.Model):
@@ -246,7 +251,7 @@ class StudentVote(models.Model):
         self.save()
         new_vote.add_vote()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.student.username + ' vote '
 
 # User uploads go to a special file in MEDIA_ROOT
@@ -256,7 +261,7 @@ def content_file_name(instance, filename):
 class DocumentCategory(models.Model):
     cat_name = models.CharField(max_length=100)
 
-    def __unicode__(self):
+    def __str__(self):
         return self.cat_name
 
 class LinkedDocument(models.Model):
@@ -265,5 +270,5 @@ class LinkedDocument(models.Model):
     user      = models.ForeignKey(User)
     doc_file  = models.FileField()
 
-    def __unicode__(self):
+    def __str__(self):
         return self.user.username + ' ' + self.doc_file.name
