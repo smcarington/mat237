@@ -179,7 +179,6 @@ class QuizParserTest(TestCase):
         sqr.refresh_from_db()
         self.assertEqual(sqr.score, 1)
 
-
         # Enter the question and submit the correct answer
 
 
