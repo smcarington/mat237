@@ -1,0 +1,99 @@
+[
+{
+    "model": "Problems.quiz",
+    "pk": 1,
+    "fields": {
+        "name": "Quiz 1",
+        "tries": 9,
+        "live": "2016-07-01T04:00:00Z",
+        "expires": "2016-07-31T04:00:00Z",
+        "out_of": 3
+    }
+},
+{
+    "model": "Problems.quiz",
+    "pk": 2,
+    "fields": {
+        "name": "Quiz 2",
+        "tries": 0,
+        "live": "2016-07-01T04:00:00Z",
+        "expires": "2016-07-31T04:00:00Z",
+        "out_of": 1
+    }
+},
+{
+    "model": "Problems.markedquestion",
+    "pk": 12,
+    "fields": {
+        "quiz": 1,
+        "category": 1,
+        "problem_str": "Find the critical point of \\( {v[0]}x^2 + {v[1]}x + {v[2]}\\)",
+        "choices": "14; rand(0,100); uni(0,1,2)",
+        "num_vars": 3,
+        "answer": "-{v[1]}/(2*{v[0]})",
+        "functions": "{}",
+        "q_type": "D",
+        "mc_choices": "{}"
+    }
+},
+{
+    "model": "Problems.markedquestion",
+    "pk": 14,
+    "fields": {
+        "quiz": 1,
+        "category": 1,
+        "problem_str": "Find the max of \\(\\{{ {v[0]}, {v[1]} \\}}\\).",
+        "choices": "rand(-15,15); rand(-30,30)",
+        "num_vars": 2,
+        "answer": "m({v[0]}, {v[1]})",
+        "functions": "{'m': lambda x,y: max(x,y)}",
+        "q_type": "D",
+        "mc_choices": "{}"
+    }
+},
+{
+    "model": "Problems.markedquestion",
+    "pk": 19,
+    "fields": {
+        "quiz": 1,
+        "category": 2,
+        "problem_str": "Determine the value of \\( \\displaystyle \\int_{{ {v[0]} }}^{{ {v[1]} }} x \\ \\mathrm dx \\)",
+        "choices": "rand(-10,0); rand(1,10)",
+        "num_vars": 2,
+        "answer": "({v[1]}**2 - {v[0]}**2)/2",
+        "functions": "{}",
+        "q_type": "D",
+        "mc_choices": "{}"
+    }
+},
+{
+    "model": "Problems.markedquestion",
+    "pk": 21,
+    "fields": {
+        "quiz": 1,
+        "category": 2,
+        "problem_str": "What is \\( f'(0) \\) if \\( f(x) = e^{{ {v[0]} x }} \\)?",
+        "choices": "uni(-100,100,1)",
+        "num_vars": 0,
+        "answer": "{v[0]}",
+        "functions": "{}",
+        "q_type": "D",
+        "mc_choices": ""
+    }
+},
+{
+    "model": "Problems.markedquestion",
+    "pk": 22,
+    "fields": {
+        "quiz": 1,
+        "category": 3,
+        "problem_str": "What is the limit \\( \\displaystyle \\lim_{{x\\to 0}} \\frac{{ \\sin({v[0]}x) }}{{ {v[1]}x }} \\)?",
+        "choices": "rand(1,100); rand(1,100)",
+        "num_vars": 2,
+        "answer": "{v[0]}/{v[1]}",
+        "functions": "{}",
+        "q_type": "MC",
+        "mc_choices": "rand(1,10);1/({v[0]}*{v[1]});{v[1]}/{v[0]}"
+    }
+}
+]

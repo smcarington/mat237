@@ -68,7 +68,15 @@ $(document).ready(function() {
     });
 
     // adds a datepicker jquery ui element to dates
-    $('#id_expires').datepicker()
+    //$('#id_expires').datepicker()
+    //$('#id_live').datepicker()
+    jQuery('#id_expires').datetimepicker(
+            { format:'Y-m-d H:i',
+            });
+    jQuery('#id_live').datetimepicker(
+            { format:'Y-m-d H:i',
+            });
+    
 
     // gets old announcements and inserts them into the page
     $('#get_old').click( function() {
@@ -122,5 +130,22 @@ $(document).ready(function() {
         "json");
     });
 
-});
+    $('span.choice-remove').click( function() {
+        data_id = $(this).attr('data-id');
+        $('[data-id='+data_id+']').remove();
+        $('form').submit();
+    });
 
+
+    if ($("#id_q_type option:selected").text() != "Multiple Choice") {
+        $("#id_mc_choices").prop("disabled", true);
+    }
+
+    $("#id_q_type").change( function() {
+        if ($(this).find("option:selected").text() == 'Multiple Choice') {
+            $("#id_mc_choices").prop('disabled', false);
+        } else {
+            $("#id_mc_choices").prop('disabled', true);
+        }
+    });
+});

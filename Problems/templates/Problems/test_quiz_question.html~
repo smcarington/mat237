@@ -1,0 +1,44 @@
+{% extends 'Problems/base.html' %}
+
+{% comment %}
+    Has context {{mquestion}}, a MarkedQuestion element
+{% endcomment%}
+
+{% block title %}
+    <title>Test Question-Mat237!</title>
+{% endblock %}
+
+{% block content %}
+    <h1>Test Question</h1>
+        <a href="{% url 'quiz_admin' quizpk=mquestion.quiz.pk %}">&#171; Return to Quiz Administration</a>
+   
+    <form method="POST"> {% csrf_token %}
+        <input id="num_tests" name="num_tests" value="100" type="number">
+        <input id="submit" type="submit" value="Run Test">
+    </form>
+
+    <div id="test_results">
+
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(document).ready( function() {
+            $('#submit').click( function(event) {
+                event.preventDefault()
+                value =  $("#num_tests").val();
+                $.post('/quiz/test/'+{{mquestion.pk}}+'/', 
+                    {'num_tests': value},
+                    function (data) {
+                        $("#test_results").html(data);
+                        renderMathInElement( $("#test_results"));
+                    },
+                    'html');
+            });
+        });
+    </script>
+
+{% endblock %}
+
+

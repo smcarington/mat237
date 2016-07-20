@@ -1,8 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.db.models import Max
 
 from datetime import timedelta
+
+import re
+import json
+import random
 
 # Problem sets and questions. Note that questions should be
 # Many2One.
@@ -54,7 +59,7 @@ class Announcement(models.Model):
     created_date   = models.DateTimeField(default=get_localtime)
     published_date = models.DateTimeField(
                         blank=True, null=True)
-    expires        = models.DateField(blank=True, null=True, default=timezone.now()+timedelta(days=21))
+    expires        = models.DateField(blank=True, null=True, default=timezone.now()+timedelta(days=7))
 
     def publish(self):
         self.published_date = timezone.now()
@@ -272,3 +277,157 @@ class LinkedDocument(models.Model):
 
     def __str__(self):
         return self.user.username + ' ' + self.doc_file.name
+
+class Quiz(models.Model):
+    name    = models.CharField("Name", max_length=200)
+    # Number of tries a student is allowed. A value of category=0 is equivalent to infinity.
+    tries   = models.IntegerField("Tries", default=0)
+    live    = models.DateTimeField("Live on")
+    expires = models.DateTimeField("Expires on")
+    out_of  = models.IntegerField("Points", default=1)
+
+    class Meta:
+        verbose_name = "Quiz"
+        verbose_name_plural = "Quizzes"
+
+    # Determines how many questions are in the current quiz.
+    def update_out_of(self):
+        # Important to base this on the max category, rather than number of questions
+        if not self.out_of: # New quiz, so markedquestion_set is empty
+            self.out_of = 0
+        self.out_of = self.markedquestion_set.aggregate(Max('category'))['category__max']
+        self.save()
+
+    def get_random_question(self, category):
+        """ Returns a random question with foreign key (self) and the given category
+            Input: category (integer) - the category to take from
+            Output: (MarkedQuestion) object
+        """
+        
+        return random.choice(self.markedquestion_set.filter(category=category))
+
+    def __str__(self):
+        return self.name
+
+class MarkedQuestion(models.Model):
+    quiz        = models.ForeignKey("Quiz", Quiz, null=True)
+    # Keeps track of the global category, so that multiple questions can be used
+    category    = models.IntegerField("Category", default=1)
+    problem_str = models.TextField("Problem")
+    choices     = models.TextField("Choices", null=True)
+    num_vars    = models.IntegerField(null=True)
+    answer      = models.TextField("Answer")
+    functions   = models.TextField("Functions", default='{}')
+    # Allows for multiple kinds of questions
+    QUESTION_CHOICES = ( 
+            ('D', 'Direct Entry'),
+            ('MC', 'Multiple Choice'),
+            ('TF', 'True/False'),
+        )
+
+    q_type      = models.CharField("Question Type",
+                    max_length=2, 
+                    choices=QUESTION_CHOICES,
+                    default='D',
+                  )
+    mc_choices = models.TextField("Multiple Choice", default ='[]', blank=True)
+
+    class Meta:
+        ordering = ['quiz', 'category']
+        verbose_name = "Marked Question"
+
+    def update(self, quiz):
+        """ Updates the quiz to which this belongs, and updates that quiz's attributes as well
+        """
+        self.quiz = quiz
+        self.num_vars = len(re.findall(r'{v\[\d+\]}', self.problem_str))
+        self.save()
+        quiz.update_out_of()
+
+    def get_random_choice(self):
+        """ Returns a random choice"""
+        return random.choice(self.choices.split(':'))
+
+    def __str__(self):
+        return self.problem_str
+
+
+class StudentQuizResult(models.Model):
+    student   = models.ForeignKey(User)
+    quiz      = models.ForeignKey(Quiz)
+    attempt   = models.IntegerField(null=True, default=1) #track which attempt this is
+    #track which question the student is on if they leave. If cur_question = 0 then completed
+    cur_quest = models.IntegerField(null=True, default=1) 
+
+    # The result is a json string which serializes the question data. For example
+    # result = {
+    #           '1': {
+    #                   'pk': '13',
+    #                   'inputs': '1;2;3', 
+    #                   'score': '0',
+    #                   'answer': 22.3,
+    #                   'guess_string': '-22.3*cos(pi)',
+    #                   'guess': 15.7,
+    #                   'type': 'D',
+    #                 },
+    #           '2': {
+    #                   'pk: '52'
+    #                   'inputs': '8;-2', 
+    #                   'score': '1',
+    #                   'answer': 3.226,
+    #                   'guess': '3.226',
+    #                   'guess_string': '3.226',
+    #                   'type': 'MC',
+    #                   'mc_choices': ['3.226', '14', '23', '5.22'],
+    #                 },
+    #          }
+    #          Indicates that the first question is a MarkedQuestion with pk=13, the inputs to
+    #          this question were v=[1,2,3], and the student got the question wrong with a guess of 15.7
+    result  = models.TextField(default='{}')
+    score   = models.IntegerField(null=True)
+
+    class Meta:
+        verbose_name = "Quiz Result"
+
+    def update_score(self):
+        """ Adds one to the overall score """
+        self.score += 1
+        self.save()
+
+    def update_result(self, result):
+        """ Takes a python dictionary, serializes it, and stores it in the result column.
+            Input: result (dict) - the python dictionary.
+            Output: Void
+        """
+        self.result = json.dumps(result)
+        self.save()
+
+    def get_result(self):
+        """ Returns a python dictionary with the student quiz results
+            Input: None
+            Output: result (dict) - The python dictionay of results
+                    attempt (string) - The current attempt, as a string to access in result
+        """
+        result = json.loads(self.result)
+        attempt = str(self.cur_quest)
+        return result, attempt
+
+    def add_question_number(self):
+        """ Adds one to the cur_quest field. However, checks if we have surpassed the last question,
+            and if so sets cur_quest to 0.
+            Input: None
+            Output: is_last (Boolean) - indicated whether the cur_quest field has been set to 0
+        """
+        num_quests = self.quiz.out_of
+        if self.cur_quest == num_quests:
+            is_last = True
+            self.cur_quest = 0
+        else:
+            is_last = False
+            self.cur_quest += 1
+        self.save()
+        
+        return is_last
+
+    def __str__(self):
+        return self.student.username + " - " + self.quiz.name + " - Attempt: " + str(self.attempt)

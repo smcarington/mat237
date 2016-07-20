@@ -20,6 +20,11 @@ h1 a {
     padding-left: 20px;
 }
 
+h4 {
+    margin-top: 20px;
+    text-decoration: underline;
+}
+
 .top-menu, .top-menu:hover, .top-menu:visited {
     color: #000000;
     float: right;
@@ -323,6 +328,14 @@ ul li a {
     font-size:10pt;
 }
 
+/*.poll-title a {
+    font-size: 12pt;
+}*/
+
+.font12 {
+    font-size: 12pt;
+}
+
 .multiplechoice, .multiplechoice button, .multiplechoice p {
     display: inline-block;
     min-width: 50px;
@@ -414,7 +427,56 @@ dd {
     background-color: #e6e6e6;
 }
 
-@media (max-width: 1100px) {
+.quiz-divs {
+    margin: 20px 0 40px 20px;
+    font-family: 'Source Sans Pro';
+}
+
+.quiz-link {
+    font-size: 13pt;
+}
+
+label.diff {
+    display: inline-block;
+    width: 200px;
+    text-align: left;
+}
+
+#quiz_start {
+    position: absolute;
+    left: 10%;
+}
+
+#quiz_start h1 {
+    font-size: 40pt;
+    font-family: Geneva, Times, Georgia, serif; 
+    margin-bottom: 50px;
+}
+
+#quiz_start span {
+    font-size: 20pt
+}
+
+#quiz_start ul {
+    font-size: 15pt;
+    padding-left: 20%;
+}
+
+#quiz_start a {
+    margin-left: 50%;
+    font-size: 20pt;
+}
+
+#quiz_start ul li {
+    padding: 10px 0 10px 0;
+}
+
+.quiz_end {
+    margin: 30px 0 30px 30px;
+}
+
+
+@media (max-width: 1200px) {
    .navbar-header {
        float: none;
    }
