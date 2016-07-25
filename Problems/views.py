@@ -555,7 +555,11 @@ def query_live(request):
 
         # Get or create a StudentVote object
         # In particular, check to see if the student has voted in the current poll.
-        svote, created = StudentVote.objects.get_or_create(student=request.user, cur_poll = choice.cur_poll, question=choice.question)
+        # Note that there is the potential here for race conditions
+        try:
+            svote, created = StudentVote.objects.get_or_create(student=request.user, cur_poll = choice.cur_poll, question=choice.question)
+        except IntegrityError as dberror:
+            return HttpResponse('<h2>You have attempted to submit multiple votes</h2>')
 
         if created: # First vote
             svote.choice = choice;

@@ -115,7 +115,7 @@ class Poll(models.Model):
 
 class PollQuestion(models.Model):
     poll     = models.ForeignKey(Poll)
-    text     = models.TextField(blank=True,null=True)
+    text     = models.TextField(blank=True)
     live     = models.BooleanField(default=False)
     num_poll = models.IntegerField(default=1)
     visible  = models.BooleanField(default=False)
@@ -234,6 +234,9 @@ class StudentVote(models.Model):
     vote     = models.ForeignKey(PollChoice, related_name="votes", null=True)
     cur_poll = models.IntegerField(default=1)
 
+    class Meta:
+        unique_together = ('student', 'question', 'cur_poll')
+
     def add_choice(self, choice):
         """ In a new vote, and the choice, save it, and increment the PollChoice object
             Input: vote (PollChoice) - The choice to add to the StudentVote element
@@ -293,9 +296,9 @@ class Quiz(models.Model):
     # Determines how many questions are in the current quiz.
     def update_out_of(self):
         # Important to base this on the max category, rather than number of questions
+        self.out_of = self.markedquestion_set.aggregate(Max('category'))['category__max']
         if not self.out_of: # New quiz, so markedquestion_set is empty
             self.out_of = 0
-        self.out_of = self.markedquestion_set.aggregate(Max('category'))['category__max']
         self.save()
 
     def get_random_question(self, category):
