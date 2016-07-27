@@ -10,6 +10,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.conf import settings
 from django.db.models import Max
+from django.db import IntegrityError
 
 from django_tables2 import RequestConfig
 
