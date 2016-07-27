@@ -1535,3 +1535,7 @@ def render_html_for_question(problem, answer, choice, mc_choices):
         template +="</ul>\n"
 
     return template
+
+# -------------------- Student Note ----------------------- #
+
+

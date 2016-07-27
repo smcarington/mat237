@@ -272,14 +272,26 @@ class DocumentCategory(models.Model):
     def __str__(self):
         return self.cat_name
 
-class LinkedDocument(models.Model):
+class UserDocument(models.Model):
+    user     = models.ForeignKey(User)
+    doc_file = models.FileField()
+
+    class Meta:
+        abstract = True
+
+class LinkedDocument(UserDocument):
     link_name = models.CharField(max_length=200)
     category  = models.ForeignKey(DocumentCategory, null=True, related_name="docs")
-    user      = models.ForeignKey(User)
-    doc_file  = models.FileField()
 
     def __str__(self):
-        return self.user.username + ' ' + self.doc_file.name
+        return "Public link. Uploaded: " + self.user.username + ' Doc Name: ' + self.doc_file.name
+
+class StudentDocument(UserDocument):
+    exemption = models.CharField(max_length=200)
+    accepted = models.BooleanField(default=False)
+
+    def __str__(self):
+        return "Student Note. Uploaded by: " + self.user.username + ', For:' + self.exemption
 
 class Quiz(models.Model):
     name    = models.CharField("Name", max_length=200)
