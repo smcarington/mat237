@@ -178,3 +178,5 @@ PREDEFINED_FUNCTIONS = {"sin": lambda x: math.sin(x),
                         "uni": lambda x,y,z: round(random.uniform(x,y),z),
                         "gobble": lambda *args: 1,
                         }
+
+NOTE_ROOT = '/notes/'

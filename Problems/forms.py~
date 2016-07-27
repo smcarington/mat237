@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import IntegerField
-from .models import Announcement, Question, ProblemSet, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion
+from .models import Announcement, Question, ProblemSet, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentDocument
 from django.contrib.admin import widgets
 
 class AnnouncementForm(forms.ModelForm):
@@ -44,6 +44,11 @@ class QuizForm(forms.ModelForm):
     class Meta:
         model = Quiz
         exclude = ['out_of']
+
+class StudentDocumentForm(forms.ModelForm):
+    class Meta:
+        model = StudentDocument
+        exclude = ['user', 'accepted']
 
 class MarkedQuestionForm(forms.ModelForm):
 #    category = IntegerField(min_value=1, initial=1)

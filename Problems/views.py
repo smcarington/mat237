@@ -23,8 +23,8 @@ import math
 from operator import attrgetter
 
 from django.contrib.auth.models import User
-from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, StudentVote
-from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm
+from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, StudentVote, StudentDocument
+from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, StudentDocumentForm
 import random
 import math
 from simpleeval import simple_eval, NameNotDefined
@@ -1538,4 +1538,35 @@ def render_html_for_question(problem, answer, choice, mc_choices):
 
 # -------------------- Student Note ----------------------- #
 
+def upload_student_note(request):
+    """ Handles student note uploads. Both new note and editing.
+    """
 
+    redirect_location = reverse('administrative')
+    if request.method == "POST":
+        form = StudentDocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            file_item = form.save(commit=False)
+            file_item.update_user(request.user)
+            success_string = "File successfully uploaded."
+            redirect_string   = '<a href="{url}">Click to continue.</a>'.format(url=redirect_location)
+            return render(request, 'Problems/success.html', 
+                    {'success_string': success_string, 
+                     'redirect_string': redirect_string
+                    })
+    else:
+        form = StudentDocumentForm()
+        
+    return render(request, 'Problems/edit_announcement.html', {'form' : form})
+
+@login_required
+def see_notes(request):
+    """ Initial view for a student to see their notes.
+    """
+    
+    student = request.user
+    notes   = StudentDocument.objects.filter(user=student)
+
+    return render(request, 'Problems/see_notes.html',
+            {'notes': notes
+            })

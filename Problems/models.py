@@ -2,12 +2,15 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db.models import Max
+from django.conf import settings
 
 from datetime import timedelta
 
 import re
 import json
 import random
+
+from .validators import FileValidator
 
 # Problem sets and questions. Note that questions should be
 # Many2One.
@@ -273,9 +276,15 @@ class DocumentCategory(models.Model):
         return self.cat_name
 
 class UserDocument(models.Model):
-    user     = models.ForeignKey(User)
-    doc_file = models.FileField()
-
+    user     = models.ForeignKey(User, related_name="%(app_label)s_%(class)s_related")
+    validate_file = FileValidator(max_size=1024*500, 
+                                  content_types=('application/xml',
+                                                 'image/jpeg',
+                                                 'image/png',)
+                                 )
+    doc_file = models.FileField(upload_to=settings.NOTE_ROOT,
+                                validators=[validate_file]
+                               )
     class Meta:
         abstract = True
 
@@ -292,6 +301,11 @@ class StudentDocument(UserDocument):
 
     def __str__(self):
         return "Student Note. Uploaded by: " + self.user.username + ', For:' + self.exemption
+
+    def update_user(self, user):
+        self.user = user
+        self.save()
+
 
 class Quiz(models.Model):
     name    = models.CharField("Name", max_length=200)
