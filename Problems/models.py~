@@ -59,7 +59,7 @@ class Announcement(models.Model):
     created_date   = models.DateTimeField(default=get_localtime)
     published_date = models.DateTimeField(
                         blank=True, null=True)
-    expires        = models.DateField(blank=True, null=True, default=timezone.now()+timedelta(days=7))
+    expires        = models.DateField(blank=True, null=True, default=lambda:timezone.now()+timedelta(days=7))
 
     def publish(self):
         self.published_date = timezone.now()

@@ -9,7 +9,7 @@ class AnnouncementForm(forms.ModelForm):
         fields = ('title', 'text', 'stickied', 'expires')
         help_texts = {
             'text': 'Format using HTML.',
-            'expires': 'Default is 3 weeks',
+            'expires': 'Default is 1 week.',
         }
 
 class QuestionForm(forms.ModelForm):
