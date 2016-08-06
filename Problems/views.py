@@ -21,6 +21,7 @@ import re
 import itertools
 import math
 from operator import attrgetter
+from sendfile import sendfile
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, StudentVote, StudentDocument
@@ -32,7 +33,7 @@ from simpleeval import simple_eval, NameNotDefined
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult
 from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, QuizForm, MarkedQuestionForm
-from .tables import MarkedQuestionTable, AllQuizTable, QuizResultTable, SQRTable
+from .tables import MarkedQuestionTable, AllQuizTable, QuizResultTable, SQRTable, NotesTable
 
 # Create your views here.
 
@@ -202,12 +203,9 @@ def notes(request):
     cat_names = docs.values_list('category__cat_name', flat=True).distinct()
     return render(request, 'Problems/notes.html', {'docs':docs, 'cats':cat_names})
 
-@staff_required()
+@login_required
 def administrative(request):
-    if request.user.is_staff:
         return render(request, 'Problems/administrative.html')
-    else:
-        return HttpResponseForbidden()
 
 @login_required
 def list_problem_set(request, pk):
@@ -1538,18 +1536,19 @@ def render_html_for_question(problem, answer, choice, mc_choices):
 
 # -------------------- Student Note ----------------------- #
 
+@login_required
 def upload_student_note(request):
     """ Handles student note uploads. Both new note and editing.
     """
 
-    redirect_location = reverse('administrative')
     if request.method == "POST":
         form = StudentDocumentForm(request.POST, request.FILES)
         if form.is_valid():
             file_item = form.save(commit=False)
             file_item.update_user(request.user)
             success_string = "File successfully uploaded."
-            redirect_string   = '<a href="{url}">Click to continue.</a>'.format(url=redirect_location)
+            redirect_location = reverse('get_note', args=(file_item.doc_file.name,))
+            redirect_string   = '<a href="{url}">Click to verify upload.</a>'.format(url=redirect_location)
             return render(request, 'Problems/success.html', 
                     {'success_string': success_string, 
                      'redirect_string': redirect_string
@@ -1561,12 +1560,30 @@ def upload_student_note(request):
 
 @login_required
 def see_notes(request):
-    """ Initial view for a student to see their notes.
+    user = request.user
+
+    note_table = NotesTable(StudentDocumentForm.objects.filter(user=user))
+
+    return render(request, 'Problems/list_notes.html', 
+                  {'table': note_table}
+                 )
+
+@login_required
+def get_note(request, filename):
+    user = request.user
+    try:
+        note = StudentDocument.objects.get(user=user, doc_file=filename)
+        path = note.doc_file.path
+    except AttributeError as e:
+        return HttpResponse('No such note')
+
+    return sendfile(request, path)
+    
+    #Need to hunt down the file name and pass the path to the webserver with an X-SENDFILE header
+
+@staff_required()
+def search_notes(request):
+    """ View for an instructor to view and approve notes.
     """
     
-    student = request.user
-    notes   = StudentDocument.objects.filter(user=student)
-
-    return render(request, 'Problems/see_notes.html',
-            {'notes': notes
-            })
+    return render(request, 'Problems/see_notes.html')

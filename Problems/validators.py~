@@ -1,5 +1,6 @@
 # From http://stackoverflow.com/a/27916582
 from django.template.defaultfilters import filesizeformat
+from django.utils.deconstruct import deconstructible
 import magic
 
 @deconstructible

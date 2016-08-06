@@ -6,16 +6,24 @@
 
 {% block content %}
     <h1>Administration</h1>
-
-    <a href="{% url 'new_problem_set' %}" class="btn btn-default">New Problem Set</a>
-    <a href="{% url 'add_user' %}" class="btn btn-default">Add Student User</a>
-    <a href="{% url 'new_announcement' %}" class="btn btn-default">New Announcement</a>
-    <a href="{% url 'upload_file' %}" class="btn btn-default">Upload File</a>
-    <a href="{% url 'edit_syllabus' %}" class="btn btn-default">Edit Syllabus</a>
-    <a href="{% url 'new_quiz' %}" class="btn btn-default">Edit Syllabus</a>
+    
+    {% if user.is_staff %}
+        <a href="{% url 'new_problem_set' %}" class="btn btn-default">New Problem Set</a>
+        <a href="{% url 'add_user' %}" class="btn btn-default">Add Student User</a>
+        <a href="{% url 'new_announcement' %}" class="btn btn-default">New Announcement</a>
+        <a href="{% url 'upload_file' %}" class="btn btn-default">Upload File</a>
+        <a href="{% url 'edit_syllabus' %}" class="btn btn-default">Edit Syllabus</a>
+        <a href="{% url 'new_quiz' %}" class="btn btn-default">New Quiz</a>
+    {% endif %}
+        <div class="button-div">
+            <a href="{% url 'see_sick_notes' %}" class="btn btn-default">See Sick Notes</a>
+            {#  <a href="{% url 'upload_student_note' %}" class="btn btn-default">Upload Sick Note</a> #}
+        </div>
 {% endblock %}
 
 {% block sidenote %}
+    {% if user.is_staff %}
     <p><b>Note:</b> You are incapable of deleting problem sets. If you accidentally create a problem set,
     please contact the system administrator to have the problem set removed from the database.</p>
+    {% endif %}
 {% endblock %}

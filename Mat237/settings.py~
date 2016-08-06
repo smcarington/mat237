@@ -148,10 +148,14 @@ STATIC_URL = '/static/'
 
 if socket.gethostname() == 'dobox':
     STATIC_ROOT = "/opt/myvenv/static"
-    MEDIA_ROOT= "/opt/myvenv/media"
+    MEDIA_ROOT  = "/opt/myvenv/media"
+    NOTE_ROOT   = "/opt/myvenv/notes"
+    SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
+    NOTE_ROOT   = os.path.join(BASE_DIR, 'notes')
+    SENDFILE_BACKEND = 'sendfile.backends.development'
 
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"

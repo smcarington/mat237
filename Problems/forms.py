@@ -48,7 +48,7 @@ class QuizForm(forms.ModelForm):
 class StudentDocumentForm(forms.ModelForm):
     class Meta:
         model = StudentDocument
-        exclude = ['user', 'accepted']
+        exclude = ['user', 'accepted', 'uploaded']
 
 class MarkedQuestionForm(forms.ModelForm):
 #    category = IntegerField(min_value=1, initial=1)

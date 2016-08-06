@@ -1,5 +1,9 @@
 {% extends 'Problems/base.html' %}
 
+{% block title %}
+<title>Announcements-Mat237!</title>
+{% endblock %}
+
     {% block content %}
         <h1>Announcements</h1>
 
@@ -23,4 +27,10 @@
             <a href="{% url 'new_announcement' %}" class="btn btn-default">New Announcement</a>
         </div>
         {% endif %}
+    {% endblock %}
+
+    {% block sidenote %}
+        <div class="button-div">
+            <a href="{% url 'upload_student_note' %}" class="btn btn-default">Upload Sick Note</a>
+        </div>
     {% endblock %}

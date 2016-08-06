@@ -3,7 +3,7 @@ from django_tables2 import tables, Column, Table
 from django.utils.html import format_html
 from django.core.urlresolvers import reverse
 
-from .models import MarkedQuestion, Quiz, StudentQuizResult
+from .models import MarkedQuestion, Quiz, StudentQuizResult, StudentDocument
 
 class MathColumn(Column):
     def render(self, value, record):
@@ -66,3 +66,17 @@ class QuizResultTable(Table):
     class Meta:
         attrs = {'class': 'paleblue'}
         order_by = 'q_num'
+
+class NotesTable(Table):
+    exemption = Column(verbose_name="Exemption")
+    uploaded  = Column(verbose_name="Uploaded")
+    accepted  = Column(verbose_name="Accepted")
+    preview   = Column(verbose_name="Preview")
+
+    class Meta:
+        model = StudentDocument
+        attrs = {'class': 'paleblue'}
+        exclude = ['user']
+
+    def render_preview(self, value, record):
+        return format_html('<a href={}>Click to Preview</a>', reverse('get_note', args=(record.doc_file.name,)))
