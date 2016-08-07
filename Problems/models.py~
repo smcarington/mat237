@@ -341,6 +341,10 @@ class StudentDocument(models.Model):
         self.uploaded = timezone.now()
         self.save()
 
+    def change_accepted(self,boolean):
+        self.accepted = boolean
+        self.save()
+
 class Quiz(models.Model):
     name    = models.CharField("Name", max_length=200)
     # Number of tries a student is allowed. A value of category=0 is equivalent to infinity.

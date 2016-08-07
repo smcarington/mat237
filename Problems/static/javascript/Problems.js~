@@ -137,7 +137,7 @@ $(document).ready(function() {
     });
 
 
-    if ($("#id_mc_choices option:selected").text() != "Multiple Choice") {
+    if ($("#id_q_type option:selected").text() != "Multiple Choice") {
         $("#id_mc_choices").prop("disabled", true);
     }
 
@@ -147,5 +147,13 @@ $(document).ready(function() {
         } else {
             $("#id_mc_choices").prop('disabled', true);
         }
+    });
+
+    $('#suggestion').keyup( function() {
+        var query;
+        query = $(this).val();
+        $.get('/search_notes/', {suggestion: query}, function(data) {
+            $('#list_of_notes').html(data);
+        });
     });
 });

@@ -1,14 +1,20 @@
-Add javascript form validation so that students cannot submit
-an arbitrary difficulty. Also need to check this server side.
+XXXX Add javascript form validation so that students cannot submit
+	 an arbitrary difficulty. Also need to check this server side.
 
 Quizzes:
 
 XXXX 1. Allow Students to insert math as an answer
 XXXX 2. Ensure that students cannot access a quiz before it's live.
-3. Subclass MarkedQuestion to allow multiple choice
+XXXX 3. Subclass MarkedQuestion to allow multiple choice
 XXXX 4. Make rand a built in function, and Rand the non-zero version. Add float version
 XXXX 4.5 Change Za,b format to allow for rand and uni functions (parse_abstract_choice)
-5. Remodel the quiz-answer section to allow for multiple choice. 
-6. Make a view that allows a question to be tested by random simulating it many times.
+XXXX 5. Remodel the quiz-answer section to allow for multiple choice. 
+XXXX 6. Make a view that allows a question to be tested by random simulating it many times.
 
-7. Add warning page about {{,}} and num_vars when submiting/editing MQ
+XXXX 7. Add warning page about {{,}} and num_vars when submiting/editing MQ
+
+ 8. Add testing to edit_choices pages
+ 9. (Maybe) Notes embed into pdf viewer
+10. Typo submission
+11. Add calendar
+12. Appointment maker

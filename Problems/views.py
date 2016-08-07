@@ -1541,6 +1541,11 @@ def upload_student_note(request):
     """ Handles student note uploads. Both new note and editing.
     """
 
+    sidenote = """<ul>
+    <li>File must be of pdf, png, or jpeg format
+    <li>File cannot be larger than 500KB.
+    </ul>"""
+
     if request.method == "POST":
         form = StudentDocumentForm(request.POST, request.FILES)
         if form.is_valid():
@@ -1556,13 +1561,16 @@ def upload_student_note(request):
     else:
         form = StudentDocumentForm()
         
-    return render(request, 'Problems/edit_announcement.html', {'form' : form})
+    return render(request, 'Problems/edit_announcement.html', 
+            {'form' : form,
+             'sidenote': sidenote,
+            })
 
 @login_required
 def see_notes(request):
     user = request.user
 
-    note_table = NotesTable(StudentDocumentForm.objects.filter(user=user))
+    note_table = NotesTable(StudentDocument.objects.filter(user=user))
 
     return render(request, 'Problems/list_notes.html', 
                   {'table': note_table}
@@ -1572,18 +1580,63 @@ def see_notes(request):
 def get_note(request, filename):
     user = request.user
     try:
-        note = StudentDocument.objects.get(user=user, doc_file=filename)
+        note = StudentDocument.objects.get(doc_file=filename)
         path = note.doc_file.path
     except AttributeError as e:
         return HttpResponse('No such note')
-
-    return sendfile(request, path)
+        
+    # Need to make sure students can only see their own files, or you are a staff member
+    if (user == note.user) or (user.is_staff):
+        return sendfile(request, path)
+    else:
+        return HttpResponseForbidden()
     
     #Need to hunt down the file name and pass the path to the webserver with an X-SENDFILE header
+
+def get_student_notes(search_string='', max_results=10):
+    """ Returns a list of students.
+        Inputs: serach_string='' (String)
+                max_results = 10 (Integer)
+        Ouput: list of notes matching the string criterion
+    """
+
+    return_list= []
+    return_list = StudentDocument.objects.filter(user__username__contains=search_string)
+
+    if max_results >0:
+        if len(return_list) > max_results:
+            return_list=return_list[:max_results]
+
+    return return_list
 
 @staff_required()
 def search_notes(request):
     """ View for an instructor to view and approve notes.
+        Also handles the AJAX calls for searching
     """
-    
-    return render(request, 'Problems/see_notes.html')
+
+    if request.is_ajax():
+        list_of_students = []
+        contains = ''
+        if 'suggestion' in request.GET:
+            search_string = request.GET['suggestion']
+            list_of_notes = get_student_notes(search_string)
+
+            return render(request, 'Problems/list_of_students.html',
+                    {'list_of_notes': list_of_notes}
+                    )
+
+        if request.method == "POST":
+            try:
+                accepted = request.POST['accepted'] == 'true'
+                notepk = request.POST['pk']
+
+                note = StudentDocument.objects.get(pk=notepk)
+                note.change_accepted(accepted)
+
+                return HttpResponse("Note modified")
+            except Exception as e:
+                return HttpResponse(e)
+
+    else:
+        return render(request, 'Problems/search_notes.html')

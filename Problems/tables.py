@@ -71,12 +71,12 @@ class NotesTable(Table):
     exemption = Column(verbose_name="Exemption")
     uploaded  = Column(verbose_name="Uploaded")
     accepted  = Column(verbose_name="Accepted")
-    preview   = Column(verbose_name="Preview")
+    preview   = Column(verbose_name="Preview",empty_values=())
 
     class Meta:
         model = StudentDocument
         attrs = {'class': 'paleblue'}
-        exclude = ['user']
+        exclude = ['user', 'id', 'doc_file']
 
     def render_preview(self, value, record):
         return format_html('<a href={}>Click to Preview</a>', reverse('get_note', args=(record.doc_file.name,)))

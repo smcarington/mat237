@@ -1,0 +1,14 @@
+{% extends 'Problems/base.html' %}
+{% load render_table from django_tables2 %}
+
+{% comment %}
+    Has context 'table' which is a NotesTable element
+{% endcomment %}
+
+{% block title %}
+    <title>Sick Notes - Mat237!</title>
+{% endblock %}
+
+{% block content %}
+    {% render_table table %}
+{% endblock %}

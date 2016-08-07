@@ -6,6 +6,10 @@
     Has list of PollQuestion elements 'questions'
 {% endcomment %}
 
+{% block title %}
+    <title>Sick Notes - Mat237!</title>
+{% endblock %}
+
 {% block content %}
     <h1>Questions for Poll {{poll.title}}</h1>
     <a href="{% url 'polls' %}">&#171; Return to Polls</a>
@@ -15,7 +19,7 @@
             <div class="diff question-detail"> {{question.text|safe}}
                 <ol>
                 {% for choice in question|filter_poll_choice %}
-                    <li> {{ choice.text }} </li>
+                    <li> {{ choice.text|safe }} </li>
                 {% endfor %}
                 </ol> 
             </div>

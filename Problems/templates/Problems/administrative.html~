@@ -14,10 +14,11 @@
         <a href="{% url 'upload_file' %}" class="btn btn-default">Upload File</a>
         <a href="{% url 'edit_syllabus' %}" class="btn btn-default">Edit Syllabus</a>
         <a href="{% url 'new_quiz' %}" class="btn btn-default">New Quiz</a>
+        <a href="{% url 'seach_notes' %}" class="btn btn-default">Verify Student Note</a>
     {% endif %}
         <div class="button-div">
-            <a href="{% url 'see_sick_notes' %}" class="btn btn-default">See Sick Notes</a>
-            {#  <a href="{% url 'upload_student_note' %}" class="btn btn-default">Upload Sick Note</a> #}
+            <a href="{% url 'see_notes' %}" class="btn btn-default">See Sick Notes</a>
+            <a href="{% url 'upload_student_note' %}" class="btn btn-default">Upload Sick Note</a>
         </div>
 {% endblock %}
 

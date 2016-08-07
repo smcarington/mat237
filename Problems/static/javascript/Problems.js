@@ -148,4 +148,5 @@ $(document).ready(function() {
             $("#id_mc_choices").prop('disabled', true);
         }
     });
+
 });
