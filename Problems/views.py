@@ -1563,6 +1563,11 @@ def quiz_details(request, sqrpk):
     return_html = ""
     for qnum in range(1,len(result_dict)+1):
         temp_dict = result_dict[str(qnum)]
+
+        #Check to see if the question has been answered. If not, skip it
+        if 'guess_string' not in temp_dict:
+            continue
+
         mquestion = MarkedQuestion.objects.get(pk = temp_dict['pk'])
 
         problem = get_return_string(mquestion, temp_dict['inputs'])
