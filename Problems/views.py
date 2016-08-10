@@ -1535,3 +1535,52 @@ def render_html_for_question(problem, answer, choice, mc_choices):
         template +="</ul>\n"
 
     return template
+
+@login_required
+def quiz_details(request, sqrpk):
+    """ A view which allows students to see the details of a completed/in-progress quiz.
+    """
+
+    quiz_results = get_object_or_404(StudentQuizResult, pk=sqrpk)
+
+    if request.user != quiz_results.student:
+        return HttpResponseForbidden()
+
+    result_dict = quiz_results.get_result()[0]
+    template = """
+    <li> 
+        <div class = "diff question-detail">
+            {problem}
+        </div>
+        {correct}
+        <ul>
+            <li><b>Correct Answer</b>: {answer}
+            <li><b>Your Answer</b>: &quot;{guess_string}&quot; evaluated to {guess}
+        </ul>
+    """
+
+    #Generate the return html
+    return_html = ""
+    for qnum in range(1,len(result_dict)+1):
+        temp_dict = result_dict[str(qnum)]
+        mquestion = MarkedQuestion.objects.get(pk = temp_dict['pk'])
+
+        problem = get_return_string(mquestion, temp_dict['inputs'])
+
+        if int(temp_dict['score']):
+            correct = "<p style='color:green'>Correct</p>"
+        else:
+            correct = "<p style='color:red'>Incorrect</p>"
+        
+        return_html += template.format(problem=problem, 
+                                       correct=correct,
+                                       answer=temp_dict['answer'],
+                                       guess_string=temp_dict['guess_string'],
+                                       guess=temp_dict['guess'])
+
+    # return_html only has body. Need to wrap on ordered-list
+    return_html = "<ol> {} </ol>".format(return_html)
+    return render(request, 'Problems/quiz_details.html',
+            {'return_html': return_html,
+             'sqr': quiz_results,
+            })

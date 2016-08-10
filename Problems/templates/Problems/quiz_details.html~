@@ -1,0 +1,20 @@
+{% extends 'Problems/base.html' %}
+
+{% comment %}
+    Has context "return_html" which is a string containing the problems/answers
+    Has context "sqr" which is StudentQuizResult
+{% endcomment %}
+
+{% block title %}
+    <title>Quiz Details - Mat237!</title>
+{% endblock %}
+
+{% block content %}
+
+    <h1>{{sqr.quiz.name}}</h1>
+    <a href="{% url 'quizzes' %}">&#171; Return to Quizzes</a>
+    
+    {{return_html | safe}}
+{% endblock %}
+
+

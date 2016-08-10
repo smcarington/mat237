@@ -36,9 +36,7 @@ urlpatterns = [
     url(r'^history/(?P<questionpk>\d+)/(?P<poll_num>-?\d+)/$', views.poll_history, name='poll_history'),
     url(r'^who_voted/(?P<questionpk>\d+)/(?P<poll_num>-?\d+)/$', views.who_voted, name='who_voted'),
     url(r'^upload_file/', views.upload_file, name='upload_file'),
-<<<<<<< HEAD
     url(r'^dump_polls/', views.dump_polls, name='dump_polls'),
-=======
     url(r'^quiz/add_new', views.new_quiz, name='new_quiz'),
     url(r'^quiz/edit/(?P<quizpk>\d+)/$', views.edit_quiz, name='edit_quiz'),
     url(r'^quiz/list', views.quizzes, name='quizzes'),
@@ -50,5 +48,5 @@ urlpatterns = [
     url(r'^quiz/admin/(?P<quizpk>\d+)/edit_question/(?P<mpk>\d+)/$', views.edit_quiz_question, name='edit_quiz_question'),
     url(r'^quiz/admin/(?P<mpk>\d+)/edit_choices/$', views.edit_choices, name='edit_choices'),
     url(r'^quiz/test/(?P<mpk>\d+)/$', views.test_quiz_question, name='test_quiz_question'),
->>>>>>> markedquestion
+    url(r'^quiz/details/(?P<sqrpk>\d+)/$', views.test_quiz_question, name='test_quiz_question'),
 ]

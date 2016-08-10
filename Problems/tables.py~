@@ -30,7 +30,7 @@ class MarkedQuestionTable(Table):
         return format_html('<a href={}>Edit Choices</a>', reverse('edit_choices', args=(record.pk,)) )
 
     def render_test(self,value,record):
-        return format_html('<a href={}>Test</a>', reverse('test_quiz_question', args(record.pk,)) )
+        return format_html('<a href={}>Test</a>', reverse('test_quiz_question', args=(record.pk,)) )
 
 class AllQuizTable(Table):
     class Meta:
@@ -46,6 +46,8 @@ class SQRTable(Table):
     attempt   = Column("Attempt")
     cur_quest = Column("Question")
     score     = Column("Score")
+    details   = Column("Details")
+
     class Meta:
         model = StudentQuizResult
         attrs = {'class': 'paleblue'}
@@ -56,6 +58,9 @@ class SQRTable(Table):
             return "Completed"
         else:
             return value
+
+    def render_details(self, value, record):
+        return format_html('<a href="{}">Details</a>', reverse('quiz_details', args=(record.pk,)))
 
 class QuizResultTable(Table):
     q_num   = Column(verbose_name="Question")

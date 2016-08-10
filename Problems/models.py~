@@ -234,8 +234,8 @@ class StudentVote(models.Model):
     vote     = models.ForeignKey(PollChoice, related_name="votes", null=True)
     cur_poll = models.IntegerField(default=1)
 
-    class Meta:
-        unique_together = ('student', 'question', 'cur_poll')
+    #class Meta:
+    #    unique_together = ('student', 'question', 'cur_poll')
 
     def add_choice(self, choice):
         """ In a new vote, and the choice, save it, and increment the PollChoice object

@@ -48,4 +48,5 @@ urlpatterns = [
     url(r'^quiz/admin/(?P<quizpk>\d+)/edit_question/(?P<mpk>\d+)/$', views.edit_quiz_question, name='edit_quiz_question'),
     url(r'^quiz/admin/(?P<mpk>\d+)/edit_choices/$', views.edit_choices, name='edit_choices'),
     url(r'^quiz/test/(?P<mpk>\d+)/$', views.test_quiz_question, name='test_quiz_question'),
+    url(r'^quiz/details/(?P<sqrpk>\d+)/$', views.quiz_details, name='quiz_details'),
 ]
