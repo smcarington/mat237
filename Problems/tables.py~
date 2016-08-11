@@ -46,7 +46,7 @@ class SQRTable(Table):
     attempt   = Column("Attempt")
     cur_quest = Column("Question")
     score     = Column("Score")
-    details   = Column("Details")
+    details   = Column("Details", empty_values=(), orderable=False)
 
     class Meta:
         model = StudentQuizResult

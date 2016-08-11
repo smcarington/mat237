@@ -638,6 +638,7 @@ def pdflatex(request):
         # Send the data to a helper function to add the pre-amble. Returns a string which
         # we will make into a file for compiling
         ps_title = "Problem Set {num}".format(num=str(problem_set))
+        import pdb; pdb.set_trace()
         latex_source = create_latex_source(qlist, ps_title)
         # Sanitize the string of html tags
         latex_source = latexify_string(latex_source)
