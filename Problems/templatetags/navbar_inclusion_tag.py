@@ -3,6 +3,7 @@ from Problems.models import ProblemSet, PollQuestion, PollChoice
 from django.core.urlresolvers import resolve, Resolver404
 from django.utils.safestring import mark_safe
 from django.utils.html import format_html
+from django.conf import settings
 
 import re
 
@@ -11,7 +12,7 @@ register = template.Library()
 @register.inclusion_tag('Problems/navbar_inclusion_tag.html', takes_context = True)
 def navbar_inclusion_tag(context):
     ps = ProblemSet.objects.all().order_by('pk')
-    return {'problem_sets': ps, 'request': context.request, 'context': context }
+    return {'problem_sets': ps, 'request': context.request, 'site_name': settings.SITE_NAME }
 
 @register.simple_tag
 def check_active(request, view_name):
