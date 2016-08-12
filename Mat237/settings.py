@@ -156,14 +156,6 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
 DEFAULT_FROM_ADDRESS = 'tholden@math.toronto.edu'
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-with open('/etc/gmailsettings.txt') as f:
-    content = f.readlines()
-    EMAIL_HOST_USER = content[0].strip()
-    EMAIL_HOST_PASSWORD = content[1].strip()
-EMAIL_USE_TLS = True
 
 MEDIA_URL  = '/media/'
 
