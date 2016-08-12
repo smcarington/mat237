@@ -36,7 +36,7 @@ from .tables import MarkedQuestionTable, AllQuizTable, QuizResultTable, SQRTable
 
 # Create your views here.
 
-def staff_required(login_url='/accounts/login/'):
+def staff_required(login_url=settings.LOGIN_URL):
     return user_passes_test(lambda u:u.is_staff, login_url=login_url)
 
 # @login_required
