@@ -7,7 +7,7 @@
 {% endcomment %}
 
 {% block title %}
-    <title>Quiz Completed-Mat237!</title>
+    <title>Quiz Completed - {{site_name}}</title>
 {% endblock %}
 
 {% block content %}

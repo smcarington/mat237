@@ -8,7 +8,7 @@
 {% endcomment %}
 
 {% block title %}
-    <title>Get Ready-Mat237!</title>
+    <title>Get Ready - {{site_name}}</title>
 {% endblock %}
 
 {% block content %}

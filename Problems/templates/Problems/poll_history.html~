@@ -9,7 +9,7 @@
 {% endcomment %}
 
 {% block title %}
-    <title>Poll History-Mat237!</title>
+    <title>Poll History - {{site_name}}</title>
 {% endblock %}
 
 {% block content %}

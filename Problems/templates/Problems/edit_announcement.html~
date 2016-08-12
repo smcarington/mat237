@@ -3,7 +3,7 @@
 {# Has context {{sidenote}} #}
 
 {% block title %}
-<title>Edit Item-Mat237!</title>
+<title>Edit Item - {{site_name}}</title>
 {% endblock %}
 
 {% block content %}
@@ -32,5 +32,5 @@
 {% endblock %}
 
 {% block sidenote %}
-    {{sidenote}}
+    {{sidenote | safe}}
 {% endblock %}

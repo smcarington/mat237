@@ -2,10 +2,10 @@
 
 {% block title %}
 <<<<<<< HEAD
-<title>Calendar-Mat237!</title>
+<title>Calendar - {{site_name}}</title>
 {% endblock %]
 =======
-    <title>Calendar-Mat237!</title>
+    <title>Calendar - {{site_name}}</title>
 {% endblock %}
 >>>>>>> clicker
 

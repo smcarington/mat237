@@ -4,7 +4,7 @@
 {# Context has list of Polls elements, called {{polls}} #}
 
 {% block title %}
-<title>Dump Polls-Mat237!</title>
+<title>Dump Polls - {{site_name}}</title>
 {% endblock %}
 
 {% block content %}

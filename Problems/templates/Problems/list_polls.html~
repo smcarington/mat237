@@ -1,7 +1,7 @@
 {% extends 'Problems/base.html' %}
 
 {% block title %}
-<title>Polls-Mat237!</title>
+<title>Polls - {{site_name}}</title>
 {% endblock %}
 
 {% block content %}

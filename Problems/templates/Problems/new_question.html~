@@ -5,7 +5,7 @@
 {% endcomment %}
 
 {% block title %}
-<title>Poll Question Edit-Mat237!</title>
+<title>Poll Question Edit - {{site_name}}</title>
 {% endblock %}
 {% block content %}
 <form method="POST" action="{% if choices %}{% url 'edit_pollquestion' questionpk=question.pk%}{% else %}{% url 'new_question' pollpk=question.poll.pk questionpk=question.pk %}{% endif %}"> {% csrf_token %}

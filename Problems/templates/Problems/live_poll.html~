@@ -16,7 +16,7 @@
 {% endcomment %}
 
 {% block title %}
-    <title>Live Poll-Mat237!</title>
+    <title>Live Poll - {{site_name}}</title>
 {% endblock %}
 
 {% block content %}

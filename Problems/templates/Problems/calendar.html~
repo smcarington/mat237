@@ -1,7 +1,7 @@
 {% extends "Problems/base.html" %}
 
 {% block title %}
-<title>Calendar-Mat237!</title>
+<title>Calendar - {{site_name}}</title>
 {% endblock %]
 
 {% block content %}
