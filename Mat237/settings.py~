@@ -21,10 +21,7 @@ ADMINS = [('Tyler', 'tholden@math.toronto.edu')]
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-
-with open('/etc/mat237_secret_key.txt') as f:
-    SECRET_KEY = f.read().strip()
-
+#
 # SECURITY WARNING: don't run with debug turned on in production!
 
 if socket.gethostname() == 'dobox':
