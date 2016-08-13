@@ -200,7 +200,11 @@ def notes(request):
     # Post links in the sidebar
     docs = LinkedDocument.objects.select_related('category').all().order_by('category')
     cat_names = docs.values_list('category__cat_name', flat=True).distinct()
-    return render(request, 'Problems/notes.html', {'docs':docs, 'cats':cat_names})
+
+    return render(request, 'Problems/notes.html', 
+            {'docs':docs, 
+             'cats':cat_names,
+             'link_url': settings.NOTES_URL})
 
 @staff_required()
 def administrative(request):
