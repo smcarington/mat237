@@ -32,7 +32,7 @@ $(document).ready( function() {
         $(".note_check").click( function() {
             notepk = $(this).attr('data-id');
             accepted = $(this).is(':checked');
-            $.post("/search_notes/", 
+            $.post("{{ajax_url}}", 
                 {accepted: accepted,
                        pk: notepk
                 },

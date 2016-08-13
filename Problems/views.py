@@ -1710,7 +1710,10 @@ def search_notes(request):
                 return HttpResponse(e)
 
     else:
-        return render(request, 'Problems/search_notes.html')
+        ajax_url = reverse('search_notes')
+        return render(request, 'Problems/search_notes.html',
+                {'ajax_url': ajax_url
+                })
 
 @staff_required()
 def create_exemption(request, exemption_pk=None):
