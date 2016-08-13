@@ -21,12 +21,14 @@ from django.conf.urls.static import static
 from django.contrib.auth.views import login, logout, password_change, password_change_done
 from django.contrib import admin
 
+url_prepend = settings.URL_PREPEND
+
 urlpatterns = [
-    url(r'^superuser/', admin.site.urls),
-    url(r'^accounts/login/$', login, name='login'),
-    url(r'^accounts/logout/$', logout, {'next_page': '/'}, name='logout'),
-    url(r'^accounts/password_change/$', password_change, {'template_name': 'registration/password_change.html', 'post_change_redirect': 'announcements'}, name='password_change'),
-    url(r'^accounts/password_change/done/$', password_change_done, name='password_change_done'),
+    url(r'^{prepend}superuser/'.format(prepend=url_prepend), admin.site.urls),
+    url(r'^{prepend}accounts/login/$'.format(prepend=url_prepend), login, name='login'),
+    url(r'^{prepend}accounts/logout/$'.format(prepend=url_prepend), logout, {'next_page': '/'}, name='logout'),
+    url(r'^{prepend}accounts/password_change/$'.format(prepend=url_prepend), password_change, {'template_name': 'registration/password_change.html', 'post_change_redirect': 'announcements'}, name='password_change'),
+    url(r'^{prepend}accounts/password_change/done/$'.format(prepend=url_prepend), password_change_done, name='password_change_done'),
     url(r'^', include('Problems.urls')),
 ]
 

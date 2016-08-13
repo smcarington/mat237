@@ -154,6 +154,8 @@ else:
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+URL_PREPEND = ''
+SITE_NAME = ''
 
 DEFAULT_FROM_ADDRESS = 'tholden@math.toronto.edu'
 
