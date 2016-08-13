@@ -12,7 +12,10 @@ register = template.Library()
 @register.inclusion_tag('Problems/navbar_inclusion_tag.html', takes_context = True)
 def navbar_inclusion_tag(context):
     ps = ProblemSet.objects.all().order_by('pk')
-    return {'problem_sets': ps, 'request': context.request, 'site_name': settings.SITE_NAME }
+    return {'problem_sets': ps, 
+            'request': context.request, 
+            'site_name': settings.SITE_NAME,
+            'logout_page': settings.LOGOUT_REDIRECT_URL}
 
 @register.simple_tag
 def check_active(request, view_name):
