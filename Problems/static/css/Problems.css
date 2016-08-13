@@ -1,5 +1,5 @@
 body {
-    background-image: url("/static/nice_snow.png");
+    background-image: url("/static/nice_snow.png"), url("/~tholden/nice_snow.png");
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-size: cover;
