@@ -285,8 +285,7 @@ def directory_setter(instance, filename):
 
 class UserDocument(models.Model):
     user     = models.ForeignKey(User, related_name="%(app_label)s_%(class)s_related")
-    validate_file = FileValidator(max_size=1024*500, 
-                                  content_types=('application/pdf',
+    validate_file = FileValidator(content_types=('application/pdf',
                                                  'image/jpeg',
                                                  'image/png',)
                                  )

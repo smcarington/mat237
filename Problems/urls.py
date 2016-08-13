@@ -52,4 +52,6 @@ urlpatterns = [
     url(r'^get_note/(?P<filename>.*)$', views.get_note, name='get_note'),
     url(r'^see_notes/$', views.see_notes, name='see_notes'),
     url(r'^search_notes/$', views.search_notes, name='search_notes'),
+    url(r'^admin/create_exemption/$', views.create_exemption, name='create_exemption'),
+    url(r'^admin/create_category/$', views.create_file_category, name='create_file_category'),
 ]

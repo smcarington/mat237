@@ -14,6 +14,7 @@ XXXX 6. Make a view that allows a question to be tested by random simulating it 
 XXXX 7. Add warning page about {{,}} and num_vars when submiting/editing MQ
 
  8. Add testing to edit_choices pages
+ 8.5 Students can see answers after reviewing a test
  9. (Maybe) Notes embed into pdf viewer
 10. Typo submission
 11. Add calendar

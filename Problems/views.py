@@ -25,13 +25,13 @@ from sendfile import sendfile
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, StudentVote, StudentDocument
-from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, StudentDocumentForm
+from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, StudentDocumentForm, ExemptionForm, CategoryForm
 import random
 import math
 from simpleeval import simple_eval, NameNotDefined
 
 from django.contrib.auth.models import User
-from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult
+from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult, ExemptionType
 from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, QuizForm, MarkedQuestionForm
 from .tables import MarkedQuestionTable, AllQuizTable, QuizResultTable, SQRTable, NotesTable
 
@@ -811,6 +811,19 @@ def who_voted(request, questionpk, poll_num):
 ## ----------------- HISTORY ----------------------- ## 
 
 @staff_required()
+def create_file_category(request):
+    if request.method == "POST":
+        form = CategoryForm(request.POST)
+        if form.is_valid():
+            post = form.save()
+            return redirect(post_announcements)
+    else:
+        form = CategoryForm()
+
+    return render(request, 'Problems/edit_announcement.html', {'form' : form})
+
+
+@staff_required()
 def upload_file(request):
     if request.method == "POST":
         form = LinkedDocumentForm(request.POST, request.FILES)
@@ -823,7 +836,8 @@ def upload_file(request):
             return render(request, 'Problems/success.html', {'success_string': success_string, 'redirect_string': redirect_string})
     else:
         form = LinkedDocumentForm()
-        return render(request, 'Problems/edit_announcement.html', {'form' : form})
+
+    return render(request, 'Problems/edit_announcement.html', {'form' : form})
 
 ## ------------------ ENTROPY ---------------------- ##
 
@@ -1640,3 +1654,31 @@ def search_notes(request):
 
     else:
         return render(request, 'Problems/search_notes.html')
+
+@staff_required()
+def create_exemption(request, exemption_pk=None):
+    """ Administrative view for creating/editing a request.
+    """
+    if not exemption_pk: # Create a new exemption
+        if request.method == "POST":
+            form = ExemptionForm(request.POST)
+            if form.is_valid():
+                exemption = form.save()
+                return redirect('administrative')
+        else:
+            form = ExemptionForm()
+    else: # Editing a question, so populate with current question
+        exemption = get_object_or_404(ExemptionType, pk=mpk)
+        if request.method == "POST":
+            form = ExemptionForm(request.POST, instance=exemption)
+            if form.is_valid():
+                exemption = form.save()
+
+                # Check to see if there are any possible issues with the format of the question
+                return redirect('administrative')
+        else:
+            form = ExemptionForm(instance=exemption)
+
+    return render(request, 'Problems/edit_announcement.html', {"form": form})
+
+
