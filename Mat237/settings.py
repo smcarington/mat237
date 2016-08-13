@@ -156,6 +156,7 @@ LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 URL_PREPEND = ''
 SITE_NAME = ''
+NOTES_URL = ''
 
 DEFAULT_FROM_ADDRESS = 'tholden@math.toronto.edu'
 
