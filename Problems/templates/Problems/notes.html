@@ -11,11 +11,11 @@
 
 {% block content %}
 <div class="pdf-holder">
-    <object data='http://www.math.toronto.edu/tholden/LectureNotes237.pdf' 
+    <object data='{{link_url}}' 
         type='application/pdf' 
         width='100%' 
         height='100%'>
-        <p>This browser does not support inline PDFs. Please download the PDF to view it: <a href="http://www.math.toronto.edu/tholden/LectureNotes237.pdf">Download PDF</a></p>
+        <p>This browser does not support inline PDFs. Please download the PDF to view it: <a href="{{link_url}}">Download PDF</a></p>
     </object>
 </div>
 {% endblock %}
