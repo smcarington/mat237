@@ -9,7 +9,7 @@ class AnnouncementForm(forms.ModelForm):
         fields = ('title', 'text', 'stickied', 'expires')
         help_texts = {
             'text': 'Format using HTML.',
-            'expires': 'Default is 1 week.',
+            'expires': 'Default is 3 weeks',
         }
 
 class QuestionForm(forms.ModelForm):
@@ -91,7 +91,7 @@ class ExemptionForm(forms.ModelForm):
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = DocumentCategory 
-        fields = ('cat_name',)
+        fields = ('name',)
 
 
 

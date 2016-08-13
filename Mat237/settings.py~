@@ -146,21 +146,16 @@ STATIC_URL = '/static/'
 
 if socket.gethostname() == 'dobox':
     STATIC_ROOT = "/opt/myvenv/static"
-    MEDIA_ROOT  = "/opt/myvenv/media"
-    NOTE_ROOT   = "/opt/myvenv/notes"
-    SENDFILE_BACKEND = 'sendfile.backends.xsendfile'
+    MEDIA_ROOT= "/opt/myvenv/media"
 else:
     STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-    MEDIA_ROOT  = os.path.join(BASE_DIR, 'media')
-    NOTE_ROOT   = os.path.join(BASE_DIR, 'notes')
-    SENDFILE_BACKEND = 'sendfile.backends.development'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 URL_PREPEND = ''
 SITE_NAME = ''
-NOTES_URL = ''
 
 DEFAULT_FROM_ADDRESS = 'tholden@math.toronto.edu'
 

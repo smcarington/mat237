@@ -149,4 +149,11 @@ $(document).ready(function() {
         }
     });
 
+    $('#suggestion').keyup( function() {
+        var query;
+        query = $(this).val();
+        $.get('/search_notes/', {suggestion: query}, function(data) {
+            $('#list_of_notes').html(data);
+        });
+    });
 });

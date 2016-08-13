@@ -1552,6 +1552,7 @@ def render_html_for_question(problem, answer, choice, mc_choices):
 
     return template
 
+<<<<<<< HEAD
 @login_required
 def quiz_details(request, sqrpk):
     """ A view which allows students to see the details of a completed/in-progress quiz.
@@ -1605,6 +1606,7 @@ def quiz_details(request, sqrpk):
             {'return_html': return_html,
              'sqr': quiz_results,
             })
+=======
 # -------------------- Student Note ----------------------- #
 
 @login_required
@@ -1737,3 +1739,6 @@ def create_exemption(request, exemption_pk=None):
             form = ExemptionForm(instance=exemption)
 
     return render(request, 'Problems/edit_announcement.html', {"form": form})
+
+
+>>>>>>> studentnote
