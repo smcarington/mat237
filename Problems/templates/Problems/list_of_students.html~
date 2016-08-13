@@ -1,0 +1,16 @@
+<ul>
+{% for note in list_of_notes %}
+    <li>
+        <h4>{{note.user.username}}</h4>
+        <div>
+            <p class="font12"> {{note.exemption.name}}: 
+            <small>(Submitted {{note.uploaded}})</small></p>
+            <p>
+                Accepted? 
+                <span data-id="{{note.pk}}"></span> 
+                <input class="note_check" data-id="{{note.pk}}" type="checkbox" {% if note.accepted %} checked{% endif %}>
+                <a target="_blank" href="{% url 'get_note' filename={{note.doc_file.name}}">See Note</a>
+            </p>
+            <hr class="fadehr">
+{% endfor %}
+</ul>

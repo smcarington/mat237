@@ -46,8 +46,6 @@ class SQRTable(Table):
     attempt   = Column("Attempt")
     cur_quest = Column("Question")
     score     = Column("Score")
-    details   = Column("Details", empty_values=(), orderable=False)
-
     class Meta:
         model = StudentQuizResult
         attrs = {'class': 'paleblue'}
@@ -58,9 +56,6 @@ class SQRTable(Table):
             return "Completed"
         else:
             return value
-
-    def render_details(self, value, record):
-        return format_html('<a href="{}">Details</a>', reverse('quiz_details', args=(record.pk,)))
 
 class QuizResultTable(Table):
     q_num   = Column(verbose_name="Question")
@@ -76,7 +71,7 @@ class NotesTable(Table):
     exemption = Column(verbose_name="Exemption")
     uploaded  = Column(verbose_name="Uploaded")
     accepted  = Column(verbose_name="Accepted")
-    preview   = Column(verbose_name="Preview",empty_values=())
+    preview   = Column(verbose_name="Preview",empty_values=()))
 
     class Meta:
         model = StudentDocument

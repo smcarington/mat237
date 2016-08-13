@@ -1,0 +1,50 @@
+{% extends 'Problems/base.html' %}
+
+{% block title %}
+    <title> Search Notes - Mat237!</title>
+{% endblock %}
+
+{% block content %}
+    <div class="quiz-divs">
+        <form>
+            <label>Student:</label>
+            <input type="text" name="suggestion" value="" id="suggestion" /></li>
+        </form>
+
+        <div id="list_of_notes">
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+<script>
+$(document).ready( function() {
+    $('#suggestion').keyup( function() {
+        var query;
+        query = $(this).val();
+        $.get('/search_notes/', {suggestion: query}, function(data) {
+            $('#list_of_notes').html(data);
+            reset_listeners();
+        });
+    });
+
+    function reset_listeners() {
+        $(".note_check").click( function() {
+            notepk = $(this).attr('data-id');
+            accepted = $(this).is(':checked');
+            $.post("/search_notes/", 
+                {accepted: accepted,
+                       pk: notepk
+                },
+                function(data) {
+                    $response = $("span[data-id="+String(notepk)+"]");
+                    $response.html(data);
+                    setTimeout( function() {$response.html('') }, 2000);
+                },
+                'text'
+            );
+        });
+    }
+});
+</script>
+{% endblock %}
