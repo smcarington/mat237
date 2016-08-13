@@ -29,7 +29,7 @@ urlpatterns = [
     url(r'^{prepend}accounts/logout/$'.format(prepend=url_prepend), logout, {'next_page': '/'}, name='logout'),
     url(r'^{prepend}accounts/password_change/$'.format(prepend=url_prepend), password_change, {'template_name': 'registration/password_change.html', 'post_change_redirect': 'announcements'}, name='password_change'),
     url(r'^{prepend}accounts/password_change/done/$'.format(prepend=url_prepend), password_change_done, name='password_change_done'),
-    url(r'^', include('Problems.urls')),
+    url(r'^{prepend}'.format(prepend=url_prepend), include('Problems.urls')),
 ]
 
 if settings.DEBUG is True:
