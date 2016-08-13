@@ -53,6 +53,9 @@ class QuestionStatus(models.Model):
 def get_localtime():
     return timezone.localtime(timezone.now())
 
+def get_time():
+    return timezone.now()+timedelta(days=7)
+
 # For staff to make announcements
 class Announcement(models.Model):
     author   = models.ForeignKey(User)
@@ -63,7 +66,7 @@ class Announcement(models.Model):
     created_date   = models.DateTimeField(default=get_localtime)
     published_date = models.DateTimeField(
                         blank=True, null=True)
-    expires        = models.DateField(blank=True, null=True, default=lambda:timezone.now()+timedelta(days=7))
+    expires        = models.DateTimeField(blank=True, null=True, default=get_time)
 
     def publish(self):
         self.published_date = timezone.now()
