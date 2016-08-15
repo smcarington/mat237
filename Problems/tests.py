@@ -48,6 +48,19 @@ from Problems.models import *
 #        body = WebDriverWait(self.browser, 1000).until(EC.presence_of_element_located((By.CSS_SELECTOR, ".old-ann>div")))
 #        self.assertIn('Old Announcement', body.text)
 
+#class AnnouncementTest(TestCase):
+#
+#    def setUp(self):
+#        self.username = 'superuser'
+#        self.password = 'djangosuperuser'
+#        self.is_staff = True
+#        self.user = User.objects.create_user(username=self.username, password=self.password, is_staff= self.is_staff)
+#
+#        self.logged_in = self.client.login(username=self.username, password=self.password)
+#        self.assertTrue(self.logged_in)
+#
+#        create_announcements()
+
 class QuizParserTest(TestCase):
     fixtures = ['user.json', 'Quiz.json']
     logged_in = False

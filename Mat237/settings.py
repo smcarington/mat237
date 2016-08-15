@@ -158,13 +158,15 @@ else:
 LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+
 URL_PREPEND = ''
 SITE_NAME = ''
 NOTES_URL = ''
+MEDIA_URL  = '/media/'
+LATEX_ROOT = '/home/tholden/djangotest/latex'
 
 DEFAULT_FROM_ADDRESS = 'tholden@math.toronto.edu'
 
-MEDIA_URL  = '/media/'
 
 UNIVERSAL_CONSTANTS =  {"pi": math.pi, "e": math.e}
 PREDEFINED_FUNCTIONS = {"sin": lambda x: math.sin(x),

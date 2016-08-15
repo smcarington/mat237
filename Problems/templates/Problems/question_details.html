@@ -68,3 +68,41 @@
             </div>
         </ul>
 {% endblock %}
+
+{% block script %}
+    <script>
+        $(document).ready( function() {
+            var curFunHandle;
+
+            $('.ajax-form').change( function() {
+                use = $('#user').val()
+                que = $('#question').val()
+                att = $('#attempted').is(':checked');
+                sol = $('#solved').is(':checked');
+                dif = $('#difficulty').val();
+
+                if (parseInt(dif) > 10) {
+                    $('#difficulty').val('10');
+                    dif = '10'
+                } else if (parseInt(dif)<1) {
+                    $('#difficulty').val('1');
+                    dif = '1'
+                }
+                
+                if (curFunHandle) {
+                    clearTimeout(curFunHandle);
+                    curFunHandle = null;
+                }
+                
+                curFunHandle = setTimeout( function() {
+                    $.post('{{ajax_url}}', {attempted: att, solved: sol, difficulty: dif, user: use, question:que}, 
+                        function(data, status) {
+                            $response = $("#response");
+                            $response.html(data['response']);
+                            setTimeout( function() {$response.html('') }, 2000);
+                    }, "json")
+                },1000);
+            });
+        });
+    </script>
+{% endblock %}
