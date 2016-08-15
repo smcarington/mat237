@@ -15,7 +15,8 @@ def navbar_inclusion_tag(context):
     return {'problem_sets': ps, 
             'request': context.request, 
             'site_name': settings.SITE_NAME,
-            'logout_page': settings.LOGOUT_REDIRECT_URL}
+            'logout_page': settings.LOGOUT_REDIRECT_URL,
+            'modules': settings.COURSE_MODULES,}
 
 @register.simple_tag
 def check_active(request, view_name):

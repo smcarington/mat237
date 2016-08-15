@@ -17,7 +17,11 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
+                {% if 'announcements' in modules %}
                 <li><a class = "{% check_active request 'announcements' %}" href="{% url 'announcements' %}">Announcements</a></li>
+                {% endif %}
+
+                {% if 'problem_set' in modules %}
                 <li class="dropdown">
                 <a class="{% check_active request 'problem_set' %}" href="javascript:void(0)" data-toggle="dropdown" class="dropdown-toggle">Problem Sets<b class="caret"></b></a>
                     <ul class="dropdown-menu">
@@ -25,12 +29,32 @@
                         <li><a href="{% url 'list_problem_set' pk=ps.pk %}">{{ ps.title }}</a></li>
                         {% endfor %}
                     </ul>
-                    <li><a class="{% check_active request 'syllabus' %}" href="{% url 'syllabus' %}" >Syllabus</a></li>
-                    <li><a class="{% check_active request 'calendar' %}" href="{% url 'calendar' %}" >Calendar</a></li>
-                    <li><a class="{% check_active request 'notes' %}" href="{% url 'notes' %}" >Notes</a></li>
-                    <li><a class="{% check_active request 'poll' %}" href="{% url 'polls' %}" >Polls</a></li>
-                    <li><a class="{% check_active request 'quiz' %}" href="{% url 'quizzes' %}" >Quizzes</a></li>
-                    <li><a class="{% check_active request 'administrative' %}" href="{% url 'administrative' %}">Administration</a></li>
+                {% endif %}
+
+                {% if 'syllabus' in modules %}
+                <li><a class="{% check_active request 'syllabus' %}" href="{% url 'syllabus' %}" >Syllabus</a></li>
+                {% endif %}
+
+                {% if 'calendar' in modules %}
+                <li><a class="{% check_active request 'calendar' %}" href="{% url 'calendar' %}" >Calendar</a></li>
+                {% endif %}
+
+                {% if 'notes' in modules %}
+                <li><a class="{% check_active request 'notes' %}" href="{% url 'notes' %}" >Notes</a></li>
+                {% endif %}
+
+                {% if 'polls' in modules %}
+                <li><a class="{% check_active request 'poll' %}" href="{% url 'polls' %}" >Polls</a></li>
+                {% endif %}
+
+                {% if 'quizzes' in modules %}
+                <li><a class="{% check_active request 'quiz' %}" href="{% url 'quizzes' %}" >Quizzes</a></li>
+                {% endif %}
+
+                {% if 'administrative' in modules %}
+                <li><a class="{% check_active request 'administrative' %}" href="{% url 'administrative' %}">Administration</a></li>
+                {% endif %}
+
             </ul>
             <div class="navbar-right">
                 {% if request.user.is_authenticated %}
