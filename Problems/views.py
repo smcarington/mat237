@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
+from django.utils.html import mark_safe
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib.auth.views import password_change
@@ -199,7 +200,10 @@ def edit_syllabus(request):
 
 @login_required
 def calendar(request):
-    return render(request, 'Problems/calendar.html')
+    cal_source = mark_safe(settings.CALENDAR_SOURCE)
+    return render(request, 'Problems/calendar.html',
+        {'cal_source': cal_source,
+        })
 
 @login_required
 def notes(request):
