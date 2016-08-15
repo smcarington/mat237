@@ -35,38 +35,6 @@ $(document).ready(function() {
         renderMathInElement( $(this)[0] );
     });
 
-    var curFunHandle;
-
-    $('.ajax-form').change( function() {
-        use = $('#user').val()
-        que = $('#question').val()
-        att = $('#attempted').is(':checked');
-        sol = $('#solved').is(':checked');
-        dif = $('#difficulty').val();
-
-        if (parseInt(dif) > 10) {
-            $('#difficulty').val('10');
-            dif = '10'
-        } else if (parseInt(dif)<1) {
-            $('#difficulty').val('1');
-            dif = '1'
-        }
-        
-        if (curFunHandle) {
-            clearTimeout(curFunHandle);
-            curFunHandle = null;
-        }
-        
-        curFunHandle = setTimeout( function() {
-            $.post('/update_status/', {attempted: att, solved: sol, difficulty: dif, user: use, question:que}, 
-                function(data, status) {
-                    $response = $("#response");
-                    $response.html(data['response']);
-                    setTimeout( function() {$response.html('') }, 2000);
-            }, "json")
-        },1000);
-    });
-
     // adds a datepicker jquery ui element to dates
     //$('#id_expires').datepicker()
     //$('#id_live').datepicker()
@@ -77,13 +45,6 @@ $(document).ready(function() {
             { format:'Y-m-d H:i',
             });
     
-
-    // gets old announcements and inserts them into the page
-    $('#get_old').click( function() {
-        $.get('/get_old_announcements/', {}, function(data) {
-            $('.old-ann').html(data);
-        });
-    });
 
     // On Problem set page, deal with ability to print questions and solutions.
     // First, nice JS for "all" checkboxes. Unnecessary but nice.
@@ -98,44 +59,11 @@ $(document).ready(function() {
         $("[name='q-"+thisNum+"']").prop("checked",true);
     });
 
-    // Now deal with the button press. Harvest the selected questions and send this list
-    // to the server
-    $('#pdflatex').click(function () {
-        // Check to see if the 'all' buttons have been pushed
-        var ps     = $('#problem-set').val();
-        var allbox = {"q": false, "a": false};
-        var qbox   = [];
-        if ($("#q-all").is(":checked")) {
-            allbox["q"] = true;
-        }
-        if ($("#s-all").is(":checked")) {
-            allbox["s"] = true;
-        }
-
-        $("[name^='q-']").each( function () {
-            if ($(this).is(":checked")) {
-                var thisNum = $(this).attr('name').split('-')[1];
-                sol = $("[name='s-"+thisNum+"'").is(":checked");
-
-                qbox.push({"number": thisNum, "sol":sol});
-            }
-        });
-
-        $.post("/pdflatex/", JSON.stringify({"all": allbox, "questions": qbox, "problem_set": ps}), 
-                function(data) {
-                    $response = $("#response");
-                    $response.html(data['response']);
-                    setTimeout( function() {$response.html('') }, 2000);
-                },
-        "json");
-    });
-
     $('span.choice-remove').click( function() {
         data_id = $(this).attr('data-id');
         $('[data-id='+data_id+']').remove();
         $('form').submit();
     });
-
 
     if ($("#id_q_type option:selected").text() != "Multiple Choice") {
         $("#id_mc_choices").prop("disabled", true);

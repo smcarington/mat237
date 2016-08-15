@@ -31,3 +31,18 @@
 
     {% block sidenote %}
     {% endblock %}
+
+    {% block script %}
+        <script>
+            $(document).ready( function () {
+
+                // gets old announcements and inserts them into the page
+                $('#get_old').click( function() {
+                    $.get('{{ajax_url}}', {}, function(data) {
+                        $('.old-ann').html(data);
+                    });
+                });
+
+            });
+        </script>
+    {% endblock %}

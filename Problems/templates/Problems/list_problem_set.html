@@ -46,11 +46,13 @@
 
 {% block sidenote %}
     <p>
-        The "Email Problem Set" utility should now be functional. Note that you can choose a specific collection of questions
+    {% comment %} 
+        The "Download Problem Set" utility should now be functional. Note that you can choose a specific collection of questions
         by checking the "Text" box in each question. In addition, if you have submitted a solution, you can include the solution
         in your pdf.
         <br>
-        If you have selected no questions, the "Email Problem Set" button will default to sending the entire problem set, without
+    {% endcomment %}
+        If you have selected no questions, the "Download Problem Set" button will default to sending the entire problem set, without
         any solutions.
     </p>
     {% if user.is_staff %}
@@ -61,11 +63,51 @@
 {% block buttons %}
     <div class="button-div">
         <div>
-        <button class="btn btn-default" id="pdflatex">Email Problem Set</button>
+        <button class="btn btn-default" id="pdflatex">Download Problem Set</button>
         </div>
         <div>
         <p id="response" class="right"></p>
         </div>
     </div>
+{% endblock %}
+
+{% block script %}
+<script>
+    $(document).ready( function() {
+        // Now deal with the button press. Harvest the selected questions and send this list
+        // to the server
+        // Moved this to page specific, for template rendering on url resolver
+        $('#pdflatex').click(function () {
+            // Check to see if the 'all' buttons have been pushed
+            var ps     = $('#problem-set').val();
+            var allbox = {"q": false, "a": false};
+            var qbox   = [];
+            if ($("#q-all").is(":checked")) {
+                allbox["q"] = true;
+            }
+            if ($("#s-all").is(":checked")) {
+                allbox["s"] = true;
+            }
+
+            $("[name^='q-']").each( function () {
+                if ($(this).is(":checked")) {
+                    var thisNum = $(this).attr('name').split('-')[1];
+                    sol = $("[name='s-"+thisNum+"'").is(":checked");
+
+                    qbox.push({"number": thisNum, "sol":sol});
+                }
+            });
+
+            $.post("{{ajax_url}}", JSON.stringify({"all": allbox, "questions": qbox, "problem_set": ps}), 
+                    function(data) {
+                        window.location.replace(data);
+                 //       $response = $("#response");
+                 //       $response.html(data['response']);
+                 //       setTimeout( function() {$response.html('') }, 2000);
+                    },
+            "text");
+        });
+    });
+</script>
 {% endblock %}
 

@@ -43,7 +43,12 @@ def staff_required(login_url=settings.LOGIN_URL):
 # @login_required
 def post_announcements(request):
     posts = Announcement.objects.filter(expires__gte=timezone.now()).order_by('-stickied', '-published_date')
-    return render(request, 'Problems/post_announcements.html', {'announcements': posts})
+    ajax_url = reverse('get_old_announcements')
+
+    return render(request, 'Problems/post_announcements.html', 
+        {'announcements': posts,
+         'ajax_url': ajax_url,
+        })
 
 def get_old_announcements(request):
     posts = Announcement.objects.filter(expires__lt=timezone.now()).order_by('-stickied', '-published_date')
@@ -219,7 +224,13 @@ def list_problem_set(request, pk):
     #CASE_SQL = '(case when difficulty="E" then 1 when difficulty="M" then 2 when difficulty="H" then 3 when difficulty="I" then 4 end)'
     #problems = ps.problems.extra(select={'difficulty': CASE_SQL}, order_by=['difficulty'])
     problems = ps.problems.order_by('difficulty', 'pk')
-    return render(request, 'Problems/list_problem_set.html', {'problems': problems, 'problem_set': ps})
+    ajax_url = reverse('pdflatex')
+
+    return render(request, 'Problems/list_problem_set.html', 
+        {   'problems': problems, 
+            'problem_set': ps,
+            'ajax_url': ajax_url,
+        })
 
 @csrf_protect
 @login_required
@@ -232,7 +243,12 @@ def question_details(request, pk):
         problemStatus.solution = solution
         problemStatus.save()
 
-    return render(request, 'Problems/question_details.html', {'problem': problem, 'status': problemStatus})
+    ajax_url = reverse('update_status')
+    return render(request, 'Problems/question_details.html', 
+        {'problem': problem, 
+         'status': problemStatus,
+         'ajax_url': ajax_url,
+        })
 
 @csrf_protect
 @login_required
@@ -644,12 +660,26 @@ def pdflatex(request):
         # Sanitize the string of html tags
         latex_source = latexify_string(latex_source)
         # Send the file to be compiled and emailed using another helper function
-        response_data = compile_and_email(latex_source, user)
+        response_data = compile_and_email(latex_source, user, str(problem_set))
 
-        return HttpResponse(json.dumps(response_data))
+        # return HttpResponse(json.dumps(response_data)) # from old email version
+
+        return HttpResponse(reverse('get_ps', kwargs={'filename':response_data}))
 
     else:
         raise Http404('Request not posted')
+
+@login_required
+def get_ps(request, filename):
+    user = request.user
+        
+    # Need to make sure students can only see their own files, or you are a staff member
+    if (user.username in filename) or (user.is_staff):
+        path = "/".join([settings.LATEX_ROOT, filename])
+        return sendfile(request, path, attachment=True)
+    else:
+        return HttpResponseForbidden()
+ 
 
 def latexify_string(string):
     """ A helper function which accepts a latex html string, possibly including tags,
@@ -712,42 +742,49 @@ def create_latex_source(question_list, title):
 
     return document + postamb
 
-def compile_and_email(latex_source, user):
+def compile_and_email(latex_source, user, ps_number):
     """ A helper function for the function 'pdflatex'. Accepts a string with the full latex
         source code. Creates a file with this string, compiles it, and emails it to the user.
         Input: latex_source - A (string) containing the latex source code.
                user         - (User) element corresponding to session user.
+               ps_number    - (String) corresponding the problem set number
         Out  : A (string) indicating the success/failure of the method.
     """
 
     # Write the string to a file so that we can curl it to the external server
-    latex_directory = "/".join([settings.MEDIA_ROOT, "latex"])
-    file_name = "/".join([latex_directory, "latex_{userpk}.tex".format(userpk=user.pk)])
+    # latex_directory = "/".join([settings.LATEX_ROOT, "latex"]) # old email
+    user_specific_name = "latex_User-{userpk}_PS-{ps_number}.tex".format(userpk=user.username, ps_number=ps_number)
+    file_name = "/".join([settings.LATEX_ROOT, user_specific_name])
+
     with open(file_name, 'w') as f:
         f.write(latex_source)
     
-    command = ["pdflatex", "-halt-on-error", "-output-directory={dir}".format(dir=latex_directory), file_name]
+    command = ["pdflatex", "-halt-on-error", "-output-directory={dir}".format(dir=settings.LATEX_ROOT), file_name]
     # Compile the document
     DEVNULL = open(os.devnull, 'w')
     subprocess.call(command, stdout=DEVNULL, stderr=subprocess.STDOUT)
-    print("done compiling")
 
-    subject = "MAT237 - PDF document"
-    message = "Your compiled document is attached"
+    return user_specific_name[:-3]+'pdf'
 
-    email = EmailMessage(subject, message, 'mat237summer2016@gmail.com', [user.email])
-    try:
-        email.attach_file(file_name[0:-3]+"pdf")
-        email.send()
-        response_data = {'response': 'Email sent successfully'}
+##  Changed to download
+#    subject = "MAT237 - PDF document"
+#    message = "Your compiled document is attached"
+#
+#    email = EmailMessage(subject, message, 'mat237summer2016@gmail.com', [user.email])
+#    try:
+#        email.attach_file(file_name[0:-3]+"pdf")
+#        email.send()
+#        response_data = {'response': 'Email sent successfully'}
+#
+#        delete_command = ["rm", "-f", "{filename}*".format(filename=file_name[0:-3])]
+#        subprocess.call(delete_command, stdout=DEVNULL, stderr=subprocess.STDOUT)
+#    except Exception as e:
+#        response_data = {'response': 'No document created. Likely an error in your code.'}
+#        print(e)
+#
+#    return response_data
 
-        delete_command = ["rm", "-f", "{filename}*".format(filename=file_name[0:-3])]
-        subprocess.call(delete_command, stdout=DEVNULL, stderr=subprocess.STDOUT)
-    except Exception as e:
-        response_data = {'response': 'No document created. Likely an error in your code.'}
-        print(e)
 
-    return response_data
 ## ----------------- PDFLATEX ----------------------- ## 
 
 ## ----------------- HISTORY ----------------------- ## 
