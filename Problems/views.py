@@ -1245,6 +1245,9 @@ def get_return_string(question,choices):
         Input:  question (MarkedQuestion) object 
                 choices (string) for the choices to insert into the question text
         Output: A string rendered correctly.
+
+        ToDo: Use delimeters to allow for mid string evaluation. For example.
+              "What is @2*{v[0]}@ more than 5?"
     """
     problem = question.problem_str
     return problem.format(v=choices.replace(' ', '').split(';'))
@@ -1353,11 +1356,17 @@ def get_mc_choices(question, choices, answer):
                choices  (String) corresponding to the concrete choices for the v[0],...,v[n]
                answer   (String) to concatenate to the choices list
         Output: A list of strings with numeric values. For example ['13', '24', '52.3', 'None of the above']
+
+        ToDo: Allow for @-sign based delimeter expressions. May want to do this based on the exception raised on
+              simple_eval
     """
     split_choices = choices.split(';')
     mc_choices = []
 
     for part in question.mc_choices.replace(' ','').split(';'):
+        """ Internal flow: See if variables are present. If so, substitute the variables. If not, it's hard coded.
+            If we do not find variables but cannot evaluate, the answer is a sentence/word. So just append it.
+        """
         try:
             if re.findall(r'{v\[\d+\]}', part): # matches no variables
                 eval_string = part.format(v=split_choices)
@@ -1370,9 +1379,10 @@ def get_mc_choices(question, choices, answer):
             mc_choices.append(part)
 
     mc_choices.append(str(answer))
-    random.shuffle(mc_choices)
 
     # Now shuffle them.
+    random.shuffle(mc_choices)
+
     return mc_choices
 
 def parse_abstract_choice(abstract_choice):
