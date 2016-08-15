@@ -167,6 +167,15 @@ LATEX_ROOT = '/home/tholden/djangotest/latex'
 
 DEFAULT_FROM_ADDRESS = 'tholden@math.toronto.edu'
 
+COURSE_MODULES = [
+    'announcement', 
+    'problem_set', 
+    'syllabus',
+    'calendar',
+    'notes',
+    'poll',
+    'quizzes',
+    'administrative']
 
 UNIVERSAL_CONSTANTS =  {"pi": math.pi, "e": math.e}
 PREDEFINED_FUNCTIONS = {"sin": lambda x: math.sin(x),
