@@ -167,6 +167,8 @@ LATEX_ROOT = '/home/tholden/djangotest/latex'
 
 DEFAULT_FROM_ADDRESS = 'tholden@math.toronto.edu'
 
+CALENDAR_SOURCE = ""
+
 COURSE_MODULES = [
     'announcements', 
     'problem_set', 
