@@ -15,7 +15,8 @@ urlpatterns = [
     url(r'^delete/(?P<objectStr>[a-z]+)/(?P<pk>\d+)', views.delete_item, name='delete_item'),
     url(r'^syllabus/', views.syllabus, name='syllabus'),
     url(r'^edit_syllabus/', views.edit_syllabus, name='edit_syllabus'),
-    url(r'^notes/', views.notes, name='notes'),
+    url(r'^notes/$', views.notes, name='notes'),
+    url(r'^notes/(?P<page_number>.+)$', views.notes, name='notes'),
     url(r'^calendar/', views.calendar, name='calendar'),
     url(r'^administrative/', views.administrative, name='administrative'),
     url(r'^update_status', views.update_status, name='update_status'),
@@ -56,4 +57,6 @@ urlpatterns = [
     url(r'^search_notes/$', views.search_notes, name='search_notes'),
     url(r'^admin/create_exemption/$', views.create_exemption, name='create_exemption'),
     url(r'^admin/create_category/$', views.create_file_category, name='create_file_category'),
+    url(r'^submit_typo/$', views.submit_typo, name='submit_typo'),
+    url(r'^submit_typo/(?P<url_redirect>.+)$', views.submit_typo, name='submit_typo'),
 ]

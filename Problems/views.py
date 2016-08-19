@@ -25,8 +25,8 @@ from operator import attrgetter
 from sendfile import sendfile
 
 from django.contrib.auth.models import User
-from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, StudentVote, StudentDocument
-from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, StudentDocumentForm, ExemptionForm, CategoryForm
+from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, StudentVote, StudentDocument, Typo
+from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, StudentDocumentForm, ExemptionForm, CategoryForm, TypoForm
 import random
 import math
 from simpleeval import simple_eval, NameNotDefined
@@ -206,15 +206,17 @@ def calendar(request):
         })
 
 @login_required
-def notes(request):
+def notes(request, page_number=''):
     # Post links in the sidebar
     docs = LinkedDocument.objects.select_related('category').all().order_by('category')
     cat_names = docs.values_list('category__cat_name', flat=True).distinct()
 
+    link_url = settings.NOTES_URL + '#'+ page_number
+
     return render(request, 'Problems/notes.html', 
             {'docs':docs, 
              'cats':cat_names,
-             'link_url': settings.NOTES_URL})
+             'link_url': link_url})
 
 @login_required
 def administrative(request):
@@ -1781,3 +1783,61 @@ def create_exemption(request, exemption_pk=None):
             form = ExemptionForm(instance=exemption)
 
     return render(request, 'Problems/edit_announcement.html', {"form": form})
+
+# ------------------ Typos (fold) ------------------ #
+
+def submit_typo(request, url_redirect=''):
+    """ View for handling typo submissions. In particular, checks if user is logged in. If the
+        user is not logged in, then we must return a human verification checkbox.
+    """
+   
+    # If user is anonymous
+    if request.user.username:
+        user = request.user
+    else:
+        user = None 
+
+    # If post, then form was submitted
+    if request.method == "POST":
+        form = TypoForm(request.POST)
+        # Check to see that user is logged in, or verified human
+        if (user is not None or 'check-cap' in request.POST):
+            if form.is_valid():
+                post = form.save(commit=False)
+                post.set_user(user)
+
+                if not url_redirect:
+                    url_redirect = reverse('administrative')
+
+                success_string = "Typo successfully submitted."
+                redirect_string = '<a href="{url}">Return to Previous Page</a>'.format(url=url_redirect)
+
+                return render(request, 
+                              'Problems/success.html', 
+                              { 'success_string': success_string, 
+                                'redirect_string': redirect_string,
+                              })
+
+        else: # Return the form
+            return render(request, 
+                          'Problems/typo_form.html', 
+                          { 'form' : form,
+                            'user' : user,
+                          })
+    else:
+        form = TypoForm()
+
+    return render(request, 
+                  'Problems/typo_form.html', 
+                  { 'form' : form,
+                    'user' : user,
+                  })
+
+@staff_required()
+def see_typos(request):
+    typos = Typo.objects.filter(verified=False)
+
+    return render(request, 'Problem/see_typos.html', {'typos': typos})
+
+# ------------------ Typos (end) ------------------ #
+

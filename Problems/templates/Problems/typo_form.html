@@ -1,0 +1,42 @@
+{% extends 'Problems/base.html' %}
+
+{# Has context {user}  #}
+{# Has context {form}  #}
+
+{% block title %}
+<title>Submit Typo - {{site_name}}</title>
+{% endblock %}
+
+{% block content %}
+<div class="quiz-divs">
+        <form method="POST" >{% csrf_token %}
+        <table class="form-table">
+            {% for field in form %}
+            <tr>
+                {{field.errors}}
+                <td> {{ field.label_tag }} </td>
+                <td> {{ field }} <br>
+                {% if field.help_text %}
+                <p> {{field.help_text|safe }} </p>
+                {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <input type="submit" value="Submit" />
+    </form>
+</div>
+{% endblock %}
+
+{% block sidenote %}
+{% endblock %}
+
+{% block script %}
+    {% if not user %}
+    <script>
+        $(document).ready( function () {
+                $('tbody').append('<tr><td><label>Are you a human?</label></td> <td><input type="checkbox" name="check-cap"/></td>');
+        });
+    </script>
+    {% endif %}
+{% endblock %}

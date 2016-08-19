@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import IntegerField
-from .models import Announcement, Question, ProblemSet, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentDocument, ExemptionType, DocumentCategory
+from .models import Announcement, Question, ProblemSet, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentDocument, ExemptionType, DocumentCategory, Typo
 from django.contrib.admin import widgets
 
 class AnnouncementForm(forms.ModelForm):
@@ -93,5 +93,10 @@ class CategoryForm(forms.ModelForm):
         model = DocumentCategory 
         fields = ('cat_name',)
 
-
+class TypoForm(forms.ModelForm):
+    attrs = {'cols': '100', 'rows': '10'}
+    description = forms.CharField(widget=forms.Textarea(attrs))
+    class Meta:
+        model = Typo
+        exclude = ('user','verified',)
 
