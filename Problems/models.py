@@ -500,3 +500,21 @@ class StudentQuizResult(models.Model):
 
     def __str__(self):
         return self.student.username + " - " + self.quiz.name + " - Attempt: " + str(self.attempt)
+
+class Typo(models.Model):
+    user = models.ForeignKey(User, null=True)
+
+    DOC_CHOICES = getattr(settings, 'DOC_CHOICES')
+    document = models.CharField(max_length=100, choices=DOC_CHOICES)
+
+    page = models.IntegerField()
+    description = models.TextField()
+
+    verified = models.BooleanField(default = False)
+
+    def set_user(self, user):
+        self.user = user
+        self.save()
+
+    def __str__(self):
+        return 'Document: ' + self.document + ', Page: ' + str(self.page)
