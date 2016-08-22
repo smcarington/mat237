@@ -1240,17 +1240,50 @@ def start_quiz(request, quizpk):
              'high_score': high_score,
              })
 
+def eval_sub_expression(string):
+    """ Used to evaluate @-sign delimited subexpressions in senetences which do not totally render.
+        Note that variables should be passed into the string first, before passing to this function.
+        For example, if a string is if the form: "What is half of \(@2*{v[0]}@\)" then we should have
+        already substituted {v[0]} into the string, so that eval_sub_expression receives, for example,
+        "What is half of \(@2*3@\)?"
+
+        Input:  string (String) containing (possibly zero) @-delimited expressions.
+        Return: That string, but with the @ signs evaluated and removed.
+    """
+
+    # If no subexpression can be found, simply return
+    if not "@" in string:
+        return string
+
+    temp_string = string
+    pattern = re.compile(r'@(.+?)@')
+    try:
+        while "@" in temp_string:
+            match = pattern.search(temp_string)
+            # Evaluate the expression and substitute it back into the string
+            replacement = round(simple_eval(match.group(1)),4)
+            temp_string = temp_string[:match.start()] + str(replacement) + temp_string[match.end():]
+
+    except Exception as e:
+        raise e
+
+    return temp_string
+
 def get_return_string(question,choices):
     """ Renders a math-readable string for displaying to a student.
         Input:  question (MarkedQuestion) object 
                 choices (string) for the choices to insert into the question text
         Output: A string rendered correctly.
 
-        ToDo: Use delimeters to allow for mid string evaluation. For example.
+        Done: Use delimeters to allow for mid string evaluation. For example.
               "What is @2*{v[0]}@ more than 5?"
     """
     problem = question.problem_str
-    return problem.format(v=choices.replace(' ', '').split(';'))
+    problem = problem.format(v=choices.replace(' ', '').split(';'))
+
+    # Pass the string through the sub-expression generator
+    problem = eval_sub_expression(problem)
+    return problem
 
     #numbers = [ float(x) for x in choices.replace(' ', '').split(';') ]
     #
@@ -1363,15 +1396,17 @@ def get_mc_choices(question, choices, answer):
     split_choices = choices.split(';')
     mc_choices = []
 
-    for part in question.mc_choices.replace(' ','').split(';'):
+    for part in question.mc_choices.split(';'):
         """ Internal flow: See if variables are present. If so, substitute the variables. If not, it's hard coded.
             If we do not find variables but cannot evaluate, the answer is a sentence/word. So just append it.
         """
+        if re.findall(r'{v\[\d+\]}', part): # matches no variables
+            part = part.format(v=split_choices)
+            part = eval_sub_expression(part)
+
         try:
-            if re.findall(r'{v\[\d+\]}', part): # matches no variables
-                eval_string = part.format(v=split_choices)
-            else:
-                eval_string = part #could be an evaluable string, or a sentence
+            # Remove troublesome whitespace as well
+            eval_string = part.replace(' ','')
             value = round(simple_eval(eval_string, functions=settings.PREDEFINED_FUNCTIONS,names=settings.UNIVERSAL_CONSTANTS),4)
                 
             mc_choices.append(str(value))
@@ -1656,6 +1691,10 @@ def quiz_details(request, sqrpk):
             {'return_html': return_html,
              'sqr': quiz_results,
             })
+
+
+# -------------------- End MARKED QUESTION ----------------------- #
+
 # -------------------- Student Note ----------------------- #
 
 @login_required
