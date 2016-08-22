@@ -32,6 +32,9 @@
         <div class="quiz-div">
             <h3>Typos</h3>
             <a href="{% url 'submit_typo' %}" class="btn btn-default">Submit Typo</a>
+            {% if user.is_staff %}
+            <a href="{% url 'see_typos' %}" class="btn btn-default">See Typos</a>
+            {% endif %}
         </div>
 {% endblock %}
 
