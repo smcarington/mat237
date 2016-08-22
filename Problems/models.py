@@ -518,3 +518,7 @@ class Typo(models.Model):
 
     def __str__(self):
         return 'Document: ' + self.document + ', Page: ' + str(self.page)
+
+    def verify(self):
+        self.verified = True
+        self.save()

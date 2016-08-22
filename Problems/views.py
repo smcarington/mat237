@@ -99,6 +99,9 @@ def delete_item(request, objectStr, pk):
         elif objectStr == "pollquestion":
             theObj      = get_object_or_404(PollQuestion, pk = pk)
             return_View = redirect('poll_admin', pollpk=theObj.poll.pk)
+        elif objectStr == "typo":
+            theObj      = get_object_or_404(Typo, pk = pk)
+            return_View = redirect('see_typos')
         else:
             return HttpResponse('<h1>Invalid Object Type</h1>')
 
@@ -1833,11 +1836,70 @@ def submit_typo(request, url_redirect=''):
                     'user' : user,
                   })
 
+def see_typos(request, document=''):
+    """ Displays the typos, ordered by page and document. If user is staff
+        then also gives unverified typos.
+    """
+
+    if document == "all":
+        if request.user.is_staff:
+            typos = Typo.objects.all()
+        else:
+            typos = Typo.objects.filter(verified=True)
+    else:
+        if request.user.is_staff:
+            typos = Typo.objects.filter(document=document)
+        else:
+            typos = Typo.objects.filter(verified=True, document=document)
+
+    typos.order_by('page')
+
+    typos_url  = reverse('see_typos')
+    verify_url = reverse('verify_typo')
+
+    return render(request, 'Problems/see_typos.html', 
+            {'typos': typos,
+             'typos_url': typos_url,
+             'verify_url': verify_url,
+             'document': document,
+            })
+
 @staff_required()
-def see_typos(request):
-    typos = Typo.objects.filter(verified=False)
+def edit_typo(request, typopk, url_redirect=''):
+    """ Edits a typo. Expects url_redirect to be the document type for see_typos
+    """
+    typo = get_object_or_404(Typo, pk=typopk)
+    if request.method == "POST":
+        form = TypoForm(request.POST, instance=typo)
+        if form.is_valid():
+            typo = form.save()
+            return redirect(reverse('see_typos', kwargs={'document': url_redirect}))
+    else:
+        form = TypoForm(instance=typo)
 
-    return render(request, 'Problem/see_typos.html', {'typos': typos})
+    return render(request, 'Problems/edit_announcement.html', 
+            {'form' : form,
+            })
 
+@staff_required()
+def verify_typo(request):
+    """ Verifies a typo. Should be done by ajax.
+        Expects: 'typopk' in POST, which is the primary key of the Typo object
+    """
+
+    if request.method =="POST":
+        response_dict = {}
+        try:
+            typopk = int(request.POST['typopk'])
+            typo = get_object_or_404(Typo, pk=typopk)
+            typo.verify()
+            response_dict['response'] = "Typo verified"
+            response_dict['flag'] = 0
+        except Exception as e:
+            response_dict['response'] = "Error: {}".format(e)
+            response_dict['flag'] = 1
+
+        return HttpResponse(json.dumps(response_dict))
+#
 # ------------------ Typos (end) ------------------ #
 

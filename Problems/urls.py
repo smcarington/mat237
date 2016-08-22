@@ -59,4 +59,8 @@ urlpatterns = [
     url(r'^admin/create_category/$', views.create_file_category, name='create_file_category'),
     url(r'^submit_typo/$', views.submit_typo, name='submit_typo'),
     url(r'^submit_typo/(?P<url_redirect>.+)$', views.submit_typo, name='submit_typo'),
+    url(r'^see_typos/$', views.see_typos, name='see_typos'),
+    url(r'^see_typos/(?P<document>.+)/$', views.see_typos, name='see_typos'),
+    url(r'^edit_typos/(?P<typopk>\d+)/(?P<url_redirect>.+)$', views.edit_typo, name='edit_typo'),
+    url(r'^verify_typo/$', views.verify_typo, name='verify_typo'),
 ]
