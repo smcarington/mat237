@@ -25,8 +25,8 @@ from operator import attrgetter
 from sendfile import sendfile
 
 from django.contrib.auth.models import User
-from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, StudentVote, StudentDocument, Typo
-from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, StudentDocumentForm, ExemptionForm, CategoryForm, TypoForm
+from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, StudentVote, StudentDocument, Typo, StudentMark
+from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, StudentDocumentForm, ExemptionForm, CategoryForm, TypoForm, PopulateCategoryForm
 import random
 import math
 from simpleeval import simple_eval, NameNotDefined
@@ -186,6 +186,7 @@ def syllabus(request):
     body = get_syllabus()
     return render(request, 'Problems/syllabus.html', {'body': body} )
 
+@staff_required()
 def edit_syllabus(request):
     """
         Creates a form for editing the syllabus and updates that form
@@ -345,6 +346,7 @@ def new_poll(request):
 
     return render(request, 'Problems/edit_announcement.html', {'form' : form})
 
+@login_required
 def list_pollquestions(request, pollpk):
     poll = get_object_or_404(Poll, pk=pollpk)
     questions = poll.pollquestion_set.order_by('position')
@@ -440,6 +442,7 @@ def new_pollquestion(request, pollpk, questionpk=None):
         return render(request, 'Problems/new_pollquestion.html',  {'question' : question})
 
 # Cannot just abuse new_question because we need to handle choices differently
+@staff_required()
 def edit_pollquestion(request, questionpk):
     question = get_object_or_404(PollQuestion, pk=questionpk)
     choices = question.pollchoice_set.filter(cur_poll=question.num_poll)
@@ -1786,6 +1789,45 @@ def create_exemption(request, exemption_pk=None):
             form = ExemptionForm(instance=exemption)
 
     return render(request, 'Problems/edit_announcement.html', {"form": form})
+
+@staff_required()
+def populate_category(request):
+    """ Once a category is created, use this view to populate it; that is,
+        we create a StudentMark element for each student in the course.
+        Input: exemption_pk (Integer) - the primary key of the category
+    """
+
+    # students are precisely those users who are not staff members
+    
+    if request.method == "POST":
+        import pdb; pdb.set_trace()
+        students = User.objects.filter(is_staff=False)
+        
+        try:
+            exemption_pk = int(request.POST['exemption'])
+            category = get_object_or_404(ExemptionType, pk=exemption_pk)
+        except:
+            return Http404('Non integer primary key')
+
+        bulk_list = []
+        for student in students:
+            bulk_list.append(StudentMark(user=student, category=category))
+
+        StudentMark.objects.bulk_create(bulk_list)
+
+        success_string = "{category} successfully populated.".format(category=category.name)
+        redirect_string = '<a href="{url}">Return to Previous Page</a>'.format(url=reverse('administrative'))
+
+        return render(request, 
+                      'Problems/success.html', 
+                      { 'success_string': success_string, 
+                        'redirect_string': redirect_string,
+                      })
+    else:
+        form = PopulateCategoryForm()
+        return render(request, 'Problems/edit_announcement.html', {'form': form} )
+
+
 
 # ------------------ Typos (fold) ------------------ #
 

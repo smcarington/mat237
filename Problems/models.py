@@ -307,6 +307,7 @@ class LinkedDocument(UserDocument):
 
 class ExemptionType(models.Model):
     name = models.CharField(max_length=200)
+    out_of = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -522,3 +523,14 @@ class Typo(models.Model):
     def verify(self):
         self.verified = True
         self.save()
+
+class StudentMark(models.Model):
+    user = models.ForeignKey(User)
+    category = models.ForeignKey(ExemptionType)
+    score = models.IntegerField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['user__username', 'category']
+
+    def __str__(self):
+        return "{user}: {score} in {category}".format(user=self.user, category=self.category.name, score=str(self.score)) 
