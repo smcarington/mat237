@@ -475,6 +475,11 @@ label.diff {
     margin: 30px 0 30px 30px;
 }
 
+#form_preview {
+    padding: 5px;
+    border: dashed black 1px;
+}
+
 
 @media (max-width: 1200px) {
    .navbar-header {
