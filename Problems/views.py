@@ -300,24 +300,24 @@ def add_user(request):
         rpass = User.objects.make_random_password()
         user.set_password(rpass)
         
-        subject = "You have just been added to MAT237!"
-        message = """ You have just been added to the MAT237 course website, located at
+        subject = "You have just been added to {site_name}".format(site_name=settings.SITE_NAME)
+        message = """ You have just been added to the {site_name} course website, located at
 
-http://www.utmat237.com
+{site_url}
 
 Your username is {username} and your password is {password}. 
 Please login and change your password
-            """.format(username=un, password=rpass)
+            """.format(username=un, password=rpass, site_name=settings.SITE_NAME, site_url = settings.SITE_URL)
 
-        send_mail(subject, message, 'mat237summer2016@gmail.com', [em])
+        send_mail(subject, message, settings.DEFAULT_FROM_ADDRESS, [em])
         user.save()
 
         # Now send a confirmation to the staff member who added this user
-        conf_subject = "User {student} has just been added to MAT237".format(student=un)
-        conf_message = """The Student with the email address {email} and username {student} has been successfully added to the MAT237 group user list. No further action is required on your part.""".format(student=un, email=em)
+        conf_subject = "User {student} has just been added to {site_name}".format(student=un, site_name=settings.SITE_NAME)
+        conf_message = """The Student with the email address {email} and username {student} has been successfully added to the {site_name} group user list. No further action is required on your part.""".format(student=un, email=em, site_name=settings.SITE_NAME)
 
         try:
-            send_mail(conf_subject, conf_message, 'mat237summer2016@gmail.com', [request.user.email], fail_silently=False)
+            send_mail(conf_subject, conf_message, settings.DEFAULT_FROM_ADDRESS, [request.user.email], fail_silently=False)
         except:
             print('Error sending confirmation email to staff member')
 
