@@ -161,6 +161,7 @@ LOGOUT_REDIRECT_URL = "/"
 
 URL_PREPEND = ''
 SITE_NAME = ''
+SITE_URL = ''
 NOTES_URL = ''
 MEDIA_URL  = '/media/'
 LATEX_ROOT = '/home/tholden/djangotest/latex'
