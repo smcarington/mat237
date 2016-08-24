@@ -34,7 +34,7 @@ from simpleeval import simple_eval, NameNotDefined
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult, ExemptionType
 from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, QuizForm, MarkedQuestionForm
-from .tables import MarkedQuestionTable, AllQuizTable, QuizResultTable, SQRTable, NotesTable
+from .tables import MarkedQuestionTable, AllQuizTable, QuizResultTable, SQRTable, NotesTable, MarksTable
 
 # Create your views here.
 
@@ -1692,9 +1692,10 @@ def see_notes(request):
 
     note_table = NotesTable(StudentDocument.objects.filter(user=user))
 
-    return render(request, 'Problems/list_notes.html', 
-                  {'table': note_table}
-                 )
+    return render(request, 'Problems/list_table.html', 
+                  {'table': note_table,
+                   'title': 'Sick Notes',
+                  })
 
 @login_required
 def get_note(request, filename):
@@ -1773,7 +1774,15 @@ def create_exemption(request, exemption_pk=None):
             form = ExemptionForm(request.POST)
             if form.is_valid():
                 exemption = form.save()
-                return redirect('administrative')
+
+                ret_flag = populate_category_helper(exemption)
+                success_string = "New exemption created and populated."
+                redirect_string = '<a href="{url}">Return to Admin Page</a>'.format(url=reverse('administrative'))
+                return render(request, 
+                      'Problems/success.html', 
+                      { 'success_string': success_string, 
+                        'redirect_string': redirect_string,
+                      })
         else:
             form = ExemptionForm()
     else: # Editing a question, so populate with current question
@@ -1790,6 +1799,32 @@ def create_exemption(request, exemption_pk=None):
 
     return render(request, 'Problems/edit_announcement.html', {"form": form})
 
+# --------------- (end) Notes --------------- #
+# Though the previous method is used in Marks #
+# --------------- (fold) Marks --------------- #
+
+def populate_category_helper(category):
+    """ Helper method for populating a category.
+        Input: category (ExemptionType) category to populate
+        Out  : return_flag - (0) Exception
+                             (1) Success
+                             (2) Already populated, nothing performed
+    """
+
+    if StudentMark.objects.filter(category=category).count():
+        return 2
+
+    try:
+        students = User.objects.filter(is_staff=False)
+        bulk_list = []
+        for student in students:
+            bulk_list.append(StudentMark(user=student, category=category))
+
+        StudentMark.objects.bulk_create(bulk_list)
+        return 1
+    except Exception as e:
+        return 0
+
 @staff_required()
 def populate_category(request):
     """ Once a category is created, use this view to populate it; that is,
@@ -1800,8 +1835,6 @@ def populate_category(request):
     # students are precisely those users who are not staff members
     
     if request.method == "POST":
-        import pdb; pdb.set_trace()
-        students = User.objects.filter(is_staff=False)
         
         try:
             exemption_pk = int(request.POST['exemption'])
@@ -1809,13 +1842,15 @@ def populate_category(request):
         except:
             return Http404('Non integer primary key')
 
-        bulk_list = []
-        for student in students:
-            bulk_list.append(StudentMark(user=student, category=category))
+        ret_flag = populate_category_helper(category)
 
-        StudentMark.objects.bulk_create(bulk_list)
+        if ret_flag == 2:
+            success_string = "{category} already populated. No further action required".format(category=category.name)
+        elif ret_flag == 1:
+            success_string = "{category} successfully populated.".format(category=category.name)
+        else:
+            success_string = "There was an error in populating the category"
 
-        success_string = "{category} successfully populated.".format(category=category.name)
         redirect_string = '<a href="{url}">Return to Previous Page</a>'.format(url=reverse('administrative'))
 
         return render(request, 
@@ -1827,8 +1862,22 @@ def populate_category(request):
         form = PopulateCategoryForm()
         return render(request, 'Problems/edit_announcement.html', {'form': form} )
 
+@login_required
+def see_marks(request):
+    """ A view for students to see their current marks.
+    """
+
+    user  = request.user
+    marks = StudentMark.objects.filter(user=user)
+
+    marks_table = MarksTable(marks)
+    return render(request, 'Problems/list_table.html', 
+                  {'table': marks_table,
+                   'title': 'Current Marks',
+                  })
 
 
+# ------------------ (end) Marks  ------------------ #
 # ------------------ Typos (fold) ------------------ #
 
 def submit_typo(request, url_redirect=''):
@@ -1942,6 +1991,7 @@ def verify_typo(request):
             response_dict['flag'] = 1
 
         return HttpResponse(json.dumps(response_dict))
-#
+
 # ------------------ Typos (end) ------------------ #
+
 
