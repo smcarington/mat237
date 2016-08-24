@@ -100,3 +100,5 @@ class TypoForm(forms.ModelForm):
         model = Typo
         exclude = ('user','verified',)
 
+class PopulateCategoryForm(forms.Form):
+    exemption = forms.ModelMultipleChoiceField(queryset=ExemptionType.objects.all())

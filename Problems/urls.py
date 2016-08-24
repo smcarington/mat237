@@ -63,4 +63,5 @@ urlpatterns = [
     url(r'^see_typos/(?P<document>.+)/$', views.see_typos, name='see_typos'),
     url(r'^edit_typos/(?P<typopk>\d+)/(?P<url_redirect>.+)$', views.edit_typo, name='edit_typo'),
     url(r'^verify_typo/$', views.verify_typo, name='verify_typo'),
+    url(r'^populate_category/$', views.populate_category, name='populate_category'),
 ]
