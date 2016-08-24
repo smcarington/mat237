@@ -86,7 +86,7 @@ class MarkedQuestionForm(forms.ModelForm):
 class ExemptionForm(forms.ModelForm):
     class Meta:
         model = ExemptionType
-        fields = ('name',)
+        fields = ('name','out_of')
 
 class CategoryForm(forms.ModelForm):
     class Meta:

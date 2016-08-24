@@ -3,7 +3,7 @@ from django_tables2 import tables, Column, Table
 from django.utils.html import format_html
 from django.core.urlresolvers import reverse
 
-from .models import MarkedQuestion, Quiz, StudentQuizResult, StudentDocument
+from .models import MarkedQuestion, Quiz, StudentQuizResult, StudentDocument, StudentMark
 
 class MathColumn(Column):
     def render(self, value, record):
@@ -85,3 +85,21 @@ class NotesTable(Table):
 
     def render_preview(self, value, record):
         return format_html('<a href={}>Click to Preview</a>', reverse('get_note', args=(record.doc_file.name,)))
+
+class MarksTable(Table):
+    name    = Column(verbose_name="Name", empty_values=())
+    score   = Column(verbose_name="Score", empty_values=())
+    out_of  = Column(verbose_name="Out of", empty_values=())
+    percent = Column(verbose_name="Percent", empty_values=())
+
+    class Meta:
+        attrs = {'class': 'paleblue'}
+
+    def render_name(self, value, record):
+        return record.category.name
+
+    def render_out_of(self, value, record):
+        return str(record.category.out_of)
+
+    def render_percent(self, value, record):
+        return str(round(100*record.score/record.category.out_of,2))

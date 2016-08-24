@@ -64,4 +64,5 @@ urlpatterns = [
     url(r'^edit_typos/(?P<typopk>\d+)/(?P<url_redirect>.+)$', views.edit_typo, name='edit_typo'),
     url(r'^verify_typo/$', views.verify_typo, name='verify_typo'),
     url(r'^populate_category/$', views.populate_category, name='populate_category'),
+    url(r'^see_marks/$', views.see_marks, name='see_marks'),
 ]
