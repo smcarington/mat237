@@ -283,7 +283,7 @@ def directory_setter(instance, filename):
     if hasattr(instance, 'exemption'):
         join_path = settings.NOTE_ROOT
     else:
-        join_path = 'latex'
+        join_path = 'document'
     return '/'.join([join_path, instance.doc_file.name])
 
 class UserDocument(models.Model):
