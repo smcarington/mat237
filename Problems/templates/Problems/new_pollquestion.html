@@ -17,6 +17,13 @@
                     <td>Question:</td>
                     <td> <textarea cols="80" rows="10" id="id_text" name="question">{% if question.text %}{{question.text}}{% endif %}</textarea></td>
                 </tr>
+                <tr>
+                    <td>Preview:</td>
+                    <td><div id="form_preview" class="diff">
+
+                        </div>
+                    </td>
+                </tr>
                 {% for choice in choices %}
                 <tr>
                     <td> Choice: </td>
@@ -70,7 +77,15 @@
             }
         })
         {% endif %}
+        $("#form_preview").html($("#id_text").val());
+        renderMathInElement( $("#form_preview")[0] );
+
+        $("#id_text").keyup( function() {
+            $("#form_preview").html($(this).val());
+            renderMathInElement( $("#form_preview")[0] );
+        });
+
+
     });
     </script>
 {% endblock %}
-

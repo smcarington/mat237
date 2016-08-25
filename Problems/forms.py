@@ -56,7 +56,7 @@ class MarkedQuestionForm(forms.ModelForm):
 #    problem_str = forms.CharField(widget=forms.Textarea(text_area_attrs))
 
     class Meta:
-        text_area_attrs = {'cols':'100', 'rows': '5'}
+        text_area_attrs = {'cols':'80', 'rows': '5'}
         mc_attrs = dict(text_area_attrs, **{'visible': 'false'})
         model = MarkedQuestion
         fields = ['category', 'problem_str', 'answer', 'q_type', 'mc_choices', 'functions']
