@@ -522,3 +522,12 @@ class Typo(models.Model):
     def verify(self):
         self.verified = True
         self.save()
+
+class StudentInfo(models.Model):
+    """ A model for storing student specific information. Initialized on registration and otherwise
+        should be immutable.
+    """
+    user = models.OneToOneField(User,related_name='info')
+    student_number = models.CharField(max_length=20)
+    tutorial = models.CharField(max_length=20)
+    lecture = models.CharField(max_length=20)
