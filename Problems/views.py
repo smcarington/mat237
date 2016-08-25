@@ -309,17 +309,18 @@ Your username is {username} and your password is {password}.
 Please login and change your password
             """.format(username=un, password=rpass, site_name=settings.SITE_NAME, site_url = settings.SITE_URL)
 
-        send_mail(subject, message, settings.DEFAULT_FROM_ADDRESS, [em])
-        user.save()
-
-        # Now send a confirmation to the staff member who added this user
-        conf_subject = "User {student} has just been added to {site_name}".format(student=un, site_name=settings.SITE_NAME)
-        conf_message = """The Student with the email address {email} and username {student} has been successfully added to the {site_name} group user list. No further action is required on your part.""".format(student=un, email=em, site_name=settings.SITE_NAME)
-
         try:
+            user.save()
+            send_mail(subject, message, settings.DEFAULT_FROM_ADDRESS, [em])
+
+            # Now send a confirmation to the staff member who added this user
+            conf_subject = "User {student} has just been added to {site_name}".format(student=un, site_name=settings.SITE_NAME)
+            conf_message = """The Student with the email address {email} and username {student} has been successfully added to the {site_name} group user list. No further action is required on your part.""".format(student=un, email=em, site_name=settings.SITE_NAME)
+
             send_mail(conf_subject, conf_message, settings.DEFAULT_FROM_ADDRESS, [request.user.email], fail_silently=False)
-        except:
-            print('Error sending confirmation email to staff member')
+        except Exception as dbError:
+            sidenote = "Error: Likely that a user with that username already exists"
+            return render(request, 'Problems/edit_announcement.html', {'form' : form, "sidenote":sidenote})
 
         return redirect('administrative')
     else:
