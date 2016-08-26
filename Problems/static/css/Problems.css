@@ -480,6 +480,26 @@ label.diff {
     border: dashed black 1px;
 }
 
+#message {
+    top: 10%;
+    left: 80%;
+    position: fixed;
+}
+
+#dialog {
+    position: relative;
+    width: 200px;
+    height:300px;
+}
+
+#ajax_results {
+    margin-bottom: 200px;
+}
+
+#marks_wrapper {
+    overflow-x: scroll;
+}
+
 
 @media (max-width: 1200px) {
    .navbar-header {

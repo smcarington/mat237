@@ -525,12 +525,16 @@ class Typo(models.Model):
         self.save()
 
 class StudentMark(models.Model):
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, related_name='marks')
     category = models.ForeignKey(ExemptionType)
     score = models.IntegerField(blank=True, null=True)
 
     class Meta:
         ordering = ['user__username', 'category']
+
+    def set_score(self, score):
+        self.score = score
+        self.save()
 
     def __str__(self):
         return "{user}: {score} in {category}".format(user=self.user, category=self.category.name, score=str(self.score)) 
