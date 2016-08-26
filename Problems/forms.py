@@ -66,7 +66,7 @@ class MarkedQuestionForm(forms.ModelForm):
             'answer': 'Use the same variables as in problem. Use python calculate the answer.<br> For example, myfun({v[0]},{v[1]}).',
             'functions': 'Define custom functions using a dictionary. For example, {"myfun": lambda x,y: max(x,y)}.<br>'
                          'Your answer must contain all variables. The "gobble" function returns 1, and can be used as such.',
-            'mc_choices': 'Enter a list with possible values. For example, ["13", "{v[0]*v[1]}", "rand(1,10)"]. Any functions '
+            'mc_choices': 'Enter a list with possible values, seperated by a semi-colon. For example, <code>None of the above; 15*{v[0]}; At most \(@2*{v[0]}@\)</code>. Any functions '
                           'you define can be used here, for example {"rand": lambda x: math.randint(1,10)}',
         }
         labels = {

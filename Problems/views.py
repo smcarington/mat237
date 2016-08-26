@@ -310,17 +310,18 @@ Your username is {username} and your password is {password}.
 Please login and change your password
             """.format(username=un, password=rpass, site_name=settings.SITE_NAME, site_url = settings.SITE_URL)
 
-        send_mail(subject, message, settings.DEFAULT_FROM_ADDRESS, [em])
-        user.save()
-
-        # Now send a confirmation to the staff member who added this user
-        conf_subject = "User {student} has just been added to {site_name}".format(student=un, site_name=settings.SITE_NAME)
-        conf_message = """The Student with the email address {email} and username {student} has been successfully added to the {site_name} group user list. No further action is required on your part.""".format(student=un, email=em, site_name=settings.SITE_NAME)
-
         try:
+            user.save()
+            send_mail(subject, message, settings.DEFAULT_FROM_ADDRESS, [em])
+
+            # Now send a confirmation to the staff member who added this user
+            conf_subject = "User {student} has just been added to {site_name}".format(student=un, site_name=settings.SITE_NAME)
+            conf_message = """The Student with the email address {email} and username {student} has been successfully added to the {site_name} group user list. No further action is required on your part.""".format(student=un, email=em, site_name=settings.SITE_NAME)
+
             send_mail(conf_subject, conf_message, settings.DEFAULT_FROM_ADDRESS, [request.user.email], fail_silently=False)
-        except:
-            print('Error sending confirmation email to staff member')
+        except Exception as dbError:
+            sidenote = "Error: Likely that a user with that username already exists"
+            return render(request, 'Problems/edit_announcement.html', {'form' : form, "sidenote":sidenote})
 
         return redirect('administrative')
     else:
@@ -1248,14 +1249,50 @@ def start_quiz(request, quizpk):
              'high_score': high_score,
              })
 
+def eval_sub_expression(string):
+    """ Used to evaluate @-sign delimited subexpressions in senetences which do not totally render.
+        Note that variables should be passed into the string first, before passing to this function.
+        For example, if a string is if the form: "What is half of \(@2*{v[0]}@\)" then we should have
+        already substituted {v[0]} into the string, so that eval_sub_expression receives, for example,
+        "What is half of \(@2*3@\)?"
+
+        Input:  string (String) containing (possibly zero) @-delimited expressions.
+        Return: That string, but with the @ signs evaluated and removed.
+    """
+
+    # If no subexpression can be found, simply return
+    if not "@" in string:
+        return string
+
+    temp_string = string
+    pattern = re.compile(r'@(.+?)@')
+    try:
+        while "@" in temp_string:
+            match = pattern.search(temp_string)
+            # Evaluate the expression and substitute it back into the string
+            replacement = round(simple_eval(match.group(1)),4)
+            temp_string = temp_string[:match.start()] + str(replacement) + temp_string[match.end():]
+
+    except Exception as e:
+        raise e
+
+    return temp_string
+
 def get_return_string(question,choices):
     """ Renders a math-readable string for displaying to a student.
         Input:  question (MarkedQuestion) object 
                 choices (string) for the choices to insert into the question text
         Output: A string rendered correctly.
+
+        Done: Use delimeters to allow for mid string evaluation. For example.
+              "What is @2*{v[0]}@ more than 5?"
     """
     problem = question.problem_str
-    return problem.format(v=choices.replace(' ', '').split(';'))
+    problem = problem.format(v=choices.replace(' ', '').split(';'))
+
+    # Pass the string through the sub-expression generator
+    problem = eval_sub_expression(problem)
+    return problem
 
     #numbers = [ float(x) for x in choices.replace(' ', '').split(';') ]
     #
@@ -1361,16 +1398,24 @@ def get_mc_choices(question, choices, answer):
                choices  (String) corresponding to the concrete choices for the v[0],...,v[n]
                answer   (String) to concatenate to the choices list
         Output: A list of strings with numeric values. For example ['13', '24', '52.3', 'None of the above']
+
+        ToDo: Allow for @-sign based delimeter expressions. May want to do this based on the exception raised on
+              simple_eval
     """
     split_choices = choices.split(';')
     mc_choices = []
 
-    for part in question.mc_choices.replace(' ','').split(';'):
+    for part in question.mc_choices.split(';'):
+        """ Internal flow: See if variables are present. If so, substitute the variables. If not, it's hard coded.
+            If we do not find variables but cannot evaluate, the answer is a sentence/word. So just append it.
+        """
+        if re.findall(r'{v\[\d+\]}', part): # matches no variables
+            part = part.format(v=split_choices)
+            part = eval_sub_expression(part)
+
         try:
-            if re.findall(r'{v\[\d+\]}', part): # matches no variables
-                eval_string = part.format(v=split_choices)
-            else:
-                eval_string = part #could be an evaluable string, or a sentence
+            # Remove troublesome whitespace as well
+            eval_string = part.replace(' ','')
             value = round(simple_eval(eval_string, functions=settings.PREDEFINED_FUNCTIONS,names=settings.UNIVERSAL_CONSTANTS),4)
                 
             mc_choices.append(str(value))
@@ -1378,9 +1423,10 @@ def get_mc_choices(question, choices, answer):
             mc_choices.append(part)
 
     mc_choices.append(str(answer))
-    random.shuffle(mc_choices)
 
     # Now shuffle them.
+    random.shuffle(mc_choices)
+
     return mc_choices
 
 def parse_abstract_choice(abstract_choice):
@@ -1654,6 +1700,10 @@ def quiz_details(request, sqrpk):
             {'return_html': return_html,
              'sqr': quiz_results,
             })
+
+
+# -------------------- End MARKED QUESTION ----------------------- #
+
 # -------------------- Student Note ----------------------- #
 
 @login_required
