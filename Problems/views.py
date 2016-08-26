@@ -10,7 +10,7 @@ from django.core.mail import send_mail, EmailMessage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.conf import settings
-from django.db.models import Max
+from django.db.models import Max, Q
 from django.db import IntegrityError
 
 from django_tables2 import RequestConfig
@@ -34,7 +34,7 @@ from simpleeval import simple_eval, NameNotDefined
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult, ExemptionType
 from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, QuizForm, MarkedQuestionForm
-from .tables import MarkedQuestionTable, AllQuizTable, QuizResultTable, SQRTable, NotesTable, MarksTable
+from .tables import MarkedQuestionTable, AllQuizTable, QuizResultTable, SQRTable, NotesTable, MarksTable, MarkSubmitTable, define_all_marks_table
 
 # Create your views here.
 
@@ -1940,9 +1940,90 @@ def append_to_log(the_dict, log_location):
         f.write(os.linesep)
 
 @staff_required()
-def submit_marks(request, category='all'):
+def marks_search(request):
+    if request.is_ajax():
+        query = request.GET['query']
+        cat   = request.GET['category']
+
+        category = get_object_or_404(ExemptionType, pk=cat)
+
+        # Search for StudentMark with category=cat and users satisfying the query
+        fields = ["user__username__contains", "user__first_name__contains", "user__last_name__contains", "user__info__student_number__contains"]
+        queries = [Q(**{f:query}) for f in fields]
+
+        qs = Q()
+        for query in queries:
+            qs = qs | query
+
+        marks = StudentMark.objects.filter(qs, category=category).distinct()
+        table = MarkSubmitTable(marks)
+        RequestConfig(request).configure(table)
+
+    return render(request, 'Problems/render_table.html', {'table': table})
+
+def create_marks_log_entry(smark, staff):
+    """ Creates a python dictionary for logging data.
+        Input: smark (StudentMark) object
+               staff (User) who made the adjustment
+        Return: (Dictionary) consisting of
+        {'staff': ___, 'category': ___, 'student': {'username': ___, 'pk': ___}, 'datetime': ___ }
+    """
+
+    return {'staff': staff.username,
+            'category': smark.category.name,
+            'student': {'username': smark.user.username,
+                        'pk': smark.user.pk},
+            'datetime': str(timezone.now())
+            }
+
+def get_student_marks_for_table(student):
+    """ A helper function which outputs the dictionary of student marks.
+        Input: student (User) the student whose marks we are getting
+        Return: (Dictionary) suitable for entry into djangot-tables2
+
+        ToDo: Could see_marks benefit from this?
+        Warning: If iterating over students, should prefetch marks
+    """
+    return_dict = {'last_name': student.last_name,
+                   'first_name': student.first_name,
+                   'username': student.username,
+                   'number': student.info.student_number}
+
+    for smark in student.marks.iterator():
+        return_dict[smark.category.name.replace(' ','')]=smark.score
+
+    return return_dict
+
+@staff_required()
+def see_all_marks(request):
+    """ A view for returning all student marks.
+    """
+
+    # From scratch, we summon all student data. Ensure to prefetch the reverse relationships,
+    # otherwise this will hit the database a lot
+    table_data = [];
+    students = User.objects.prefetch_related('marks', 'info').filter(is_staff=False)
+    for student in students:
+        table_data.append(get_student_marks_for_table(student))
+
+    # Generate the table. This is dynamic to the number of categories which currently exists
+    table = define_all_marks_table()(table_data)
+    RequestConfig(request, paginate=False).configure(table)
+    return render(request, 'Problems/list_table.html',
+            {'table': table,
+             'title': 'All Marks',
+            })
+
+
+@staff_required()
+def submit_marks(request, category=''):
     """ A view for populating a table and submitting marks.
         Input: category (String) indicating the primary key of the category.
+
+        AJAX: Requires input (score, category, user), which are strings but can
+              be cast as (float, int, int). Returns json element
+              'success': (Boolean) indicating whether the mark was successfuly recorded
+              'response': (String) with a message
     """
 
     #Standard handling
@@ -1951,21 +2032,52 @@ def submit_marks(request, category='all'):
         # We always need this to populate the scroller
         list_of_categories = ExemptionType.objects.all()
 
-        if category=="all":
-            this_category = list_of_categories
-        else:
+        if category:
             try:
                 this_category = list_of_categories.filter(pk=int(category))
             except Exception as e:
                 return Http404('No such category: {}'.format(str(e)))
+        else:
+            this_category = list_of_categories.latest('id')
+            category = str(this_category.pk)
 
+        marks = StudentMark.objects.filter(category=this_category)
+        table = MarkSubmitTable(marks)
+        RequestConfig(request).configure(table)
 
+        #Get the address of the ajax method (which is just this view as well)
+        ajax_url = reverse('submit_marks')
 
+        return render(request, 'Problems/submit_marks.html',
+                {'table':table,
+                 'category': category,
+                 'list_of_categories': list_of_categories,
+                 'ajax_url': ajax_url,
+                })
 
+    elif request.method == "POST": # Score input
+        data_dict = request.POST
+        try:
+            score = float(data_dict['score'])
+            cat   = int(data_dict['category'])
+            user  = int(data_dict['user'])
 
+            category = get_object_or_404(ExemptionType, pk=cat)
+            user     = get_object_or_404(User, pk=user)
+            smark    = StudentMark.objects.get(user=user, category=category)
 
-    elif request.method == "POST":
-        pass
+            smark.set_score(score)
+
+            response_string= "Mark for {user} successfully recorded".format(user=user.username)
+            ret_data = {'success': True, 'response':response_string}
+            
+            log_entry = create_marks_log_entry(smark,request.user)
+            append_to_log(log_entry, settings.MARKS_LOG)
+
+        except Exception as e:
+            ret_data = {'success': False, 'response': str(e)}
+
+        return HttpResponse(json.dumps(ret_data))
 
 
 # ------------------ (end) Marks  ------------------ #

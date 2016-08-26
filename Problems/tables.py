@@ -3,7 +3,7 @@ from django_tables2 import tables, Column, Table
 from django.utils.html import format_html
 from django.core.urlresolvers import reverse
 
-from .models import MarkedQuestion, Quiz, StudentQuizResult, StudentDocument, StudentMark
+from .models import MarkedQuestion, Quiz, StudentQuizResult, StudentDocument, StudentMark, ExemptionType
 
 class MathColumn(Column):
     def render(self, value, record):
@@ -102,24 +102,48 @@ class MarksTable(Table):
         return str(record.category.out_of)
 
     def render_percent(self, value, record):
-        return str(round(100*record.score/record.category.out_of,2))
+        if record.score:
+            return str(round(100*record.score/record.category.out_of,2))
+        else:
+            return ''
 
 class MarkSubmitTable(Table):
-    last_name  = Column(verbose_name="First Name", accessor='sm.user.last_name')
-    first_name = Column(verbose_name="Name", accessor='sm.user.first_name')
-    username   = Column(verbose_name="UTORid", accessor='sm.user.username')
-    number     = Column(verbose_name="Student Number", accessor='sm.user.info.student_number')
-
+    last_name  = Column(verbose_name="First Name", accessor='user.last_name')
+    first_name = Column(verbose_name="Last Name", accessor='user.first_name')
+    username   = Column(verbose_name="UTORid", accessor='user.username')
+    number     = Column(verbose_name="Student Number", accessor='user.info.student_number')
+    score      = Column(verbose_name="Score", empty_values=())
 
     class Meta:
-        model = StudentMark
         attrs = {'class': 'paleblue'}
 
-    def render_name(self, value, record):
-        return record.category.name
+    def render_score(self, value, record):
+        template = "<input name='user_{userpk}' data-category='{category}' data-user='{userpk}' value='{score}' size='10'>"
+        if record.score is None:
+            score = ''
+        else:
+            score = record.score
+        return format_html(template, userpk=record.user.pk, category=record.category.pk, score=score)
 
-    def render_out_of(self, value, record):
-        return str(record.category.out_of)
+class SeeAllMarksTable(Table):
+    last_name  = Column(verbose_name="Last Name")
+    first_name = Column(verbose_name="First Name")
+    username   = Column(verbose_name="UTORid")
+    number     = Column(verbose_name="Student Number")
 
-    def render_percent(self, value, record):
-        return str(round(100*record.score/record.category.out_of,2))
+    class Meta:
+        attrs = {'class': 'paleblue'}
+
+def define_all_marks_table():
+    """ A helper function which extends the base SeeAllMarksTable for variable category types.
+        Input: categories (List of ExemptionType) - Add these as columns to the table
+        Return: (SeeAllMarksTable, Table) object
+    """
+    
+    categories = ExemptionType.objects.all()
+    attrs = dict( (cat.name.replace(' ', ''), Column(verbose_name=cat.name)) for cat in categories)
+    # Meta is not inherited, so need to explicitly define it
+    attrs['Meta'] = type('Meta', (), dict(attrs={"class":"paleblue", "orderable":"True"}, order_by=("last_name","first_name",)))
+    dyntable = type('FullMarksTable', (SeeAllMarksTable,), attrs)
+
+    return dyntable
