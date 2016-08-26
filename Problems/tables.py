@@ -103,3 +103,23 @@ class MarksTable(Table):
 
     def render_percent(self, value, record):
         return str(round(100*record.score/record.category.out_of,2))
+
+class MarkSubmitTable(Table):
+    last_name  = Column(verbose_name="First Name", accessor='sm.user.last_name')
+    first_name = Column(verbose_name="Name", accessor='sm.user.first_name')
+    username   = Column(verbose_name="UTORid", accessor='sm.user.username')
+    number     = Column(verbose_name="Student Number", accessor='sm.user.info.student_number')
+
+
+    class Meta:
+        model = StudentMark
+        attrs = {'class': 'paleblue'}
+
+    def render_name(self, value, record):
+        return record.category.name
+
+    def render_out_of(self, value, record):
+        return str(record.category.out_of)
+
+    def render_percent(self, value, record):
+        return str(round(100*record.score/record.category.out_of,2))

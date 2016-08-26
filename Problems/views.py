@@ -1871,10 +1871,51 @@ def see_marks(request):
     marks = StudentMark.objects.filter(user=user)
 
     marks_table = MarksTable(marks)
+
     return render(request, 'Problems/list_table.html', 
                   {'table': marks_table,
                    'title': 'Current Marks',
                   })
+
+def append_to_log(the_dict, log_location):
+    """ A helper function which appends to a python dictionary to a data-log.
+        Inputs: the_dict (Dictionary) - A python dictionary to be appended
+                log_location (string) - The path to the log-file
+        Return: Void
+    """
+
+    # We will use JSON serialization. Open the log as an 'append', and dump the dictionary
+    with open(log_location, 'a') as f:
+        json.dump(the_dict, f)
+        f.write(os.linesep)
+
+@staff_required()
+def submit_marks(request, category='all'):
+    """ A view for populating a table and submitting marks.
+        Input: category (String) indicating the primary key of the category.
+    """
+
+    #Standard handling
+    if request.method == "GET":
+
+        # We always need this to populate the scroller
+        list_of_categories = ExemptionType.objects.all()
+
+        if category=="all":
+            this_category = list_of_categories
+        else:
+            try:
+                this_category = list_of_categories.filter(pk=int(category))
+            except Exception as e:
+                return Http404('No such category: {}'.format(str(e)))
+
+
+
+
+
+
+    elif request.method == "POST":
+        pass
 
 
 # ------------------ (end) Marks  ------------------ #

@@ -165,6 +165,7 @@ SITE_URL = ''
 NOTES_URL = ''
 MEDIA_URL  = '/media/'
 LATEX_ROOT = '/home/tholden/djangotest/latex'
+MARKS_LOG = '/'
 
 DEFAULT_FROM_ADDRESS = 'tholden@math.toronto.edu'
 
