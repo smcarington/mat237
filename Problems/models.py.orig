@@ -524,6 +524,7 @@ class Typo(models.Model):
         self.verified = True
         self.save()
 
+<<<<<<< HEAD
 class StudentMark(models.Model):
     user = models.ForeignKey(User)
     category = models.ForeignKey(ExemptionType)
@@ -534,7 +535,7 @@ class StudentMark(models.Model):
 
     def __str__(self):
         return "{user}: {score} in {category}".format(user=self.user, category=self.category.name, score=str(self.score)) 
-
+=======
 class StudentInfo(models.Model):
     """ A model for storing student specific information. Initialized on registration and otherwise
         should be immutable.
@@ -543,3 +544,4 @@ class StudentInfo(models.Model):
     student_number = models.CharField(max_length=20)
     tutorial = models.CharField(max_length=20)
     lecture = models.CharField(max_length=20)
+>>>>>>> master

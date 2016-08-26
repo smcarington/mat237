@@ -28,7 +28,7 @@
             $('#submit').click( function(event) {
                 event.preventDefault()
                 value =  $("#num_tests").val();
-                $.post('/quiz/test/'+{{mquestion.pk}}+'/', 
+                $.post('{% url "test_quiz_question" mpk=mquestion.pk %}', 
                     {'num_tests': value},
                     function (data) {
                         $("#test_results").html(data);
