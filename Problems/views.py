@@ -689,7 +689,7 @@ def get_ps(request, filename):
     # Need to make sure students can only see their own files, or you are a staff member
     if (user.username in filename) or (user.is_staff):
         path = "/".join([settings.LATEX_ROOT, filename])
-        return sendfile(request, path, attachment=True)
+        return sendfile(request, path)
     else:
         return HttpResponseForbidden()
  
