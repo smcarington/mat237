@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import User
 from django.core.mail import send_mail
 from django.conf import settings
+from django.db import IntegrityError
 
 from Problems.models import StudentInfo
 
@@ -45,13 +46,16 @@ The {site_name} Instructors"""
                 
                 # Create user instance in database with randomly generated password. Email
                 # this password to the user
+
+                if User.objects.get(username=username).exists():
+                    continue
+
                 user  = User(username=username, 
                              email=email,
                              first_name=first_name,
                              last_name=last_name)
                 rpass = User.objects.make_random_password()
                 user.set_password(rpass)
-                user.save()
 
                 # Now create the additional user information model
 
