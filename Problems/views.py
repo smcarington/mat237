@@ -2197,4 +2197,15 @@ def verify_typo(request):
 
 # ------------------ Typos (end) ------------------ #
 
+@staff_required()
+def latex_playground(request):
+    """ A view for people to play around with latex.
+    """
 
+    file_path = settings.MEDIA_ROOT + "/latex_help.txt"
+    with open(file_path, 'r') as f:
+        latex_help = f.read()
+
+    return render(request, 'Problems/latex_playground.html',
+            {'latex_help': latex_help,
+            })

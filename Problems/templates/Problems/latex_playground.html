@@ -1,0 +1,47 @@
+{% extends 'Problems/base.html' %}
+
+{% comment %}
+    Has context {{latex_help}}
+{% endcomment %}
+
+{% block title %}
+<title>LaTeX Playground- {{site_name}}</title>
+{% endblock %}
+
+{% block content %}
+
+<h1>LaTeX Playground</h1>
+<div class="quiz-divs">
+    <label>Enter code here:</label><textarea cols="40" id="id_text" name="text" rows="10">
+Use <code>&#92;(</code> and <code>&#92;)</code> to enclose mathematics. For example, \(ax^3 + bx^2 + cx + d = 0 \). Some items render better when <code>\displaystyle</code> is prepended to the text, for example:
+<br>
+\( \displaystyle \frac{d}{dx} \int_a^{f(x)} g(s) d s = g(f(x)) \).
+    </textarea>
+</div>
+
+<div id="form_preview_wrapper">
+    <p><b>Preview</b></p>
+    <div id="form_preview" class="diff">
+
+    </div>
+</div>
+
+<a href="#latex_help" data-toggle="collapse">Get LaTeX Tips</a>
+<div id="latex_help" class="collapse">
+    {{latex_help | safe}}
+</div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(document).ready( function() {
+            $("#form_preview").html($("#id_text").val());
+            renderMathInElement( $("#form_preview")[0] );
+
+            $("#id_text").keyup( function() {
+                $("#form_preview").html($(this).val());
+                renderMathInElement( $("#form_preview")[0] );
+            });
+        });
+</script>
+{% endblock %}
