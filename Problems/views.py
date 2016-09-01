@@ -25,7 +25,7 @@ from operator import attrgetter
 from sendfile import sendfile
 
 from django.contrib.auth.models import User
-from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, StudentVote, StudentDocument, Typo, StudentMark
+from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, StudentVote, StudentDocument, Typo, StudentMark, StudentInfo
 from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, StudentDocumentForm, ExemptionForm, CategoryForm, TypoForm, PopulateCategoryForm
 import random
 import math
@@ -2004,7 +2004,10 @@ def see_all_marks(request):
     table_data = [];
     students = User.objects.prefetch_related('marks', 'info').filter(is_staff=False)
     for student in students:
-        table_data.append(get_student_marks_for_table(student))
+        try:
+            table_data.append(get_student_marks_for_table(student))
+        except StudentInfo.DoesNotExist:
+            continue
 
     # Generate the table. This is dynamic to the number of categories which currently exists
     table = define_all_marks_table()(table_data)
