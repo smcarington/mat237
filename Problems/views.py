@@ -1890,7 +1890,7 @@ def populate_category(request):
             exemption_pk = int(request.POST['exemption'])
             category = get_object_or_404(ExemptionType, pk=exemption_pk)
         except:
-            return Http404('Non integer primary key')
+            raise Http404('Non integer primary key')
 
         ret_flag = populate_category_helper(category)
 
@@ -2039,13 +2039,13 @@ def submit_marks(request, category=''):
             try:
                 this_category = list_of_categories.filter(pk=int(category))
             except Exception as e:
-                return Http404('No such category: {}'.format(str(e)))
+                raise Http404('No such category: {}'.format(str(e)))
         else:
             try:
                 this_category = list_of_categories.latest('id')
                 category = str(this_category.pk)
             except Exception as e:
-                return Http404('No mark objects')
+                raise Http404('No mark objects')
 
         marks = StudentMark.objects.filter(category=this_category)
         table = MarkSubmitTable(marks)
