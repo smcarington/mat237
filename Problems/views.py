@@ -2041,8 +2041,11 @@ def submit_marks(request, category=''):
             except Exception as e:
                 return Http404('No such category: {}'.format(str(e)))
         else:
-            this_category = list_of_categories.latest('id')
-            category = str(this_category.pk)
+            try:
+                this_category = list_of_categories.latest('id')
+                category = str(this_category.pk)
+            except Exception as e:
+                return Http404('No mark objects')
 
         marks = StudentMark.objects.filter(category=this_category)
         table = MarkSubmitTable(marks)
