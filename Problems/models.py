@@ -547,3 +547,10 @@ class StudentInfo(models.Model):
     student_number = models.CharField(max_length=20)
     tutorial = models.CharField(max_length=20)
     lecture = models.CharField(max_length=20)
+
+    def __str__(self):
+        return "{fn} {ln} - {sn}: Lecture {l}, Tutorial {t}".format(fn = self.user.first_name,
+                                                                    ln = self.user.last_name,
+                                                                    sn = self.student_number,
+                                                                    t  = self.tutorial,
+                                                                    l  = self.lecture)
