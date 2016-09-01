@@ -69,4 +69,5 @@ urlpatterns = [
     url(r'^administrative/marks/submit_marks/$', views.submit_marks, name='submit_marks'),
     url(r'^administrative/marks/see_all_marks/$', views.see_all_marks, name='see_all_marks'),
     url(r'^administrative/marks/marks_search/$', views.marks_search, name='marks_search'),
+    url(r'^latex_playground/$', views.latex_playground, name='latex_playground'),
 ]
