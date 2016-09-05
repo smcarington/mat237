@@ -2007,7 +2007,15 @@ def see_all_marks(request):
         try:
             table_data.append(get_student_marks_for_table(student))
         except StudentInfo.DoesNotExist:
-            continue
+            # Make en empty StudentInfo object so that the student still appears in the grade sheet list
+            student_info = StudentInfo(user=student,
+                                student_number = '',
+                                tutorial = '',
+                                lecture = '')
+            student_info.save()
+            table_data.append(get_student_marks_for_table(student))
+
+
 
     # Generate the table. This is dynamic to the number of categories which currently exists
     table = define_all_marks_table()(table_data)
