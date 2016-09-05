@@ -548,6 +548,12 @@ class StudentInfo(models.Model):
     tutorial = models.CharField(max_length=20)
     lecture = models.CharField(max_length=20)
 
+    def update(self, student_number, tutorial, lecture):
+        self.student_number = student_number
+        self.tutorial = tutorial
+        self.lecture = lecture
+        self.save()
+
     def __str__(self):
         return "{fn} {ln} - {sn}: Lecture {l}, Tutorial {t}".format(fn = self.user.first_name,
                                                                     ln = self.user.last_name,
