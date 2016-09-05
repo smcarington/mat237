@@ -46,35 +46,46 @@ The {site_name} Instructors"""
                 
                 # Create user instance in database with randomly generated password. Email
                 # this password to the user
+                
+                user, created = User.objects.get_or_create(username=username, 
+                                                     email=email,
+                                                     first_name=first_name,
+                                                     last_name=last_name)
 
-                if User.objects.get(username=username).exists():
-                    continue
-
-                user  = User(username=username, 
-                             email=email,
-                             first_name=first_name,
-                             last_name=last_name)
-                rpass = User.objects.make_random_password()
-                user.set_password(rpass)
-
-                # Now create the additional user information model
-
-                user_info = StudentInfo(user = user,
+                if not created:
+                    print('User {} {} already exists. Updating information'.format(first_name, last_name))
+                    try: # If somehow the info does not exist, we make it
+                        user.info.update(student_number = student_number,
+                                     tutorial = tutorial,
+                                     lecture = lecture)
+                    except StudentInfo.DoesNotExist as e:
+                        user_info = StudentInfo(user = user,
                                         student_number = student_number,
                                         tutorial = tutorial,
                                         lecture = lecture)
-                user_info.save()
-                
+                        user_info.save()
+                else:
+                    print('Creating user for {} {}.'.format(first_name, last_name))
+                    rpass = User.objects.make_random_password()
+                    user.set_password(rpass)
+                    user.save()
 
-                # Now send the email
-                custom_message = body.format(username = username, 
-                                             password = rpass, 
-                                             site_name= settings.SITE_NAME,
-                                             site_url = settings.SITE_URL)
+                    # Now create the additional user information model
+                    user_info = StudentInfo(user = user,
+                                            student_number = student_number,
+                                            tutorial = tutorial,
+                                            lecture = lecture)
+                    user_info.save()
 
-                send_mail(subject_line, custom_message, "tholden@math.toronto.edu", [email])
+                    # Now send the email
+                    custom_message = body.format(username = username, 
+                                                 password = rpass, 
+                                                 site_name= settings.SITE_NAME,
+                                                 site_url = settings.SITE_URL)
 
-                print('Email sent to {first} {last} with username: {username} at {email}'.format(first=first_name, last=last_name,username=username, email=email))
+                    send_mail(subject_line, custom_message, "tholden@math.toronto.edu", [email])
+
+                    print('Email sent to {first} {last} with username: {username} at {email}'.format(first=first_name, last=last_name,username=username, email=email))
             except Exception as e:
                 print(e)
                 print('ERROR: {first} {last} with username: {username} at {email}. \n Exception: {e}'.format(first=first_name, last=last_name, username=username, email=email, e=e))
