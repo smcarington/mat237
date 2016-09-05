@@ -500,6 +500,10 @@ label.diff {
     overflow-x: scroll;
 }
 
+table.diff td {
+    padding: 5px;
+}
+
 
 @media (max-width: 1200px) {
    .navbar-header {
