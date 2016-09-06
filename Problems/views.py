@@ -1134,14 +1134,13 @@ def isnumber(string):
     except:
         return False
 
-
-@staff_required()
 def edit_choices(request, mpk):
     """
         View which handles the ability to add/edit choices.
         Input: mpk - (integer) the marked question primary key
     """
 
+    import pdb; pdb.set_trace()
     mquestion = get_object_or_404(MarkedQuestion, pk=mpk)
     error_message = ''
 
@@ -1468,9 +1467,15 @@ def get_answer(question, choices):
         Depends: simpleeval.simple_eval
     """
     answer = question.answer
+    if re.findall(r'{v\[\d+\]}', answer): # matches no variables
+        answer = answer.format(v=choices.split(';'))
+        answer = eval_sub_expression(answer)
+
     try:
         # Substitute the variables into the string and evaluate the functions dictionary
-        eval_string = answer.format(v=choices.split(';'))
+#        eval_string = answer.format(v=choices.split(';'))
+        # Remove whitespace before evaluating
+        eval_string = answer.replace(' ', '')
         functions = eval(question.functions)
         functions.update(settings.PREDEFINED_FUNCTIONS)
 
@@ -1478,10 +1483,11 @@ def get_answer(question, choices):
     except (SyntaxError, NameNotDefined,) as e:
         # Enter this exception if the answer is not one that can be evaluated.
         # In that case, the answer is just the answer
-        if question.q_type == "MC":
-            return answer
-        else:
-            raise e
+#        if question.q_type == "MC":
+#            return answer
+#        else:
+#            raise e
+        return eval_string
 
     except Exception as e: 
         raise e
