@@ -1486,7 +1486,7 @@ def get_answer(question, choices):
 #            return answer
 #        else:
 #            raise e
-        return eval_string
+        return answer
 
     except Exception as e: 
         raise e
