@@ -1140,7 +1140,6 @@ def edit_choices(request, mpk):
         Input: mpk - (integer) the marked question primary key
     """
 
-    import pdb; pdb.set_trace()
     mquestion = get_object_or_404(MarkedQuestion, pk=mpk)
     error_message = ''
 
