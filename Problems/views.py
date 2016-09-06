@@ -1466,6 +1466,8 @@ def get_answer(question, choices):
         Depends: simpleeval.simple_eval
     """
     answer = question.answer
+    if choices is None:
+        return answer
     if re.findall(r'{v\[\d+\]}', answer): # matches no variables
         answer = answer.format(v=choices.split(';'))
         answer = eval_sub_expression(answer)
