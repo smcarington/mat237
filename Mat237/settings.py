@@ -181,6 +181,8 @@ COURSE_MODULES = [
     'quizzes',
     'administrative']
 
+SHOW_QUESTION_DETAILS = True
+
 UNIVERSAL_CONSTANTS =  {"pi": math.pi, "e": math.e}
 PREDEFINED_FUNCTIONS = {"sin": lambda x: math.sin(x),
                         "cos": lambda x: math.cos(x),

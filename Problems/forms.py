@@ -15,7 +15,10 @@ class AnnouncementForm(forms.ModelForm):
 class QuestionForm(forms.ModelForm):
     class Meta:
         model = Question
-        fields = ('difficulty', 'text')
+        fields = ('difficulty', 'text', 'solution')
+        widgets = {
+            'solution': forms.Textarea({'style':'width: 100%'}),
+        }
 
 class ProblemSetForm(forms.ModelForm):
     class Meta:

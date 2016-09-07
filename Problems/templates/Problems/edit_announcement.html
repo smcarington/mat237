@@ -37,6 +37,11 @@
     <div id="form_preview" class="diff">
 
     </div>
+    <br>
+    <p><b>Solution</b></p>
+    <div id="solution_preview" class="diff">
+
+    </div>
 </div>
 {% endblock %}
 
@@ -48,6 +53,7 @@
 
 {% block script %}
     <script>
+        // ToDo: Make a function to minimize code redundancy 
         $(document).ready( function() {
 
             if ($("#id_text").length) {
@@ -68,6 +74,17 @@
                 });
             } else {
                 $("#form_preview_wrapper").remove();
+            }
+
+            if ($("#id_solution").length) {
+                $("#solution_preview").html($("#id_solution").val());
+                renderMathInElement( $("#solution_preview")[0] );
+
+                $("#id_solution").keyup( function() {
+                    $("#solution_preview").html($(this).val());
+                    renderMathInElement( $("#solution_preview")[0] );
+                });
+
             }
         });
     </script>
