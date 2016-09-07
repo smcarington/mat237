@@ -44,9 +44,11 @@
         <hr class="fadehr">
         {% endfor %}
         </ol>
+        {% if show_details %}
         <p>All Text: <input type="checkbox" id="quest-all" name="quest-all"> &nbsp;
            All Solution: <input type="checkbox" id="sol-all" name="sol-all">
         </p>
+        {% endif %}
     </div>
 
     <input type="hidden" id="problem-set" value="{{problem_set.pk}}">
