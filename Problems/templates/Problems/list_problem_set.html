@@ -5,6 +5,7 @@
     Has element problem_set which is a db-item ProblemSet
     Has element problems which is a list of problems associated
         to problem_set. Indeed, problems=problem_set.problems
+    ContextProcessor provides "show_details" which is settings.SHOW_QUESTION_DETAILS
 {% endcomment %}
 
 {% block title %}
@@ -20,15 +21,22 @@
         <li class="diff-{{prob.difficulty}}"> 
             <div class="ps-list-inner-left">
                 {{ prob.difficulty | num2diff }}
-                <a href="{% url 'question_details' pk=prob.pk %}">(Details)</a>
+                {% if show_details %}
+                    <a href="{% url 'question_details' pk=prob.pk %}">(Details)</a>
+                {% endif %}
+                {% if prob.solution %}
+                    <a href="{% url 'question_solution' question_pk=prob.pk%}">(Solution)</a>
+                {% endif %}
             </div>
             <div class="ps-list-inner-right">
                 {{prob.text | safe }}
             </div>
         </li>
-            (Text: <input type="checkbox" name="q-{{prob.pk}}"> &nbsp;
-            Solution: <input type="checkbox" name="s-{{prob.pk}}">
-            )
+            {% if show_details %}
+                (Text: <input type="checkbox" name="q-{{prob.pk}}"> &nbsp;
+                Solution: <input type="checkbox" name="s-{{prob.pk}}">
+                )
+            {% endif %}
             {% if user.is_staff %}
             <a href="{% url 'edit_question' pk=prob.pk %}"><small>Edit</small></a>
             <a href="{% url 'delete_item' pk=prob.pk objectStr='question' %}"><small>Delete</small></a>

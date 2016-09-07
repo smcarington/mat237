@@ -36,6 +36,7 @@ class Question(models.Model):
     attempts    = models.IntegerField(default=0)
     solved      = models.IntegerField(default=0)
     stud_diff   = models.IntegerField(default=1)
+    solution    = models.TextField(default='', blank=True)
 
     def __str__(self):
         return self.text[0:20]

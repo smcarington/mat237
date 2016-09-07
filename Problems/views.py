@@ -226,6 +226,8 @@ def notes(request, page_number=''):
 def administrative(request):
         return render(request, 'Problems/administrative.html')
 
+# --------- Problem Sets and Questions (fold) --------- #
+
 @login_required
 def list_problem_set(request, pk):
     ps = get_object_or_404(ProblemSet, pk=pk)
@@ -260,6 +262,14 @@ def question_details(request, pk):
          'ajax_url': ajax_url,
         })
 
+@login_required
+def question_solution(request, question_pk):
+    problem = get_object_or_404(Question, pk=question_pk)
+
+    return render(request, 'Problems/question_solution.html',
+            {'problem': problem,
+            })
+
 @csrf_protect
 @login_required
 def update_status(request):
@@ -288,6 +298,8 @@ def update_status(request):
         raise HttpResponseForbidden()
 
     return HttpResponse(json.dumps(response_data))
+
+# --------- Problem Sets and Questions (end) --------- #
 
 @staff_required()
 def add_user(request):
