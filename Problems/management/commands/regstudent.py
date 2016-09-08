@@ -48,9 +48,11 @@ The {site_name} Instructors"""
                 # this password to the user
                 
                 user, created = User.objects.get_or_create(username=username, 
-                                                     email=email,
                                                      first_name=first_name,
                                                      last_name=last_name)
+                # Email could change between updates
+                user.email = email
+                user.save()
 
                 if not created:
                     print('User {} {} already exists. Updating information'.format(first_name, last_name))
