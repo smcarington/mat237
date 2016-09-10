@@ -72,6 +72,12 @@ class QuizResultTable(Table):
         attrs = {'class': 'paleblue'}
         order_by = 'q_num'
 
+    def render_correct(self, value, record):
+        return format_html('<span class="diff">{}</span>', value)
+
+    def render_guess(self, value, record):
+        return format_html('<span class="diff">{}</span>', value)
+
 class NotesTable(Table):
     exemption = Column(verbose_name="Exemption")
     uploaded  = Column(verbose_name="Uploaded")

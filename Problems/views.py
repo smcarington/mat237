@@ -1684,8 +1684,8 @@ def quiz_details(request, sqrpk):
         </div>
         {correct}
         <ul>
-            <li><b>Correct Answer</b>: {answer}
-            <li><b>Your Answer</b>: &quot;{guess_string}&quot; evaluated to {guess}
+            <li><b>Correct Answer</b>: <span class="diff">{answer}</span>
+            <li><b>Your Answer</b>: <span class="diff">&quot;{guess_string}&quot; evaluated to {guess}</span>
         </ul>
     """
 
