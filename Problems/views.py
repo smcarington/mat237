@@ -230,7 +230,14 @@ def administrative(request):
 
 @login_required
 def list_problem_set(request, pk):
+    """ Finds the problems corresponding to the given problem set and displays them.
+        Input: (pk) The problem set primary key
+    """
     ps = get_object_or_404(ProblemSet, pk=pk)
+
+    # Ensure that if the problem set is not visible, students cannot see it
+    if not ps.visible and not request.user.is_staff:
+        raise Http404()
 
     # There is no standary sort_by on the charfield that returns difficulty, so we use the 'extra' method
     #CASE_SQL = '(case when difficulty="E" then 1 when difficulty="M" then 2 when difficulty="H" then 3 when difficulty="I" then 4 end)'
