@@ -504,6 +504,10 @@ table.diff td {
     padding: 5px;
 }
 
+.unavailable {
+    opacity: 0.5;
+}
+
 
 @media (max-width: 1200px) {
    .navbar-header {

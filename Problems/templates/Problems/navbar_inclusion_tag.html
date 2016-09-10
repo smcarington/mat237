@@ -26,7 +26,11 @@
                 <a class="{% check_active request 'problem_set' %}" href="javascript:void(0)" data-toggle="dropdown" class="dropdown-toggle">Problem Sets<b class="caret"></b></a>
                     <ul class="dropdown-menu">
                         {% for ps in problem_sets %}
-                        <li><a href="{% url 'list_problem_set' pk=ps.pk %}">{{ ps.title }}</a></li>
+                            {% if ps.visible %}
+                                <li><a href="{% url 'list_problem_set' pk=ps.pk %}">{{ ps.title }}</a></li>
+                            {% elif request.user.is_staff %}
+                                <li><a class="unavailable" href="{% url 'list_problem_set' pk=ps.pk %}">{{ ps.title }}</a></li>
+                            {% endif %}
                         {% endfor %}
                     </ul>
                 {% endif %}
