@@ -29,7 +29,7 @@
             {% if high_score != -1 and high_score %}
             Your highest score is {{high_score}}/{{quiz.out_of}}
             {% endif %}
-            <li> In question which requires a numerical answer should be recorded to at least <b>4 decimal points</b>
+            <li> Any question which requires a numerical answer should be recorded to at least <b>4 decimal points</b>
         </ul>
 
         <a class="btn btn-default" href="{% url 'display_question' sqrpk=record.pk %}">Begin Quiz</a>
