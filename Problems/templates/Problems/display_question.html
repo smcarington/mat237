@@ -64,7 +64,7 @@
                 }, 
                 function(data) {
 //                    document.write(data),
-                    location.reload()
+                    location.replace("{% url 'display_question' sqrpk=sqrpk %}")
                     renderMathInElement( $(".diff")[0] );
                 }, 
             "text");

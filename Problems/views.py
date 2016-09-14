@@ -976,6 +976,14 @@ def new_quiz(request):
         if form.is_valid():
             quiz = form.save(commit=False)
             quiz.update_out_of()
+            # Create an exemption type for the quiz and update it's out_of field
+            exemption, created = ExemptionType.objects.get_or_create(name=quiz.name)
+            exemption.quiz_update_out_of(quiz)
+            
+            # For database convenience, populate the category as well. Updates will be made
+            # in the function 'display_question', which will also take care of any student whose
+            # record was not made to begin with
+            ret_flag = populate_category_helper(exemption)
             return redirect(administrative)
     else:
         form = QuizForm()
@@ -992,6 +1000,10 @@ def edit_quiz(request, quizpk):
         if form.is_valid():
             quiz = form.save()
             quiz.update_out_of()
+            # Since we might have changed the quiz's score, we also need to fix the
+            # exemption score
+            exemption, created = ExemptionType.objects.get_or_create(name=quiz.name)
+            exemption.quiz_update_out_of(quiz)
             return redirect('quiz_admin', quizpk=quiz.pk)
     else:
         form = QuizForm(instance=quiz)
@@ -1053,6 +1065,9 @@ def edit_quiz_question(request, quizpk, mpk=None):
             if form.is_valid():
                 mquestion = form.save(commit=False)
                 mquestion.update(quiz)
+                # Also update the exemption score, if necessary
+                exemption, created = ExemptionType.objects.get_or_create(name=mquestion.quiz.name)
+                exemption.quiz_update_out_of(mquestion.quiz)
                 return redirect('edit_choices', mpk=mquestion.pk)
         else:
             form = MarkedQuestionForm()
@@ -1064,6 +1079,9 @@ def edit_quiz_question(request, quizpk, mpk=None):
                 mquestion = form.save(commit=False)
                 mquestion.update(quiz)
                 mquestion.quiz.update_out_of()
+                # Also update the exemption score, if necessary
+                exemption, created = ExemptionType.objects.get_or_create(name=mquestion.quiz.name)
+                exemption.quiz_update_out_of(mquestion.quiz)
 
                 # Check to see if there are any possible issues with the format of the question
                 return redirect('quiz_admin', quizpk=quiz.pk)
@@ -1520,7 +1538,6 @@ def display_question(request, sqrpk, submit=None):
 
         Depends: get_return_string, mark_question, generate_next_question
     """
-
     sqr = StudentQuizResult.objects.select_related('quiz').get(pk=sqrpk)
     string_answer = ''
     error_message = ''
@@ -1566,8 +1583,9 @@ def display_question(request, sqrpk, submit=None):
             if not is_last: # There are more questions, so make the next one
                 q_string, mc_choices = generate_next_question(sqr)
                 string_answer = ''
-            else:
+            else: # The quiz is over, so generate the result table. Also, update the student mark
                 result_table = get_result_table(sqr.result)
+                update_marks(sqr) # Call a helper method for updating the student's marks 
                 RequestConfig(request, paginate={'per_page', 10}).configure(result_table)
                 return render(request, 'Problems/completed_quiz.html', 
                         {   'sqr': sqr,
@@ -1582,7 +1600,6 @@ def display_question(request, sqrpk, submit=None):
 #                    return_data = 
 #                return HttpResponse(json.dumps(return_data))
 
-
         except ValueError as e:
             error_message = "The expression '{}' did not parse to a valid mathematical expression. Please try again".format(string_answer)
             # Technically if we get here, we do not have the mc_choices to return if it was a multiple choice
@@ -1596,6 +1613,20 @@ def display_question(request, sqrpk, submit=None):
              'string_answer': string_answer,
              'mc_choices': mc_choices,
              })
+
+def update_marks(quiz_result):
+    """ Helper function for updating quiz marks once a quiz has been completed.
+        Input: quiz_record (StudentQuizResult)
+    """
+    try:
+        exemption = get_object_or_404(ExemptionType, name=quiz_result.quiz.name)
+        cur_grade, created = StudentMark.objects.get_or_create(
+                        user     = quiz_result.student,
+                        category = exemption
+                    )
+        cur_grade.set_score(quiz_result.score, 'HIGH')
+    except Exception as e:
+        raise e
 
 def get_result_table(result):
     """ Turns the (string) StudentQuizResults.results into a table.

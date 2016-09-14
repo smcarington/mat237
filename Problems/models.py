@@ -209,7 +209,6 @@ class PollQuestion(models.Model):
         try:
             return "Poll {number}: {text}".format(number=self.poll.pk, text=self.text[0:20])
         except Exception as e:
-            import pdb; pdb.set_trace()
             return "Error"
 
 
@@ -309,6 +308,12 @@ class LinkedDocument(UserDocument):
 class ExemptionType(models.Model):
     name = models.CharField(max_length=200)
     out_of = models.IntegerField(default=0)
+
+    def quiz_update_out_of(self, quiz):
+        """ If the exemption corresponds to a quiz, we update the out_of category
+        """
+        self.out_of = quiz.out_of
+        self.save()
 
     def __str__(self):
         return self.name
@@ -533,8 +538,17 @@ class StudentMark(models.Model):
     class Meta:
         ordering = ['user__username', 'category']
 
-    def set_score(self, score):
-        self.score = score
+    def set_score(self, score, method=''):
+        """ Method to set the score. Allows input of method which determines how to set the score.
+            Input: score (integer) - the value to update
+                  method (String) - 'HIGH' only update the score if the input score is higher
+        """
+
+        if method == 'HIGH':
+            self.score = max(self.score or 0, score)
+        else:
+            self.score = score
+
         self.save()
 
     def __str__(self):
