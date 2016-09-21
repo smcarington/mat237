@@ -193,6 +193,8 @@ PREDEFINED_FUNCTIONS = {"sin": lambda x: math.sin(x),
                         "gobble": lambda *args: 1,
                         }
 
+AJAX_TYPOS_URL = ''
+
 try:
     from .local_settings import *
 except ImportError as e:

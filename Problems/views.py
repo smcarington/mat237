@@ -220,6 +220,7 @@ def notes(request, page_number=''):
     return render(request, 'Problems/notes.html', 
             {'docs':docs, 
              'cats':cat_names,
+             'ajax_url': settings.AJAX_TYPOS_URL,
              'link_url': link_url})
 
 @login_required
@@ -2221,6 +2222,11 @@ def see_typos(request, document=''):
 
     typos_url  = reverse('see_typos')
     verify_url = reverse('verify_typo')
+
+    if request.is_ajax():
+        return render(request, 'Problems/base_typo.html',
+                {'typos': typos,
+                })
 
     return render(request, 'Problems/see_typos.html', 
             {'typos': typos,
