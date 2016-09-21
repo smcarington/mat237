@@ -1,0 +1,10 @@
+{# Expects {{typos}} a list of Typos #}
+<ul>
+{% for typo in typos %}
+<li> 
+    <div class="diff question-detail"> 
+        <b>{{typo.get_document_display}}:</b> <small>(Page {{typo.page}})</small>
+        <p>{{typo.description}} </p>
+    </div>
+{% endfor %}
+</ul>

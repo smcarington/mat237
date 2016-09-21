@@ -265,8 +265,13 @@ ul li a {
     min-height: 80vh;
 }
 
+.typos {
+    padding: 20px;
+}
+
 .pdf-holder object {
     position: absolute;
+    padding-bottom: 30px;
 }
 
 .sidenote ul {

@@ -18,6 +18,10 @@
         <p>This browser does not support inline PDFs. Please download the PDF to view it: <a href="{{link_url}}">Download PDF</a></p>
     </object>
 </div>
+
+<div class="typos">
+    <a class="typos"href="javascript:void(0)">See typos</a>
+</div>
 {% endblock %}
 
 {% block sidenote %}
@@ -31,4 +35,21 @@
         {% endfor %}
         </ul>
     {% endfor %}
+{% endblock %}
+
+{% block script %}
+<script>
+    $(document).ready( function() {
+        $('a.typos').click ( function() {
+            $.get(
+                "{{ajax_url}}", 
+                function (data) {
+                    $('div.typos').html(data);
+                    renderMathInElement( $('div.typos')[0] );
+                },
+                'html'
+            );
+        })
+    });
+</script>
 {% endblock %}
