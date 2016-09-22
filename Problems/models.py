@@ -569,8 +569,13 @@ class StudentInfo(models.Model):
         self.lecture = lecture
         self.save()
 
+    class Meta:
+        ordering = ['user', 'student_number', 'lecture', 'tutorial']
+
     def __str__(self):
-        return "{fn} {ln} - {sn}: Lecture {l}, Tutorial {t}".format(fn = self.user.first_name,
+        return "({un}) {fn} {ln} - {sn}: Lecture {l}, Tutorial {t}".format(
+                                                                    un = self.user.username,
+                                                                    fn = self.user.first_name,
                                                                     ln = self.user.last_name,
                                                                     sn = self.student_number,
                                                                     t  = self.tutorial,
