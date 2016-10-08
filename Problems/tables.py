@@ -122,6 +122,7 @@ class MarkSubmitTable(Table):
 
     class Meta:
         attrs = {'class': 'paleblue'}
+        row_attrs = {'data-active': lambda record: record.user.is_active}
 
     def render_score(self, value, record):
         template = "<input name='user_{userpk}' data-category='{category}' data-user='{userpk}' value='{score}' size='10'>"
@@ -139,6 +140,7 @@ class SeeAllMarksTable(Table):
 
     class Meta:
         attrs = {'class': 'paleblue'}
+        row_attrs = {'data-active': lambda record: record.user.is_active}
 
 def define_all_marks_table():
     """ A helper function which extends the base SeeAllMarksTable for variable category types.
@@ -146,10 +148,15 @@ def define_all_marks_table():
         Return: (SeeAllMarksTable, Table) object
     """
     
-    categories = ExemptionType.objects.all()
+    categories = ExemptionType.objects.all().order_by('name')
     attrs = dict( (cat.name.replace(' ', ''), Column(verbose_name=cat.name)) for cat in categories)
     # Meta is not inherited, so need to explicitly define it
-    attrs['Meta'] = type('Meta', (), dict(attrs={"class":"paleblue", "orderable":"True"}, order_by=("last_name","first_name",)))
+    attrs['Meta'] = type('Meta', 
+                         (), 
+                         dict(attrs={"class":"paleblue", "orderable":"True"}, 
+                              order_by=("last_name","first_name",)
+                              )
+                         )
     dyntable = type('FullMarksTable', (SeeAllMarksTable,), attrs)
 
     return dyntable

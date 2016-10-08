@@ -2073,8 +2073,6 @@ def see_all_marks(request):
             student_info.save()
             table_data.append(get_student_marks_for_table(student))
 
-
-
     # Generate the table. This is dynamic to the number of categories which currently exists
     table = define_all_marks_table()(table_data)
     RequestConfig(request, paginate=False).configure(table)
