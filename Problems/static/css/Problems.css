@@ -513,6 +513,10 @@ table.diff td {
     opacity: 0.5;
 }
 
+tr[data-active="False"] {
+    background-color: red !important;
+}
+
 
 @media (max-width: 1200px) {
    .navbar-header {
