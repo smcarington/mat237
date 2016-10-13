@@ -722,14 +722,14 @@ def latexify_string(string):
     """
 
     ret_string = string
-    ret_string = re.sub(r'<ol>', r'\\begin{enumerate}', ret_string)
+    ret_string = re.sub(r'<ol.*?>', r'\\begin{enumerate}', ret_string)
     ret_string = re.sub(r'</ol>', r'\\end{enumerate}', ret_string)
-    ret_string = re.sub(r'<ul>', r'\\begin{itemize}', ret_string)
+    ret_string = re.sub(r'<ul.*?>', r'\\begin{itemize}', ret_string)
     ret_string = re.sub(r'</ul>', r'\\end{itemize}', ret_string)
-    ret_string = re.sub(r'<li>', r'\\item ', ret_string)
+    ret_string = re.sub(r'<li.*?>', r'\\item ', ret_string)
     ret_string = re.sub(r'(<br>)+', r'\\', ret_string)
-    ret_string = re.sub(r'<b>(.*)</b>', r'\\textbf{\1}', ret_string)
-    ret_string = re.sub(r'<i>(.*)</i>', r'\\emph{\1}', ret_string)
+    ret_string = re.sub(r'<b.*?>(.*)</b>', r'\\textbf{\1}', ret_string)
+    ret_string = re.sub(r'<i.*?>(.*)</i>', r'\\emph{\1}', ret_string)
     ret_string = re.sub(r'&lt;', r'<', ret_string)
     ret_string = re.sub(r'&gt;', r'>', ret_string)
 
