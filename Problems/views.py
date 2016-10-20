@@ -2216,7 +2216,7 @@ def see_typos(request, document=''):
         else:
             typos = Typo.objects.filter(verified=True, document=document)
 
-    typos.order_by('page')
+    typos=typos.order_by('page')
 
     typos_url  = reverse('see_typos')
     verify_url = reverse('verify_typo')

@@ -24,7 +24,7 @@
     <li> 
         <div class="diff question-detail"> 
             <b>{{typo.get_document_display}}:</b> <small>(Page {{typo.page}})</small>
-            <p>{{typo.description}} </p>
+            <p>{{typo.description | linebreaks}} </p>
             {% if user.is_staff %}
                 <a href="{% url 'edit_typo' typopk=typo.pk url_redirect=document%}"><small>Edit</small></a>
                 <a href="{% url 'delete_item' objectStr='typo' pk=typo.pk %}"><small>Delete</small></a>
