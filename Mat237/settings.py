@@ -189,9 +189,21 @@ PREDEFINED_FUNCTIONS = {"sin": lambda x: math.sin(x),
                         "tan": lambda x: math.tan(x),
                         "ln": lambda x: math.log(x, math.e),
                         "rand": lambda x,y: random.randint(x,y),
+                        "Rand": lambda x,y: NZRandInt(x,y),
                         "uni": lambda x,y,z: round(random.uniform(x,y),z),
                         "gobble": lambda *args: 1,
                         }
+
+def NZRandInt(x,y):
+    """ Generates a random non-zero number between x and y """
+    if x>0: # Behave like normal if x>0
+        return random.randint(x,y)
+    else:
+        if random.randint(0,1):
+            return random.randint(x,-1)
+        else:
+            return random.randint(1,y)
+
 
 AJAX_TYPOS_URL = ''
 
