@@ -688,7 +688,7 @@ def pdflatex(request):
 
         # Send the data to a helper function to add the pre-amble. Returns a string which
         # we will make into a file for compiling
-        ps_title = "Problem Set {num}".format(num=str(problem_set))
+        ps_title = problemSet.title 
         latex_source = create_latex_source(qlist, ps_title)
         # Sanitize the string of html tags
         latex_source = latexify_string(latex_source)
@@ -722,12 +722,12 @@ def latexify_string(string):
     """
 
     ret_string = string
-    ret_string = re.sub(r'<ol.*?>', r'\\begin{enumerate}', ret_string)
-    ret_string = re.sub(r'</ol>', r'\\end{enumerate}', ret_string)
-    ret_string = re.sub(r'<ul.*?>', r'\\begin{itemize}', ret_string)
-    ret_string = re.sub(r'</ul>', r'\\end{itemize}', ret_string)
-    ret_string = re.sub(r'<li.*?>', r'\\item ', ret_string)
-    ret_string = re.sub(r'(<br>)+', r'\\', ret_string)
+    ret_string = re.sub(r'<ol.*?>', r'\t\\begin{enumerate}', ret_string)
+    ret_string = re.sub(r'</ol>', r'\t\\end{enumerate}', ret_string)
+    ret_string = re.sub(r'<ul.*?>', r'\t\\begin{itemize}', ret_string)
+    ret_string = re.sub(r'</ul>', r'\t\\end{itemize}', ret_string)
+    ret_string = re.sub(r'<li.*?>', r'\t\t\\item ', ret_string)
+    ret_string = re.sub(r'(<br>)+', r'\n\\\\\n', ret_string)
     ret_string = re.sub(r'<b.*?>(.*)</b>', r'\\textbf{\1}', ret_string)
     ret_string = re.sub(r'<i.*?>(.*)</i>', r'\\emph{\1}', ret_string)
     ret_string = re.sub(r'&lt;', r'<', ret_string)
