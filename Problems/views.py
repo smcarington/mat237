@@ -727,7 +727,7 @@ def latexify_string(string):
     ret_string = re.sub(r'<ul.*?>', r'\t\\begin{itemize}', ret_string)
     ret_string = re.sub(r'</ul>', r'\t\\end{itemize}', ret_string)
     ret_string = re.sub(r'<li.*?>', r'\t\t\\item ', ret_string)
-    ret_string = re.sub(r'(<br>)+', r'\n\\\\\n', ret_string)
+    ret_string = re.sub(r'(<br>)+', r'\newline ', ret_string)
     ret_string = re.sub(r'<b.*?>(.*)</b>', r'\\textbf{\1}', ret_string)
     ret_string = re.sub(r'<i.*?>(.*)</i>', r'\\emph{\1}', ret_string)
     ret_string = re.sub(r'&lt;', r'<', ret_string)
