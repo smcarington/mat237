@@ -83,7 +83,7 @@ def mathify_choice(choice):
             mathstring += element + ','
         else:
             try:
-                match1 = re.match(r'rand\((-?\d+),(-?\d+)\)',element)
+                match1 = re.match(r'[rR]and\((-?\d+),(-?\d+)\)',element)
                 match2 = re.match(r'uni\((-?\d+),(-?\d+),(\d+)\)',element)
 
                 if match1:
