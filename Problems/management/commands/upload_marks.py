@@ -10,7 +10,7 @@ import logging
 
 class Command(BaseCommand):
     """ A command for uploading marks. Expects a comma separated list
-        username, email, student_number, first_name, last_name, score
+        username, student_number, first_name, last_name, score
     """
 
     def add_arguments(self, parser):
@@ -29,7 +29,7 @@ class Command(BaseCommand):
 
         for user in lines:
             try:
-                [username, email, student_number, first_name, last_name, score] = [item.strip() for item in user]
+                [username, student_number, first_name, last_name, score] = [item.strip() for item in user]
                 
                 user = User.objects.get(username=username, 
                                         first_name=first_name,
@@ -43,6 +43,6 @@ class Command(BaseCommand):
                 stud_mark, created = StudentMark.objects.get_or_create(user=user, category=exemption)
                 stud_mark.set_score(round(float(score)))
             except Exception as e:
-                string = 'ERROR: {first} {last} with username: {username}. \n Exception: {e}'.format(first=first_name, last=last_name, username=username, email=email, e=e)
+                string = 'ERROR: {first} {last} with username: {username}. \n Exception: {e}'.format(first=first_name, last=last_name, username=username, e=e)
                 print(string)
                 logging.error(string)
