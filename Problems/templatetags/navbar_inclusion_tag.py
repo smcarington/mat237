@@ -84,7 +84,7 @@ def mathify_choice(choice):
         else:
             try:
                 match1 = re.match(r'[rR]and\((-?\d+),(-?\d+)\)',element)
-                match2 = re.match(r'uni\((-?\d+),(-?\d+),(\d+)\)',element)
+                match2 = re.match(r'uni\((-?\d*\.?\d+),(-?\d*\.?\d+),(\d+)\)',element)
 
                 if match1:
                     field = '\mathbb Z'
@@ -93,6 +93,11 @@ def mathify_choice(choice):
                 elif match2:
                     field = '\mathbb R'
                     lower,upper,acc = match2.groups(0)
+                else:
+                    field = 'Un'
+                    lower = ''
+                    upper = ''
+                    acc   = ''
 
             #    lower,upper = element[1:].split(',')
             #    integer = '\mathbb Z'
