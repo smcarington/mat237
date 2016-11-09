@@ -13,7 +13,7 @@
 
 {% block content %}
     <h1> Add and Edit Choices</h1>
-    <a href="{% url 'quizzes' %}">&#171; Return to Quizzes</a>
+    <a href="{% url 'quiz_admin' quizpk=mquestion.quiz.pk %}">&#171; Return to {{mquestion.quiz.name}} Administration</a>
 
     <div class="diff quiz-divs question-detail">
         {{mquestion.problem_str}}
