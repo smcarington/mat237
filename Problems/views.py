@@ -10,7 +10,7 @@ from django.core.mail import send_mail, EmailMessage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.conf import settings
-from django.db.models import Max, Q
+from django.db.models import Max, Q, F
 from django.db import IntegrityError
 
 from django_tables2 import RequestConfig
@@ -26,7 +26,7 @@ from sendfile import sendfile
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, StudentVote, StudentDocument, Typo, StudentMark, StudentInfo
-from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, StudentDocumentForm, ExemptionForm, CategoryForm, TypoForm, PopulateCategoryForm
+from .forms import *
 import random
 import math
 from simpleeval import simple_eval, NameNotDefined
@@ -2284,3 +2284,41 @@ def latex_playground(request):
     return render(request, 'Problems/latex_playground.html',
             {'latex_help': latex_help,
             })
+
+# ------------------ Tutorials (fold) ------------------ #
+
+@login_required
+def change_tutorial(request):
+    """ Allows students to change tutorials at will.
+        Todo: Add administrator certification of change
+    """
+    if request.method == "POST": # Form submitted
+        try:
+            # Read the tutorial number from the form and get the 
+            # tutorial object
+            tut_pk   = int(request.POST['tutorial'])
+            tutorial = get_object_or_404(Tutorial.objects.select_for_update(), pk=tut_pk)
+
+            # Get the user's student information so that we can update
+            user = request.user
+            info = StudentInfo.objects.select_for_update().get(user__username=user.username)
+
+            info.change_tutorial(tutorial)
+        except:
+            raise Http404('Non integer primary key')
+
+        success_string = ("Your tutorial was successfully changed to "
+                          "TUT{}.".format(tutorial.name)
+                         )
+        redirect_string = '<a href="{url}">Return to Administration Page</a>'.format(url=reverse('administrative'))
+
+        return render(request, 
+                      'Problems/success.html', 
+                      { 'success_string': success_string, 
+                        'redirect_string': redirect_string,
+                      })
+    else:
+        form = ChangeTutorialForm()
+        return render(request, 'Problems/edit_announcement.html', {'form': form} )
+
+# ------------------ Tutorials (end)  ------------------ #

@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import IntegerField
-from .models import Announcement, Question, ProblemSet, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentDocument, ExemptionType, DocumentCategory, Typo
+from django.db.models import F
+from .models import Announcement, Question, ProblemSet, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentDocument, ExemptionType, DocumentCategory, Typo, Tutorial
 from django.contrib.admin import widgets
 
 class AnnouncementForm(forms.ModelForm):
@@ -105,3 +106,12 @@ class TypoForm(forms.ModelForm):
 
 class PopulateCategoryForm(forms.Form):
     exemption = forms.ModelMultipleChoiceField(queryset=ExemptionType.objects.all())
+
+class ChangeTutorialForm(forms.Form):
+    tutorial = forms.ModelChoiceField(queryset=Tutorial.objects.filter(cur_enrol__lt=F('max_enrol')))
+
+    class Meta:
+        help_text = {
+            'tutorial': "Select your tutorial. If a tutorial is not visible, "
+                        "is at full capacity.",
+        }
