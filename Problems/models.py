@@ -597,9 +597,16 @@ class StudentInfo(models.Model):
         """ Changes the student's tutorial. 
             new_tutorial (Tutorial model)
         """
+        old_tutorial = self.tutorial
+
+        # update the tutorial
         self.tutorial = new_tutorial
         self.save()
+
+        # change enrollments
         new_tutorial.update_enrollment()
+        if old_tutorial:
+            old_tutorial.update_enrollment()
 
     class Meta:
         ordering = ['user', 'student_number', 'lecture', 'tutorial']
