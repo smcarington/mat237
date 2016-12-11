@@ -554,14 +554,34 @@ class StudentMark(models.Model):
     def __str__(self):
         return "{user}: {score} in {category}".format(user=self.user, category=self.category.name, score=str(self.score)) 
 
+class Tutorial(models.Model):
+    """ For storing tutorial information.
+    """
+    name      = models.CharField(max_length=20)
+    max_enrol = models.IntegerField()
+    cur_enrol = models.IntegerField()
+    ta        = models.ForeignKey(User, null=True, blank=True)
+    add_info  = models.TextField(null=True,blank=True)
+
+    class Meta:
+        ordering = ['name']
+
+    def __str__(self):
+        return "Tutorial {tname}. Cur Enrol: {cur} of {max}".format(
+                    tname=self.name, cur = self.cur_enrol, max=self.max_enrol)
+
+
 class StudentInfo(models.Model):
     """ A model for storing student specific information. Initialized on registration and otherwise
         should be immutable.
     """
-    user = models.OneToOneField(User,related_name='info')
+    user           = models.OneToOneField(User,related_name='info')
     student_number = models.CharField(max_length=20)
-    tutorial = models.CharField(max_length=20)
-    lecture = models.CharField(max_length=20)
+    tutorial       = models.ForeignKey(
+                        Tutorial, 
+                        null=True,
+                        related_name='students')
+    lecture        = models.CharField(max_length=20)
 
     def update(self, student_number, tutorial, lecture):
         self.student_number = student_number
@@ -573,10 +593,12 @@ class StudentInfo(models.Model):
         ordering = ['user', 'student_number', 'lecture', 'tutorial']
 
     def __str__(self):
+        tut_info = self.tutorial.name if self.tutorial else "Unset"
+
         return "({un}) {fn} {ln} - {sn}: Lecture {l}, Tutorial {t}".format(
-                                                                    un = self.user.username,
-                                                                    fn = self.user.first_name,
-                                                                    ln = self.user.last_name,
-                                                                    sn = self.student_number,
-                                                                    t  = self.tutorial,
-                                                                    l  = self.lecture)
+                   un = self.user.username,
+                   fn = self.user.first_name,
+                   ln = self.user.last_name,
+                   sn = self.student_number,
+                   t  = tut_info,
+                   l  = self.lecture)
