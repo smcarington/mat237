@@ -563,6 +563,10 @@ class Tutorial(models.Model):
     ta        = models.ForeignKey(User, null=True, blank=True)
     add_info  = models.TextField(null=True,blank=True)
 
+    def update_enrollment(self):
+        self.cur_enrol=self.students.count()
+        self.save()
+
     class Meta:
         ordering = ['name']
 
@@ -588,6 +592,14 @@ class StudentInfo(models.Model):
         self.tutorial = tutorial
         self.lecture = lecture
         self.save()
+
+    def change_tutorial(self, new_tutorial):
+        """ Changes the student's tutorial. 
+            new_tutorial (Tutorial model)
+        """
+        self.tutorial = new_tutorial
+        self.save()
+        new_tutorial.update_enrollment()
 
     class Meta:
         ordering = ['user', 'student_number', 'lecture', 'tutorial']
