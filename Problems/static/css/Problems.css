@@ -90,6 +90,11 @@ ul li a.active, ul li a.active:hover, ul li a.active:focus {
     float: right;
 }
 
+.posted {
+    font-size:8pt;
+    padding: 15px;
+}
+
 .ann-text {
     padding-left: 20px;
     padding-right: 20px;

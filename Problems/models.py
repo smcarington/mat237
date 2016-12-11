@@ -85,14 +85,11 @@ class Announcement(models.Model):
         return """
             <div class="diff announcement{extra}">
                 <div class="row ann-title">
-                    <div class = "col-sm-4">
+                    <div class = "col-sm-8">
                         <h4>{title}</h4>
                     </div>
                     <div class = "col-sm-4">
-                        
-                    </div>
-                    <div class = "col-sm-4">
-                        <small><emph> Posted: {date}</emph> </small>
+                        <p class="posted"> Posted: {date}</p>
                     </div>
                 </div>
 
