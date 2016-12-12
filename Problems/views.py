@@ -2297,7 +2297,10 @@ def change_tutorial(request):
             # Read the tutorial number from the form and get the 
             # tutorial object
             tut_pk   = int(request.POST['tutorial'])
-            tutorial = get_object_or_404(Tutorial.objects.select_for_update(), pk=tut_pk)
+            try:
+                tutorial = Tutorial.objects.select_for_update().get(pk=tut_pk)
+            except:
+                raise Http404('No such tutorial')
 
             # Get the user's student information so that we can update
             user = request.user
