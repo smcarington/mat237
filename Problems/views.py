@@ -2297,18 +2297,16 @@ def change_tutorial(request):
             # Read the tutorial number from the form and get the 
             # tutorial object
             tut_pk   = int(request.POST['tutorial'])
-            try:
-                tutorial = Tutorial.objects.select_for_update().get(pk=tut_pk)
-            except:
-                raise Http404('No such tutorial')
+            tutorial = get_object_or_404(Tutorial, pk=tut_pk)
 
             # Get the user's student information so that we can update
             user = request.user
-            info = StudentInfo.objects.select_for_update().get(user__username=user.username)
+            info = StudentInfo.objects.get(user__username=user.username)
 
             info.change_tutorial(tutorial)
-        except:
-            raise Http404('Non integer primary key')
+        except Exception as e:
+            print(e)
+            raise Http404(str(e))
 
         success_string = ("Your tutorial was successfully changed to "
                           "TUT{}.".format(tutorial.name)
