@@ -2060,7 +2060,7 @@ def see_all_marks(request):
     # From scratch, we summon all student data. Ensure to prefetch the reverse relationships,
     # otherwise this will hit the database a lot
     table_data = [];
-    students = User.objects.prefetch_related('marks', 'info').filter(is_staff=False)
+    students = User.objects.prefetch_related('marks', 'info').filter(is_staff=False, is_active=True)
     for student in students:
         try:
             table_data.append(get_student_marks_for_table(student))
