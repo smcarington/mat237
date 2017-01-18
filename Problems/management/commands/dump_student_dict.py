@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth.models import User
 
 import logging, json
-from Problems.models import StudentInfo
+from Problems.models import StudentInfo, Tutorial
 
 class Command(BaseCommand):
     """ Dumps the student information as a JSON objects to a text file.
@@ -30,22 +30,22 @@ class Command(BaseCommand):
         # Tutorial 0102, 12th in that tutorial alphabetically
        
         glob_count    = 0
-        tutorial_list = StudentInfo.objects.values('tutorial').distinct()
+        tutorial_list = Tutorial.objects.values_list('name',flat=True).distinct()
         tut_dict      = {tut_name: 0 for tut_name in tutorial_list}
         cur_letter    = 'A'
         let_number    = 0
 
         # Get current number of students in class, to use for number padding
         padding = len(str(students.count()))
-        template = "{glob:0>{pad}d}_{let}{let_num}_{tutorial}-{tut_num}}"
+        template = "{glob:0>{pad}d}_{let}{let_num}_{tutorial}-{tut_num}"
 
         for student in students:
             try:
-                stud_tutorial  = student.info.tutorial
+                stud_tutorial  = student.info.tutorial.name
                 stud_last_name = student.last_name
 
-                global_count   += 1
-                tutorial[stud_tutorial] += 1
+                glob_count   += 1
+                tut_dict[stud_tutorial] += 1
 
                 #Check to see if last name letter has changed
                 if stud_last_name[0] == cur_letter:
@@ -55,7 +55,7 @@ class Command(BaseCommand):
                     let_number = 1
 
                 sort_string = template.format(
-                                glob = global_count,
+                                glob = glob_count,
                                 pad  = padding,
                                 let  = cur_letter,
                                 let_num = let_number,
@@ -65,7 +65,7 @@ class Command(BaseCommand):
                 print(json.dumps({'first_name': student.first_name,
                                   'last_name' : student.last_name,
                                   'student_number': student.info.student_number,
-                                  'tutorial': student.info.tutorial,
+                                  'tutorial': student.info.tutorial.name,
                                   'sort': sort_string})
                      )
             
