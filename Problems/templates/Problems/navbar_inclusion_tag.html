@@ -24,7 +24,7 @@
                 {% if 'problem_set' in modules %}
                 <li class="dropdown">
                 <a class="{% check_active request 'problem_set' %}" href="javascript:void(0)" data-toggle="dropdown" class="dropdown-toggle">Problem Sets<b class="caret"></b></a>
-                    <ul class="dropdown-menu">
+                    <ul class="dropdown-menu ps-columns">
                         {% for ps in problem_sets %}
                             {% if ps.visible %}
                                 <li><a href="{% url 'list_problem_set' pk=ps.pk %}">{{ ps.title }}</a></li>
