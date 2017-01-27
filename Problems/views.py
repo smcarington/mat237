@@ -2019,10 +2019,11 @@ def marks_search(request):
 
     return render(request, 'Problems/render_table.html', {'table': table})
 
-def create_marks_log_entry(smark, staff):
+def create_marks_log_entry(smark, staff, old_score=''):
     """ Creates a python dictionary for logging data.
         Input: smark (StudentMark) object
                staff (User) who made the adjustment
+               old_score (Optional, Integer) The old score
         Return: (Dictionary) consisting of
         {'staff': ___, 'category': ___, 'student': {'username': ___, 'pk': ___}, 'datetime': ___ }
     """
@@ -2031,6 +2032,8 @@ def create_marks_log_entry(smark, staff):
             'category': smark.category.name,
             'student': {'username': smark.user.username,
                         'pk': smark.user.pk},
+            'old_score': old_score,
+            'new_score': smark.score,
             'datetime': str(timezone.now())
             }
 
@@ -2136,12 +2139,12 @@ def submit_marks(request, category=''):
             user     = get_object_or_404(User, pk=user)
             smark    = StudentMark.objects.get(user=user, category=category)
 
-            smark.set_score(score)
+            old_score = smark.set_score(score)
 
             response_string= "Mark for {user} successfully recorded".format(user=user.username)
             ret_data = {'success': True, 'response':response_string}
             
-            log_entry = create_marks_log_entry(smark,request.user)
+            log_entry = create_marks_log_entry(smark,request.user, old_score)
             append_to_log(log_entry, settings.MARKS_LOG)
 
         except Exception as e:

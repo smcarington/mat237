@@ -539,7 +539,10 @@ class StudentMark(models.Model):
         """ Method to set the score. Allows input of method which determines how to set the score.
             Input: score (integer) - the value to update
                   method (String) - 'HIGH' only update the score if the input score is higher
+              Out: old_score (integer)  - the old score, for loggin purposes
         """
+
+        old_score = self.score
 
         if method == 'HIGH':
             self.score = max(self.score or 0, score)
@@ -547,6 +550,8 @@ class StudentMark(models.Model):
             self.score = score
 
         self.save()
+
+        return old_score
 
     def __str__(self):
         return "{user}: {score} in {category}".format(user=self.user, category=self.category.name, score=str(self.score)) 

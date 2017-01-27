@@ -22,8 +22,7 @@ class Command(BaseCommand):
         if options['log']:
             logging.basicConfig(filename=options['log'], level=logging.DEBUG)
 
-        # Marks all students as inactive
-        students=User.objects.filter(is_staff=False, is_active=not options['all']).prefetch_related('info').order_by('last_name')
+        students=User.objects.filter(is_staff=False, is_active=True).prefetch_related('info').order_by('last_name')
 
         # Generate sorting code as follows: 
         # 023_M15_0102-12 = 23 student globally, 15th student with M last name, 
@@ -37,7 +36,7 @@ class Command(BaseCommand):
 
         # Get current number of students in class, to use for number padding
         padding = len(str(students.count()))
-        template = "{glob:0>{pad}d}_{let}{let_num}_{tutorial}-{tut_num}"
+        template = "{glob:0>{pad}d}\_{let}{let_num}\_{tutorial}-{tut_num}"
 
         for student in students:
             try:
