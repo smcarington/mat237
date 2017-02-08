@@ -1577,6 +1577,8 @@ def display_question(request, sqrpk, submit=None):
                     })
 
         q_string = request.POST['problem'] # Grab this in case we need to return the question on error
+        # Note: I need to provide the above line with a default. It sometimes
+        # throws an error for some reason. Also need to track down this bug
         try:
             string_answer = request.POST['answer'] #string input
             is_last       = mark_question(sqr, string_answer)

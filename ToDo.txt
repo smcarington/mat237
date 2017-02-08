@@ -19,3 +19,6 @@ XXXX 7. Add warning page about {{,}} and num_vars when submiting/editing MQ
 10. Typo submission
 11. Add calendar
 12. Appointment maker
+
+13. Link StudentMark to StudentDocument through Exceptions
+14. Create categories for student mark, and model methods for computing grades
