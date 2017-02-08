@@ -325,7 +325,7 @@ def note_name_setter(instance, filename):
 # Tempting to inherit from user document, but tricker since we need storage to be secure
 class StudentDocument(models.Model):
     user     = models.ForeignKey(User)
-    validate_file = FileValidator(max_size=1024*500, 
+    validate_file = FileValidator(max_size=1024*1000, 
                                   content_types=('application/pdf',
                                                  'image/jpeg',
                                                  'image/png',)
