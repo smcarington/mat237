@@ -1773,7 +1773,7 @@ def upload_student_note(request):
 
     sidenote = """<ul>
     <li>File must be of pdf, png, or jpeg format
-    <li>File cannot be larger than 500KB.
+    <li>File cannot be larger than 1000KB.
     </ul>"""
 
     if request.method == "POST":
