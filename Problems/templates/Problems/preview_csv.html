@@ -1,0 +1,29 @@
+{% extends 'Problems/base.html' %}
+{% load navbar_inclusion_tag %}
+{% load render_table from django_tables2 %}
+
+{% comment %}
+    Has context {{table}} which is a CSVPreviewTable element
+    Has context {{assessment}} which is the name of an ExemptionType model
+    Has context {{csv_pk}} which is the primary key for the CSVBackup element
+{% endcomment %}
+
+{% block title %}
+    <title>Upload Preview - {{assessment}}</title>
+{% endblock %}
+
+{% block content %}
+    <div class="poll-title">
+        <h1>Marks Preview</h1>
+        <div class="quiz_end">
+            <form action="{% url 'upload_marks_file' csvfile_pk=csv_pk%}" class="delete-form" method="POST">{% csrf_token %}
+                <input class="btn btn-warning" type="submit" value="Save Marks">
+                <a href="{% url 'upload_marks_file'%}" class="btn
+                    btn-default">Discard Marks</a>
+            </form>
+            <br>
+            <br>
+            {% render_table table %}    
+        </div>
+    </div>
+{% endblock %}

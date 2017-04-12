@@ -30,7 +30,15 @@
         <ul>
         {% for doc in docs %}
             {% if doc.category.cat_name == cat %}
-                <li><a href={{doc.doc_file.url}}>{{doc.link_name}}</a> </li>
+                {% if doc.is_live_now %}
+                    <li><a href={{doc.doc_file.url}}>{{doc.link_name}}</a>
+                    </li>
+                {% else %}
+                    <li class="unavailable">{{now}} 
+                        <a href={{doc.doc_file.url}}>{{doc.link_name}}</a>
+                        <small>(Live on {{doc.live_on}}</small>
+                    </li>
+                {% endif %}
             {% endif %}
         {% endfor %}
         </ul>

@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.core.mail import send_mail, EmailMessage
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
+from django.core.files import File
 from django.conf import settings
 from django.db.models import Max, Q, F
 from django.db import IntegrityError
@@ -21,6 +22,8 @@ import os
 import re
 import itertools
 import math
+import csv #Used for updating marks from a csv file
+import logging
 from operator import attrgetter
 from sendfile import sendfile
 
@@ -33,8 +36,12 @@ from simpleeval import simple_eval, NameNotDefined
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult, ExemptionType
-from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, QuizForm, MarkedQuestionForm
-from .tables import MarkedQuestionTable, AllQuizTable, QuizResultTable, SQRTable, NotesTable, MarksTable, MarkSubmitTable, define_all_marks_table
+from .forms import (AnnouncementForm, QuestionForm, ProblemSetForm,
+        NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm,
+        QuizForm, MarkedQuestionForm, CSVBackupForm)
+from .tables import (MarkedQuestionTable, AllQuizTable, QuizResultTable,
+        SQRTable, NotesTable, MarksTable, MarkSubmitTable, define_all_marks_table,
+        CSVPreviewTable)
 
 # Create your views here.
 
@@ -211,9 +218,16 @@ def calendar(request):
 
 @login_required
 def notes(request, page_number=''):
-    # Post links in the sidebar
-    docs = LinkedDocument.objects.select_related('category').all().order_by('category')
-    cat_names = docs.values_list('category__cat_name', flat=True).distinct()
+    # Post links in the sidebar. If user is staff, show unavailable links as
+    # well
+    if request.user.is_staff:
+        docs = (LinkedDocument.objects.all().order_by('category', 'id'))
+    else:
+        docs = (LinkedDocument.objects.filter(live_on__lte=timezone.now())
+                .order_by('category', 'id'))
+    cat_names = DocumentCategory.objects.all().values_list('cat_name',
+            flat=True) 
+#    cat_names = docs.values_list('category__cat_name', flat=True).distinct()
 
     link_url = settings.NOTES_URL + '#'+ page_number
 
@@ -820,7 +834,7 @@ def compile_and_email(latex_source, user, ps_number):
 
 ## ----------------- PDFLATEX ----------------------- ## 
 
-## ----------------- HISTORY ----------------------- ## 
+# ----------------- HISTORY ----------------------- # 
 
 @staff_required()
 def poll_history(request, questionpk, poll_num=None):
@@ -882,7 +896,7 @@ def who_voted(request, questionpk, poll_num):
                 'list': student_votes,
             })
 
-## ----------------- HISTORY ----------------------- ## 
+# ----------------- (fold) History ----------------------- #
 
 @staff_required()
 def create_file_category(request):
@@ -913,7 +927,9 @@ def upload_file(request):
 
     return render(request, 'Problems/edit_announcement.html', {'form' : form})
 
-## ------------------ ENTROPY ---------------------- ##
+# ----------------- (end) History ----------------------- #
+
+# --------------------- (fold) Entropy --------------------- #
 
 @staff_required()
 def dump_polls(request):
@@ -956,6 +972,7 @@ def dump_polls(request):
             {'polls': polls}
             )
 
+
 def compute_entropy(question_dictionary):
     """ Takes a dictionary element from 'dump_polls' and computes its Shannon Entropy """
     choices     = question_dictionary['choices']
@@ -968,7 +985,10 @@ def compute_entropy(question_dictionary):
             entropy  -= norm_prob*math.log(norm_prob,2)
 
     return entropy
-## ----------------- MARKED QUESTIONS ----------------------- ## 
+
+# --------------------- (end) Entropy -------------------- #
+
+# ----------------- (fold) Marked Questions ----------------------- #
 
 @staff_required()
 def new_quiz(request):
@@ -1762,9 +1782,9 @@ def quiz_details(request, sqrpk):
             })
 
 
-# -------------------- End MARKED QUESTION ----------------------- #
+# -------------------- (end) MARKED QUESTION ----------------------- #
 
-# -------------------- Student Note ----------------------- #
+# -------------------- Student Note (fold) ----------------------- #
 
 @login_required
 def upload_student_note(request):
@@ -1910,6 +1930,7 @@ def create_exemption(request, exemption_pk=None):
     return render(request, 'Problems/edit_announcement.html', {"form": form})
 
 # --------------- (end) Notes --------------- #
+
 # Though the previous method is used in Marks #
 # --------------- (fold) Marks --------------- #
 
@@ -2156,6 +2177,7 @@ def submit_marks(request, category=''):
 
 
 # ------------------ (end) Marks  ------------------ #
+
 # ------------------ Typos (fold) ------------------ #
 
 def submit_typo(request, url_redirect=''):
@@ -2328,3 +2350,195 @@ def change_tutorial(request):
         return render(request, 'Problems/edit_announcement.html', {'form': form} )
 
 # ------------------ Tutorials (end)  ------------------ #
+
+# --------------------- (fold) Upload Data --------------------- #
+
+# These views emulate the management commands for resetting the active students
+# (unecessary if remote authentication is used), and uploading marks. Uses Comma
+# Separated Value (CSV) files for upload. Identifying model should be username
+# or student_number
+
+def extract_csv_data(the_file, as_dict=False):
+    """ Takes a csv file and extracts the data.
+        Input: 
+            the_file (File) - the csv file
+            as_dict (Bool)  - Default is False, and will return a 2d array.
+                              Otherwise, will return a dictionary.
+    """
+    ret_data = []
+    with open(the_file.path, 'rt') as csv_file:
+        for row in csv.reader(csv_file):
+            if as_dict:
+                this_row = {'student_number': row[0], 'grade': row[1]}
+            else:
+                this_row = row
+
+            ret_data.append(this_row)
+
+    return ret_data
+
+def backup_current_grades(category, user):
+    """ Creates a CSVBackup model element with a backup for the grades. Called
+        'upload_marks_file'.
+        Input:
+            category - (ExemptionType) specifying which assessment is to be
+                       backed up.
+        Output:
+            (CSVBackup) Model element containing the backup information
+    """
+    list_of_students = User.objects.select_related('info').filter(is_active=True, is_staff=False)
+
+    file_name = "{cat}_backup_by_{user}_{date}".format(
+                    cat  = category.name,
+                    user = user,
+                    date = timezone.now().timestamp())
+    
+    with open(".".join([file_name, "csv"]), 'a+') as csv_file:
+        the_writer = csv.writer(csv_file, delimiter=',')
+        for student in list_of_students:
+            # Write each student's current grade to a csv file. Use that file to
+            # create a CSVBackup element.
+            stud_mark, created = StudentMark.objects.get_or_create(
+                                    user     = student,
+                                    category = category)
+            if created:
+                stud_mark.set_score(0)
+
+            the_writer.writerow([student.info.student_number, stud_mark.score])
+
+        # With the CSV file written, create a CSVBackup element
+        backup_file = CSVBackup(user = user,
+                                file_name = file_name,
+                                category = category)
+        backup_file.doc_file.save(file_name, File(csv_file))
+
+    return backup_file
+
+def error_report_and_backup(log_location, backup_file):
+    """ Internal method for creating the large html string necessary to report
+        the results of the grade-change view.
+        Input: (String) log_location
+               (CSVBackup) backup_file
+        Ouput: (String) With html for the success.html template
+    """
+    # Need to provide two pieces of information. The results in the error log,
+    # and the location of the backup file
+
+    backup = """
+    <p> The backup file is located in a file named {name} on the server, under a
+    model name of {model}
+    """.format(name=backup_file.doc_file.name, 
+               model=backup_file.file_name)
+
+    # Open the log and feed it to the error report
+    try:
+        with open(log_location, 'r') as the_error_log:
+            error = the_error_log.read()
+
+        if not error:
+            error = "No errors in uploading"
+    except:
+        error = "No error log"
+
+    template = """<p>Operation was successful.</p>
+    <br>
+    <h4>Backup Information</h4>
+    {backup}
+    <h4>Error Information</h4>
+    {error}
+    <br><br>""".format(backup=backup, error=error)
+
+    return template
+    
+@staff_required()
+def upload_marks_file(request, csvfile_pk=None):
+    """ A simple form for uploading a csv file. First column must be 
+        csvfile_pk - In form POST, has the primary key for the CSVBackup file
+        containing the marks
+    """
+    if request.method == "POST":
+        # Two options: Either first submitting the data, or confirming after the
+        # preview. The preview is distinguished by csvfile_pk.
+        if csvfile_pk:
+            # Recall that saved CSV file and update the student marks
+            csv_file = CSVBackup.objects.get(pk=csvfile_pk)
+            category = csv_file.category
+            table_data = extract_csv_data(csv_file.doc_file)
+
+            # Initialize the logger to track the old grades and the new grades
+            log_name = "{cat}_backup_{timestamp}".format(
+                            cat=category, 
+                            timestamp=timezone.now().timestamp())
+            log_location = "/".join([settings.LOG_ROOT, log_name])
+            # Deprecated: Now using append_to_log for custom logging
+            #logging.basicConfig(filename=log_location, level=logging.DEBUG)
+
+            # Backup the current grades, then make the changes
+            backup_file = backup_current_grades(category, request.user)
+
+            for row in table_data:
+                try:
+                    # More pythonic to do [student_number, score] in table data,
+                    # but doesn't check against invalid information
+                    [student_number, score] = row
+                    try:
+                        user = User.objects.get(info__student_number=student_number)
+                    except Exception as e:
+                        message='Error for entry {}: {} <br>'.format(row, e)
+                        append_to_log(message, log_location)
+                        continue
+
+                    if not score:
+                        score = 0
+
+                    stud_mark, created = StudentMark.objects.get_or_create(
+                                            user=user,
+                                            category=category)
+                    # Once I change the StudentMark scheme to allow floats in
+                    # score, this line will need to be changed to remove 'round'
+                    stud_mark.set_score(float(score))
+                except Exception as e:
+                    string = ("ERROR: {first} {last} with username: {username}."
+                              "\n Exception: {e}").format(
+                              first=first_name, last=last_name, username=username, e=e)
+                    append_to_log(string, log_location)
+
+            success_string  = error_report_and_backup(log_location, backup_file) 
+
+            redirect_string = '<a href="{url}">Visit Marks Page</a>'.format(
+                                        url=reverse('see_all_marks'))
+            return render(request, 
+                          'Problems/success.html', 
+                          { 'success_string': success_string, 
+                            'redirect_string': redirect_string})
+
+        else:
+            form = CSVBackupForm(request.POST, request.FILES)
+            if form.is_valid():
+                csv_file = form.save(commit=False)
+                csv_file.set_user_and_name(request.user)
+
+                # Create the preview and push the link to this csv file through
+                table_data = extract_csv_data(csv_file.doc_file, as_dict=True)
+                table = CSVPreviewTable(table_data)
+
+                return render(request, 'Problems/preview_csv.html', 
+                        {'table':      table,
+                         'assessment': csv_file.category.name,
+                         'csv_pk':     csv_file.pk,
+                        })
+    else:
+        # No POST, which means accessing the page for the first time.
+        form = CSVBackupForm(include_cat=True)
+        
+    sidenote = ("First column must be the student number, the second column"
+                " is the grade.")
+
+    return render(request, 'Problems/edit_announcement.html', 
+            {'form' : form,
+             'sidenote': sidenote,
+            })
+
+
+
+# --------------------- (end) Upload Data --------------------- #

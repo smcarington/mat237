@@ -1,7 +1,9 @@
 from django import forms
 from django.forms import IntegerField
 from django.db.models import F
-from .models import Announcement, Question, ProblemSet, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentDocument, ExemptionType, DocumentCategory, Typo, Tutorial
+from .models import (Announcement, Question, ProblemSet, Poll, PollQuestion,
+PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentDocument,
+ExemptionType, DocumentCategory, Typo, Tutorial, CSVBackup)
 from django.contrib.admin import widgets
 
 class AnnouncementForm(forms.ModelForm):
@@ -38,7 +40,7 @@ class PollForm(forms.ModelForm):
 class LinkedDocumentForm(forms.ModelForm):
     class Meta:
         model  = LinkedDocument
-        fields = ('link_name', 'doc_file', 'category')
+        fields = ('link_name', 'doc_file', 'category', 'live_on')
 
 class TextFieldForm(forms.Form):
     attrs = {'cols': '150', 'rows': '30'}
@@ -53,6 +55,24 @@ class StudentDocumentForm(forms.ModelForm):
     class Meta:
         model = StudentDocument
         exclude = ['user', 'accepted', 'uploaded']
+
+class CSVBackupForm(forms.ModelForm):
+    """ Model form for CSVBackup. Since it needs to be used both for updating
+        marks and setting active students, we may not want a `category' to be
+        assigned. Hence we override the constructor the include a conditional
+        'include_cat' which when set to true include the category in the form.
+    """
+
+    def __init__(self, *args, **kwargs):
+        include_cat = kwargs.pop('include_cat', True)
+        super(CSVBackupForm, self).__init__(*args, **kwargs)
+
+        if not include_cat:
+            del self.fields['category']
+
+    class Meta:
+        model = CSVBackup
+        fields = ['doc_file', 'category']
 
 class MarkedQuestionForm(forms.ModelForm):
 #    category = IntegerField(min_value=1, initial=1)

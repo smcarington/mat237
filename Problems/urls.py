@@ -71,5 +71,7 @@ urlpatterns = [
     url(r'^administrative/marks/see_all_marks/$', views.see_all_marks, name='see_all_marks'),
     url(r'^administrative/marks/marks_search/$', views.marks_search, name='marks_search'),
     url(r'^administrative/change_tutorial/$', views.change_tutorial, name='change_tutorial'),
+    url(r'^administrative/update_marks/save/(?P<csvfile_pk>\d+)/$', views.upload_marks_file, name='upload_marks_file'),
+    url(r'^administrative/update_marks/$', views.upload_marks_file, name='upload_marks_file'),
     url(r'^latex_playground/$', views.latex_playground, name='latex_playground'),
 ]

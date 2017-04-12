@@ -283,26 +283,13 @@ def directory_setter(instance, filename):
         join_path = 'document'
     return '/'.join([join_path, instance.doc_file.name])
 
-class UserDocument(models.Model):
-    user     = models.ForeignKey(User, related_name="%(app_label)s_%(class)s_related")
-    validate_file = FileValidator(content_types=('application/pdf',
-                                                 'image/jpeg',
-                                                 'image/png',)
-                                 )
-    doc_file = models.FileField(upload_to=directory_setter,
-                                validators=[validate_file]
-                               )
-    class Meta:
-        abstract = True
-
-class LinkedDocument(UserDocument):
-    link_name = models.CharField(max_length=200)
-    category  = models.ForeignKey(DocumentCategory, null=True, related_name="docs")
-
-    def __str__(self):
-        return "Public link. Uploaded: " + self.user.username + ' Doc Name: ' + self.doc_file.name
-
 class ExemptionType(models.Model):
+    """ Model used to track events to which students might need exemptions. Is
+        badly named, since it is also used as model for storing StudentMark
+        categories, such as tests and quizzes.
+
+        To Do: Rename 
+    """
     name = models.CharField(max_length=200)
     out_of = models.IntegerField(default=0)
 
@@ -322,8 +309,64 @@ def note_name_setter(instance, filename):
                                                   exemption= instance.exemption.name, 
                                                   filename = filename)
 
+class UserDocument(models.Model):
+    """ Abstract model field for instructor-uploaded documents. Used for
+        linked-documents and CSVBackup
+    """
+    user     = models.ForeignKey(User, related_name="%(app_label)s_%(class)s_related")
+    validate_file = FileValidator(content_types=('application/pdf',
+                                                 'image/jpeg',
+                                                 'image/png',
+                                                 'text/plain',)
+                                 )
+    doc_file = models.FileField(upload_to=directory_setter,
+                                validators=[validate_file]
+                               )
+    class Meta:
+        abstract = True
+
+class LinkedDocument(UserDocument):
+    """ Used for instructor-uploaded documents. Will appear in /notes section of
+        website. 
+        To Do: Make visible/invisible.
+    """
+    link_name = models.CharField(max_length=200)
+    category  = models.ForeignKey(DocumentCategory, null=True, related_name="docs")
+    live_on   = models.DateTimeField(blank=True, null=True, default=timezone.now)
+
+    def is_live_now(self):
+        """ Used to check if the document is currently visible """
+        return self.live_on < timezone.now()
+
+    def __str__(self):
+        return "Public link. Uploaded: " + self.user.username + ' Doc Name: ' + self.doc_file.name
+
+class CSVBackup(UserDocument):
+    """ Inherits UserDocument. Used for storing CSV files, whether user uploaded
+        or the backup for a grade change.
+    """
+    file_name = models.CharField(max_length=200)
+    category  = models.ForeignKey(ExemptionType, null=True, blank=True)
+
+    def set_user_and_name(self, the_user):
+        """ Model method for setting the user. Will automatically save."""
+        self.user = the_user
+
+        # We name the file according to the uploading user and the timestamp
+        the_time = timezone.now().date()
+        the_name = "{user}_{doc_name}_{timestamp}".format(user=the_user,
+                doc_name=self.doc_file.name, timestamp=the_time)
+        self.file_name = the_name
+        self.save()
+
+    def __str__(self):
+        return self.file_name
+
 # Tempting to inherit from user document, but tricker since we need storage to be secure
 class StudentDocument(models.Model):
+    """ Used to allow students to upload files to the website, which only they
+        and the instructors are capable of seeing. Used for SickNotes.
+    """
     user     = models.ForeignKey(User)
     validate_file = FileValidator(max_size=1024*1000, 
                                   content_types=('application/pdf',
@@ -528,18 +571,18 @@ class Typo(models.Model):
         self.save()
 
 class StudentMark(models.Model):
-    user = models.ForeignKey(User, related_name='marks')
+    user     = models.ForeignKey(User, related_name='marks')
     category = models.ForeignKey(ExemptionType)
-    score = models.IntegerField(blank=True, null=True)
+    score    = models.FloatField(blank=True, null=True)
 
     class Meta:
         ordering = ['user__username', 'category']
 
     def set_score(self, score, method=''):
         """ Method to set the score. Allows input of method which determines how to set the score.
-            Input: score (integer) - the value to update
-                  method (String) - 'HIGH' only update the score if the input score is higher
-              Out: old_score (integer)  - the old score, for loggin purposes
+            Input: score (float) - the value to update
+                   method (String) - 'HIGH' only update the score if the input score is higher
+              Out: old_score (float)  - the old score, for logging purposes
         """
 
         old_score = self.score

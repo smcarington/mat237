@@ -160,3 +160,25 @@ def define_all_marks_table():
     dyntable = type('FullMarksTable', (SeeAllMarksTable,), attrs)
 
     return dyntable
+
+class CSVPreviewTable(Table):
+    student_number = Column(verbose_name="Student Number")
+    grade          = Column(verbose_name="Grade")
+
+    class Meta:
+        attrs = {'class': 'paleblue'}
+        order_by = 'student_number'
+
+    def render_student_number(self, value, record):
+        try:
+            int(value)
+            return value
+        except:
+            return format_html('<span style="color:red">{}</span>', value)
+
+    def render_grade(self, value, record):
+        try:
+            float(value)
+            return value
+        except:
+            return format_html('<span style="color:red">{}</span>', value)

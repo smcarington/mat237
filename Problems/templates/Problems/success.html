@@ -10,7 +10,7 @@
 {% endblock %}
 
 {% block content %}
-<h4> {{success_string}} </h4>
+<h4> {{success_string | safe}} </h4>
 
 <div>
     {{redirect_string | safe}}.
