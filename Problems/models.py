@@ -367,7 +367,7 @@ class StudentDocument(models.Model):
     """ Used to allow students to upload files to the website, which only they
         and the instructors are capable of seeing. Used for SickNotes.
     """
-    user     = models.ForeignKey(User)
+    user     = models.ForeignKey(User, related_name='notes')
     validate_file = FileValidator(max_size=1024*1000, 
                                   content_types=('application/pdf',
                                                  'image/jpeg',
@@ -595,6 +595,14 @@ class StudentMark(models.Model):
         self.save()
 
         return old_score
+
+    def has_note(self):
+        """ Checks if a StudentDocument (sicknote) has been submitted for this.
+            Returns the StudentDocuments if so, and an empty array otherwise.
+        """
+        return StudentDocument.objects.filter(
+                    user=self.user,
+                    exemption=self.category)
 
     def __str__(self):
         return "{user}: {score} in {category}".format(user=self.user, category=self.category.name, score=str(self.score)) 

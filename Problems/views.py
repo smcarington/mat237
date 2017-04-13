@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
-from django.utils.html import mark_safe
+from django.utils.html import mark_safe, format_html
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib.auth.views import password_change
@@ -109,6 +109,10 @@ def delete_item(request, objectStr, pk):
         elif objectStr == "typo":
             theObj      = get_object_or_404(Typo, pk = pk)
             return_View = redirect('see_typos')
+        elif objectStr == "markedquestion":
+            theObj      = get_object_or_404(MarkedQuestion, pk = pk)
+            the_quiz    = theObj.quiz
+            return_View = redirect('quiz_admin', quizpk=the_quiz.pk)
         else:
             return HttpResponse('<h1>Invalid Object Type</h1>')
 
@@ -2003,9 +2007,21 @@ def see_marks(request):
 
     marks_table = MarksTable(marks)
 
+    sidenote = """<h4>Comments</h4>
+    If you have submitted a note to be exempted from an assessment,
+    it will appear in this table. Notably,
+    <ul>
+        <li> <b>Submitted</b>: The note has been submitted but not yet accepted.
+        <li> <b>Exempt</b>: The note has been accepted, and you are exempt from
+        the assessment.
+    </ul>
+    </div>
+    """
+
     return render(request, 'Problems/list_table.html', 
                   {'table': marks_table,
                    'title': 'Current Marks',
+                   'sidenote': sidenote,
                   })
 
 def append_to_log(the_dict, log_location):
@@ -2074,19 +2090,29 @@ def get_student_marks_for_table(student):
                    'number': student.info.student_number}
 
     for smark in student.marks.iterator():
-        return_dict[smark.category.name.replace(' ','')]=smark.score
+        notes = smark.has_note()
+        if notes:
+            if [note for note in notes if note.accepted]:
+                score="Exempt"
+            else:
+                score="Submitted"
+        else:
+            score = smark.score
 
+        return_dict[smark.category.name.replace(' ','')]=score
     return return_dict
 
-@staff_required()
-def see_all_marks(request):
-    """ A view for returning all student marks.
+def get_marks_data():
+    """ Helper function for created the dictionary of student marks. Only looks
+        at active students (non-staff members), and uses their student info. If
+        student_info does not exist, that element is created and initialized
+        with empty strings.
+        Returns (Dict) Dictionary of student data, with fields
+        {last_name, first_name, user_name, number}
+        and a field for each ExemptionType assessment
     """
-
-    # From scratch, we summon all student data. Ensure to prefetch the reverse relationships,
-    # otherwise this will hit the database a lot
     table_data = [];
-    students = User.objects.prefetch_related('marks', 'info').filter(is_staff=False, is_active=True)
+    students = User.objects.prefetch_related('marks', 'info', 'notes').filter(is_staff=False, is_active=True)
     for student in students:
         try:
             table_data.append(get_student_marks_for_table(student))
@@ -2099,12 +2125,73 @@ def see_all_marks(request):
             student_info.save()
             table_data.append(get_student_marks_for_table(student))
 
+    return table_data
+
+@staff_required()
+def download_all_marks(request):
+    """ For staff members to download the marks table as a csv file.
+    """
+
+    # This effectively starts the same was as the see_all_marks view, but
+    # instead of rendering as a table, we write to a csv and set up a download
+    # link
+    table_data = get_marks_data()
+
+    file_name = "All_grades_by_{user}_{date}.csv".format(
+                    user = request.user,
+                    date = timezone.now().timestamp())
+    file_path = os.path.join(settings.NOTE_ROOT, file_name)
+
+    # The csv DictWriter needs to know the field names.
+    ident_names = [ 'last_name', 'first_name', 'username', 'number'] 
+    cat_names   = ExemptionType.objects.all().values_list('name', flat=True)
+    # cat_names will have spaces in them, while table_data stripped spaces
+    cat_names = [cat.replace(' ','') for cat in cat_names]
+    field_names = ident_names + cat_names
+    
+    with open(file_path, 'a+') as csv_file:
+        writer = csv.DictWriter(csv_file, field_names)
+        writer.writeheader()
+        for row in table_data:
+            # Write each row to a csv file
+            writer.writerow(row)
+        
+    return sendfile(request, file_path)
+
+@staff_required()
+def see_all_marks(request):
+    """ A view for returning all student marks.
+    """
+
+    # [[[Added a method to handle this. Delete when confirmed works.]]]
+    #
+    # From scratch, we summon all student data. Ensure to prefetch the reverse relationships,
+    # otherwise this will hit the database a lot
+    #table_data = [];
+    #students = User.objects.prefetch_related('marks', 'info', 'notes').filter(is_staff=False, is_active=True)
+    #for student in students:
+    #    try:
+    #        table_data.append(get_student_marks_for_table(student))
+    #    except StudentInfo.DoesNotExist:
+    #        # Make en empty StudentInfo object so that the student still appears in the grade sheet list
+    #        student_info = StudentInfo(user=student,
+    #                            student_number = '',
+    #                            tutorial = '',
+    #                            lecture = '')
+    #        student_info.save()
+    #        table_data.append(get_student_marks_for_table(student))
+
     # Generate the table. This is dynamic to the number of categories which currently exists
+    table_data = get_marks_data()
     table = define_all_marks_table()(table_data)
     RequestConfig(request, paginate=False).configure(table)
+
+    sidenote = format_html("<h4>Options</h4><a class='btn btn-default' href='{}'>Download Marks</a>", 
+                           reverse('download_all_marks'))
     return render(request, 'Problems/list_table.html',
             {'table': table,
              'title': 'All Marks',
+             'sidenote': sidenote,
             })
 
 
@@ -2388,12 +2475,13 @@ def backup_current_grades(category, user):
     """
     list_of_students = User.objects.select_related('info').filter(is_active=True, is_staff=False)
 
-    file_name = "{cat}_backup_by_{user}_{date}".format(
+    file_name = "{cat}_backup_by_{user}_{date}.csv".format(
                     cat  = category.name,
                     user = user,
                     date = timezone.now().timestamp())
+    file_path = os.path.join(settings.NOTE_ROOT, file_name)
     
-    with open(".".join([file_name, "csv"]), 'a+') as csv_file:
+    with open(file_path, 'a+') as csv_file:
         the_writer = csv.writer(csv_file, delimiter=',')
         for student in list_of_students:
             # Write each student's current grade to a csv file. Use that file to

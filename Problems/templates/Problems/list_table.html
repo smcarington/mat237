@@ -4,6 +4,7 @@
 {% comment %}
     Has context 'table' which is a Table element
     Has context 'title' which is the page title
+    Has context 'sidenote' which is the page instructions/comments
 {% endcomment %}
 
 {% block title %}
@@ -15,4 +16,8 @@
         <h1>{{title}}</h1>
         {% render_table table %}
     </div>
+{% endblock %}
+
+{% block sidenote %}
+    {{sidenote| safe}}
 {% endblock %}

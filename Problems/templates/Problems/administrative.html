@@ -41,6 +41,7 @@
             {% if user.is_staff %}
                 <a href="{% url 'submit_marks' %}" class="btn btn-success">Submit Marks</a>
                 <a href="{% url 'see_all_marks' %}" class="btn btn-success">Marks Table</a>
+                <a href="{% url 'upload_marks_file' %}" class="btn btn-success">Upload Marks</a>
             {% endif %}
         </div>
 

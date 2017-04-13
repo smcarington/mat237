@@ -1,15 +1,17 @@
 from django_tables2 import tables, Column, Table
 
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
 
 from .models import MarkedQuestion, Quiz, StudentQuizResult, StudentDocument, StudentMark, ExemptionType
 
 class MathColumn(Column):
     def render(self, value, record):
-        return format_html('<span class="diff">{}</span><small><a href="{}">(Edit)</a>', 
-                value, 
-                reverse('edit_quiz_question', args=(record.quiz.pk, record.pk,))
+        return format_html('<span class="diff">{}</span><br><small><a href="{}">(Edit)</a><a href="{}">(Delete)</a>', 
+                mark_safe(value), 
+                reverse('edit_quiz_question', args=(record.quiz.pk,record.pk,)),
+                reverse('delete_item', kwargs={'objectStr':'markedquestion', 'pk': record.pk}),
                )
 
 #class LinkColumn(Column):
@@ -92,10 +94,25 @@ class NotesTable(Table):
     def render_preview(self, value, record):
         return format_html('<a href={}>Click to Preview</a>', reverse('get_note', args=(record.doc_file.name,)))
 
+def html_for_notes(notes):
+    """ Subroutine for returning the html strings for notes, whether
+        accepted or not. Used in both render_score and render_percent. 
+        Input: Array of [StudentDocument]
+        Output: HTML string
+    """
+    if [note for note in notes if note.accepted]:
+        return format_html('<span>{}</span>', "Exempt")
+    else:
+        return format_html('<span>{}</span>', "Submitted")
+
 class MarksTable(Table):
+    """ Used for displaying a student's individual marks. The score and percent
+        will render differently if a note has been submitted for this work.
+        `record' will therefore be a StudentMark object
+    """
     name    = Column(verbose_name="Name", empty_values=())
-    score   = Column(verbose_name="Score", empty_values=())
     out_of  = Column(verbose_name="Out of", empty_values=())
+    score   = Column(verbose_name="Score", empty_values=())
     percent = Column(verbose_name="Percent", empty_values=())
 
     class Meta:
@@ -107,11 +124,22 @@ class MarksTable(Table):
     def render_out_of(self, value, record):
         return str(record.category.out_of)
 
-    def render_percent(self, value, record):
-        if record.score:
-            return str(round(100*record.score/record.category.out_of,2))
+    def render_score(self, value, record):
+        notes = record.has_note()
+        if notes: 
+            return html_for_notes(notes)
         else:
-            return ''
+            return value
+
+    def render_percent(self, value, record):
+        notes = record.has_note()
+        if notes:
+            return html_for_notes(notes)
+        else:
+            if record.score:
+                return str(round(100*record.score/record.category.out_of,2))
+            else:
+                return ''
 
 class MarkSubmitTable(Table):
     last_name  = Column(verbose_name="First Name", accessor='user.last_name')

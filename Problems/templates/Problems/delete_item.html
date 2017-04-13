@@ -24,6 +24,8 @@
         <a href="{% url 'poll_admin' pollpk=object.poll.pk %}" class="btn btn-default">No</a>
     {% elif type == "typo" %}
         <a href="{% url 'see_typos'%}" class="btn btn-default">No</a>
+    {% elif type == "markedquestion" %}
+        <a href="{% url 'quiz_admin' quizpk=object.quiz.pk%}" class="btn btn-default">No</a>
     {% endif %}
 
 {% endblock %}

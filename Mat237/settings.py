@@ -29,6 +29,14 @@ if socket.gethostname() == 'dobox':
 else: 
     DEBUG = True
 
+#if DEBUG:
+#    EMAIL_HOST = 'localhost'
+#    EMAIL_PORT = '1025'
+#    EMAIL_HOST_USER = ''
+#    EMAIL_HOST_PASSWORD = ''
+#    EMAIL_USE_TLS = False
+#    DEFAULT_FROM_EMAIL = "test@mat237.com"
+
 ALLOWED_HOSTS = ["127.0.0.1",]
 
 # Application definition
@@ -62,7 +70,7 @@ PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
