@@ -4,7 +4,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db import IntegrityError
 
-from Problems.models import StudentInfo
+from Problems.models import *
 
 class Command(BaseCommand):
     """ A command for registering student en masse.
