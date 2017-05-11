@@ -638,7 +638,7 @@ class StudentInfo(models.Model):
                         Tutorial, 
                         null=True,
                         related_name='students')
-    lecture        = models.CharField(max_length=20)
+    lecture        = models.CharField(max_length=20, null=True)
 
     def update(self, student_number, tutorial, lecture):
         self.student_number = student_number
