@@ -55,6 +55,7 @@ The {site_name} Instructors"""
                 user.save()
 
                 if not created:
+                    tutorial = Tutorial.objects.get(name=tutorial)
                     print('User {} {} already exists. Updating information'.format(first_name, last_name))
                     try: # If somehow the info does not exist, we make it
                         user.info.update(student_number = student_number,
