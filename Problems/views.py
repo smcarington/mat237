@@ -1646,14 +1646,14 @@ def update_marks(quiz_result):
         Input: quiz_record (StudentQuizResult)
     """
     try:
-        exemption = get_object_or_404(ExemptionType, name=quiz_result.quiz.name)
+        exemption, cr = ExemptionType.objects.get_or_create(name=quiz_result.quiz.name)
         cur_grade, created = StudentMark.objects.get_or_create(
                         user     = quiz_result.student,
                         category = exemption
                     )
         cur_grade.set_score(quiz_result.score, 'HIGH')
-    except Exception as e:
-        raise e
+    except ExemptionType.DoesNotExist as e:
+        print(e)
 
 def get_result_table(result):
     """ Turns the (string) StudentQuizResults.results into a table.
@@ -2088,7 +2088,6 @@ def get_student_marks_for_table(student):
                    'first_name': student.first_name,
                    'username': student.username,
                    'number': student.info.student_number}
-
     for smark in student.marks.iterator():
         notes = smark.has_note()
         if notes:
