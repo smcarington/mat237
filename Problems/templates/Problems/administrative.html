@@ -1,4 +1,4 @@
-{% extends "Problems/base.html" %}
+{% extends "accounts/base.html" %}
 
 {% block title %}
 <title>Administration - {{site_name}}</title>
@@ -12,7 +12,7 @@
             <a href="{% url 'new_problem_set' %}" class="btn btn-success">New Problem Set</a>
             <a href="{% url 'new_announcement' %}" class="btn btn-success">New Announcement</a>
             <a href="{% url 'new_quiz' %}" class="btn btn-success">New Quiz</a>
-            <a href="{% url 'create_exemption' %}" class="btn btn-success">New Exemption</a>
+            <a href="{% url 'create_exemption' %}" class="btn btn-success">New Evaluation</a>
 
         <h3>Student Management</h3>
             <a href="{% url 'search_notes' %}" class="btn btn-success">Verify Student Note</a>

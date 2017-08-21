@@ -1,4 +1,4 @@
-{% extends 'Problems/base.html' %}
+{% extends 'accounts/base.html' %}
 {% load render_table from django_tables2 %}
 
 {% comment %}
@@ -19,6 +19,14 @@
         {% endfor %}
     </select>
 
+    <div id="ajax_search_wrapper">
+        <p><b>Search: </b><input type="text" size="100" id="ajax_search"></p>
+
+        <div id="ajax_results">
+            
+        </div>
+    </div>
+
     <div id="message">
         <div id="dialog">
         </div>
@@ -28,13 +36,6 @@
         {% render_table table %}
     </div>
 
-    <div id="ajax_search_wrapper">
-        <p><b>Search: </b><input type="text" size="100" id="ajax_search"></p>
-
-        <div id="ajax_results">
-            
-        </div>
-    </div>
 {% endblock %}
 
 {% block script %}

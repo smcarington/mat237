@@ -1,4 +1,4 @@
-from django.conf.urls import url, include, patterns
+from django.conf.urls import url, include
 from django.contrib import admin
 from . import views
 
@@ -41,17 +41,19 @@ urlpatterns = [
     url(r'^upload_file/', views.upload_file, name='upload_file'),
     url(r'^dump_polls/', views.dump_polls, name='dump_polls'),
     url(r'^quiz/add_new', views.new_quiz, name='new_quiz'),
-    url(r'^quiz/edit/(?P<quizpk>\d+)/$', views.edit_quiz, name='edit_quiz'),
-    url(r'^quiz/list', views.quizzes, name='quizzes'),
-    url(r'^quiz/start/(?P<quizpk>\d+)/$', views.start_quiz, name='start_quiz'),
-    url(r'^quiz/display_question/(?P<sqrpk>\d+)/$', views.display_question, name='display_question'),
-    url(r'^quiz/display_question/(?P<sqrpk>\d+)/(?P<submit>\w+)$', views.display_question, name='display_question'),
-    url(r'^quiz/admin/(?P<quizpk>\d+)/$', views.quiz_admin, name='quiz_admin'),
-    url(r'^quiz/admin/(?P<quizpk>\d+)/edit_question/$', views.edit_quiz_question, name='edit_quiz_question'),
-    url(r'^quiz/admin/(?P<quizpk>\d+)/edit_question/(?P<mpk>\d+)/$', views.edit_quiz_question, name='edit_quiz_question'),
-    url(r'^quiz/admin/(?P<mpk>\d+)/edit_choices/$', views.edit_choices, name='edit_choices'),
-    url(r'^quiz/test/(?P<mpk>\d+)/$', views.test_quiz_question, name='test_quiz_question'),
-    url(r'^quiz/details/(?P<sqrpk>\d+)/$', views.quiz_details, name='quiz_details'),
+    url(r'^quiz/edit/(?P<quiz_pk>\d+)/$', views.edit_quiz, name='edit_quiz'),
+    url(r'^quiz/list', views.list_quizzes, name='quizzes'),
+    url(r'^quiz/start/(?P<quiz_pk>\d+)/$', views.start_quiz, name='start_quiz'),
+    url(r'^quiz/display_question/(?P<sqr_pk>\d+)/$', views.display_question, name='display_question'),
+    url(r'^quiz/display_question/(?P<sqr_pk>\d+)/(?P<submit>\w+)$', views.display_question, name='display_question'),
+    url(r'^quiz/admin/(?P<quiz_pk>\d+)/$', views.quiz_admin, name='quiz_admin'),
+    url(r'^quiz/admin/(?P<quiz_pk>\d+)/edit_question/$', views.edit_quiz_question, name='edit_quiz_question'),
+    url(r'^quiz/admin/(?P<quiz_pk>\d+)/edit_question/(?P<mq_pk>\d+)/$', views.edit_quiz_question, name='edit_quiz_question'),
+    url(r'^quiz/admin/(?P<quiz_pk>\d+)/(?P<mq_pk>\d+)/edit_choices/$', views.edit_choices, name='edit_choices'),
+    url(r'^quiz/admin/(?P<quiz_pk>\d+)/test/(?P<mq_pk>\d+)/$', views.test_quiz_question, name='test_quiz_question'),
+    url(r'^quiz/search_students/$', views.search_students, name='search_students'),
+    url(r'^quiz/student_results/(?P<user_pk>\d+)/$', views.student_results, name='student_results'),
+    url(r'^quiz/details/(?P<sqr_pk>\d+)/$', views.quiz_details, name='quiz_details'),
     url(r'^upload_note/$', views.upload_student_note, name='upload_student_note'),
     url(r'^get_note/(?P<filename>.*)$', views.get_note, name='get_note'),
     url(r'^see_notes/$', views.see_notes, name='see_notes'),

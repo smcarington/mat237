@@ -1,4 +1,4 @@
-{% extends 'Problems/base.html' %}
+{% extends 'accounts/base.html' %}
 {% load navbar_inclusion_tag %}
 
 {% comment %}
@@ -13,7 +13,7 @@
 
 {% block content %}
     <h1> Add and Edit Choices</h1>
-    <a href="{% url 'quiz_admin' quizpk=mquestion.quiz.pk %}">&#171; Return to {{mquestion.quiz.name}} Administration</a>
+    <a href="{% url 'quiz_admin' quiz_pk=mquestion.quiz.pk %}">&#171; Return to {{mquestion.quiz.name}} Administration</a>
 
     <div class="diff quiz-divs question-detail">
         {{mquestion.problem_str}}
@@ -58,7 +58,7 @@
             $('#submit').click( function(event) {
                 event.preventDefault()
                 value =  $("#num_tests").val();
-                $.post('{% url "test_quiz_question" mpk=mquestion.pk%}', 
+                $.post('{% url "test_quiz_question" quiz_pk=mquestion.quiz.pk mq_pk=mquestion.pk%}', 
                     {'num_tests': value},
                     function (data) {
                         $("#test_results").html(data);

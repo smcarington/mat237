@@ -1,4 +1,4 @@
-{% extends 'Problems/base.html' %}
+{% extends 'accounts/base.html' %}
 {% load render_table from django_tables2 %}
 
 {% comment %}
@@ -31,7 +31,7 @@
         <ul>
             <li> Instructions
         </ul>
-        <a class="btn btn-default" href="{% url 'edit_quiz_question' quizpk=quiz.pk %}">Add Question</a>
-        <a class="btn btn-default" href="{% url 'edit_quiz' quizpk=quiz.pk %}">Edit Quiz Properties</a>
+        <a class="btn btn-default" href="{% url 'edit_quiz_question' quiz_pk=quiz.pk %}">Add Question</a>
+        <a class="btn btn-default" href="{% url 'edit_quiz' quiz_pk=quiz.pk %}">Edit Quiz Properties</a>
     </div>
 {% endblock %}

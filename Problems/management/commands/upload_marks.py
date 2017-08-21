@@ -4,7 +4,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.db import IntegrityError
 
-from Problems.models import StudentMark, ExemptionType
+from Problems.models import StudentMark, Evaluation
 
 import logging
 
@@ -22,7 +22,7 @@ class Command(BaseCommand):
         if options['log']:
             logging.basicConfig(filename=options['log'], level=logging.DEBUG)
 
-        exemption, created = ExemptionType.objects.get_or_create(name=options['category'])
+        exemption, created = Evaluation.objects.get_or_create(name=options['category'])
 
         with open(options['filename']) as e_file:
             lines = [line.strip().split(',') for line in e_file]

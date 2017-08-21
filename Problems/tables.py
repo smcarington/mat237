@@ -4,15 +4,23 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.core.urlresolvers import reverse
 
-from .models import MarkedQuestion, Quiz, StudentQuizResult, StudentDocument, StudentMark, ExemptionType
+from django_tables2 import RequestConfig
+
+from .models import *
 
 class MathColumn(Column):
+    # Records are MarkedQuestions
     def render(self, value, record):
-        return format_html('<span class="diff">{}</span><br><small><a href="{}">(Edit)</a><a href="{}">(Delete)</a>', 
+        return format_html('<span class="mathrender">{}</span><br><small><a href="{}">(Edit)</a><a href="{}">(Delete)</a>', 
                 mark_safe(value), 
-                reverse('edit_quiz_question', args=(record.quiz.pk,record.pk,)),
+                reverse('edit_quiz_question', 
+                    kwargs={
+                        'quiz_pk': record.quiz.pk,
+                        'mq_pk': record.pk,
+                    }
+                ),
                 reverse('delete_item', kwargs={'objectStr':'markedquestion', 'pk': record.pk}),
-               )
+           )
 
 #class LinkColumn(Column):
 #    def render(self, record, value):
@@ -20,6 +28,7 @@ class MathColumn(Column):
 #        return format_html('{}', args=(record.id,))
 
 class MarkedQuestionTable(Table):
+    # Record is a MarkedQuestion
     problem_str = MathColumn()
     choices = Column(empty_values=())
     test = Column(empty_values=())
@@ -29,19 +38,49 @@ class MarkedQuestionTable(Table):
         fields = ['category', 'problem_str', 'choices']
 
     def render_choices(self, value, record):
-        return format_html('<a href={}>Edit Choices</a>', reverse('edit_choices', args=(record.pk,)) )
+        return format_html('<a href={}>Edit Choices</a>', 
+                reverse('edit_choices', 
+                    kwargs={ 
+                        'mq_pk': record.pk,
+                        'quiz_pk': record.quiz.pk,
+                    }
+                ) 
+            )
 
     def render_test(self,value,record):
-        return format_html('<a href={}>Test</a>', reverse('test_quiz_question', args=(record.pk,)) )
+        return format_html('<a href={}>Test</a>', 
+                reverse('test_quiz_question', 
+                    kwargs={
+                        'mq_pk':record.pk,
+                        'quiz_pk': record.quiz.pk,
+                    }
+                ) 
+            )
 
 class AllQuizTable(Table):
+    out_of = Column("Points", empty_values=())
+
     class Meta:
         model = Quiz
         attrs = {'class': 'paleblue'}
-        exclude = ['id']
+        exclude = ['id', '_cat_list']
+
+    def render_out_of(self, value, record):
+        return record.out_of
+
+    def render_cat_list(self, value, record):
+        return len(cat_list)
+
+    def render_tries(self, value, record):
+        # Returns the value or infinity if value is 0
+        return value or format_html('&infin;')
 
     def render_name(self, value, record):
-        return format_html('<a href={}>{}</a>', reverse('quiz_admin', args=(record.pk,)), value )
+        return format_html('<a href={}>{}</a>', 
+            reverse('quiz_admin', 
+                kwargs={'quiz_pk': record.pk,}
+            ), value 
+        )
 
 class SQRTable(Table):
     quiz      = Column("Quiz")
@@ -172,11 +211,11 @@ class SeeAllMarksTable(Table):
 
 def define_all_marks_table():
     """ A helper function which extends the base SeeAllMarksTable for variable category types.
-        Input: categories (List of ExemptionType) - Add these as columns to the table
+        Input: categories (List of Evaluation) - Add these as columns to the table
         Return: (SeeAllMarksTable, Table) object
     """
     
-    categories = ExemptionType.objects.all().order_by('name')
+    categories = Evaluation.objects.all().order_by('name')
     attrs = dict( (cat.name.replace(' ', ''), Column(verbose_name=cat.name)) for cat in categories)
     # Meta is not inherited, so need to explicitly define it
     attrs['Meta'] = type('Meta', 

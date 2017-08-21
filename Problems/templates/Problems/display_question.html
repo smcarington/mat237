@@ -1,9 +1,9 @@
-{% extends 'Problems/base.html' %}
+{% extends 'accounts/base.html' %}
 
 {% comment %}
     Has context {{question}} which is a String object with the question statement
     Has context {{sqr}} which is a StudentQuizResult object
-    Has context {{sqrpk}} which is an integer corresponding to the StudentQuizRecord primary key
+    Has context {{sqr.pk}} which is an integer corresponding to the StudentQuizRecord primary key
     Has context {{error_message}} which is a String with an error
     Has context {{string_answer}} which is a String with the original answer, if error-returned
     Has context {{mc_choices}} which is a list of strings with multiple choice answers
@@ -28,7 +28,7 @@
         {% endfor %}
         </div>
     {% else %}
-        <form method="POST" action="{% url 'display_question' sqrpk=sqrpk submit='submit'%}">{% csrf_token %}
+        <form method="POST" action="{% url 'display_question' sqr_pk=sqr.pk submit='submit'%}">{% csrf_token %}
             <div class="diff quiz-divs question-detail">
                 {{question | safe}}
                 <input type="hidden" value="{{question}}" name="problem">
@@ -58,13 +58,13 @@
         $('.quiz_mc').click( function() {
             answer = $(this).attr('data-id');
             problem = $(".question-detail").attr("data-id");
-            $.post("{% url 'display_question' sqrpk=sqrpk submit='submit'%}", 
+            $.post("{% url 'display_question' sqr_pk=sqr.pk submit='submit'%}", 
                 {answer: answer,
                  problem: problem,
                 }, 
                 function(data) {
 //                    document.write(data),
-                    location.replace("{% url 'display_question' sqrpk=sqrpk %}")
+                    location.replace("{% url 'display_question' sqr_pk=sqr.pk %}")
                     renderMathInElement( $(".diff")[0] );
                 }, 
             "text");

@@ -1,4 +1,4 @@
-{% extends 'Problems/base.html' %}
+{% extends 'accounts/base.html' %}
 {% comment %}
     Generic: used to delete elements. Should have
     var object = model instance for the type to delete
@@ -25,7 +25,7 @@
     {% elif type == "typo" %}
         <a href="{% url 'see_typos'%}" class="btn btn-default">No</a>
     {% elif type == "markedquestion" %}
-        <a href="{% url 'quiz_admin' quizpk=object.quiz.pk%}" class="btn btn-default">No</a>
+        <a href="{% url 'quiz_admin' quiz_pk=object.quiz.pk%}" class="btn btn-default">No</a>
     {% endif %}
 
 {% endblock %}

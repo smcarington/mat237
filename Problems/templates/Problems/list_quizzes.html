@@ -1,4 +1,4 @@
-{% extends 'Problems/base.html' %}
+{% extends 'accounts/base.html' %}
 {% load render_table from django_tables2 %}
 
 {% comment %}
@@ -22,6 +22,27 @@
             <h3>Administration</h3>
             {% render_table all_quizzes_table %}
         </div>
+
+
+        <div>
+            <a class="btn btn-default" href="javascript:void" data-toggle="modal" data-target="#modal-search">Search Student Results</a>
+        </div>
+        <div class="modal fade" id="modal-search" tabindex="-1" role="dialog">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h5 class="modal-title">
+                    Search: <input type="text" size="20" id="ajax_search">
+                </h5>
+              </div>
+              <div class="modal-body">
+                  {# JS to add here #}
+              </div>
+            </div><!-- /.modal-content -->
+          </div><!-- /.modal-dialog -->
+        </div><!-- /.modal -->
+
     {% endif %}
 
     <div class="quiz-divs">
@@ -29,7 +50,7 @@
 
         <ul>
         {% for quiz in live_quiz %}
-        <li> <a class="btn btn-default" href="{% url 'start_quiz' quizpk=quiz.pk %}">Start {{quiz.name}}</a> <small>({{quiz.out_of}} questions) Ends {{quiz.expires}}</small> 
+        <li> <a class="btn btn-default" href="{% url 'start_quiz' quiz_pk=quiz.pk %}">Start {{quiz.name}}</a> <small>({{quiz.out_of}} questions) Ends {{quiz.expires}}</small> 
         {% empty %}
             <p> There are currently no live quizzes.</p>
         {% endfor %}
@@ -40,5 +61,29 @@
         <h3>Previous Quiz Results</h3>
             {% render_table student_quizzes %}
     </div>
+{% endblock %}
+
+
+{% block script %}
+    {% if request.user.is_staff %}
+        <script>
+            $(document).ready( function() {
+                $("#ajax_search").keyup( function() {
+                    var query = $(this).val();
+                    update_search(query);
+                });
+
+                function update_search(query) {
+                    $.get('{% url "search_students"  %}', 
+                        {query:query},
+                        function (data) {
+                            $(".modal-body").html(data);
+                        },
+                        "html"
+                    );
+                }
+            });
+        </script>
+    {% endif %}
 {% endblock %}
  

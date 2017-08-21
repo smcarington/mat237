@@ -34,6 +34,10 @@ $(document).ready(function() {
     $('[class^="diff"]').each( function () {
         renderMathInElement( $(this)[0] );
     });
+    $('[class^="mathrender"]').each( function () {
+        renderMathInElement( $(this)[0] );
+    });
+
 
     // adds a datepicker jquery ui element to dates
     //$('#id_expires').datepicker()

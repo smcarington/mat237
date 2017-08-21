@@ -52,10 +52,6 @@ h4 {
     display:inline;
 }
 
-.nav-tabs .dropdown-menu, .nav-pills .dropdown-menu, .navbar .dropdown-menu {
-    margin-top: 0;
-}
-
 .form-table {
     margin-top: 40px;
     width: 100%;
@@ -63,7 +59,7 @@ h4 {
 
 ul li a.active, ul li a.active:hover, ul li a.active:focus {
     background-color: #1a75ff;
-    border-radius: 15px;
+    border-radius: 5px;
     color: #e6f0ff;
 }
 
@@ -371,6 +367,7 @@ ul li a {
     font-size: 14pt;
     height: 25px;
 }
+
 dt {
     display: inline-block;
     margin-left: 10px;
@@ -421,20 +418,6 @@ dd {
     width: 20%;
     margin-bottom: 10pt;
     font-weight: bold;
-}
-
-.navbar-nav>li>a, .navbar-nav>li>a.active {
-    margin-top: 5px;
-    line-height: 10px;
-    color: #e6f0ff;
-}
-
-.navbar-right {
-    margin-top: 5px;
-}
-
-.navbar-default {
-    background-color: #e6e6e6;
 }
 
 .quiz-divs {

@@ -1,4 +1,4 @@
-{% extends "Problems/base.html" %}
+{% extends "accounts/base.html" %}
 
 {% comment %}
     Context contains StudentQuizRecord element called {{record}} 
@@ -32,7 +32,7 @@
             <li> Any question which requires a numerical answer should be recorded to at least <b>4 decimal points</b>
         </ul>
 
-        <a class="btn btn-default" href="{% url 'display_question' sqrpk=record.pk %}">Begin Quiz</a>
+        <a class="btn btn-default" href="{% url 'display_question' sqr_pk=record.pk %}">Begin Quiz</a>
     </div>
 {% endblock %}
 

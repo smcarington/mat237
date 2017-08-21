@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (ProblemSet, Question, QuestionStatus, Announcement, Poll,
 PollQuestion, PollChoice, LinkedDocument, DocumentCategory, StudentVote, Quiz,
-MarkedQuestion, StudentQuizResult, ExemptionType, StudentDocument, Typo,
+MarkedQuestion, StudentQuizResult, Evaluation, StudentDocument, Typo,
 StudentMark, StudentInfo, Tutorial, CSVBackup)
 
 # Register your models here.
@@ -18,7 +18,7 @@ admin.site.register(StudentVote)
 admin.site.register(Quiz)
 admin.site.register(MarkedQuestion)
 admin.site.register(StudentQuizResult)
-admin.site.register(ExemptionType)
+admin.site.register(Evaluation)
 admin.site.register(StudentDocument)
 admin.site.register(Typo)
 admin.site.register(StudentMark)

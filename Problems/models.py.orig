@@ -305,7 +305,7 @@ class LinkedDocument(UserDocument):
     def __str__(self):
         return "Public link. Uploaded: " + self.user.username + ' Doc Name: ' + self.doc_file.name
 
-class ExemptionType(models.Model):
+class Evaluation(models.Model):
     name = models.CharField(max_length=200)
     out_of = models.IntegerField(default=0)
 
@@ -332,7 +332,7 @@ class StudentDocument(models.Model):
                                 storage   = fs,
                                 validators=[validate_file]
                                )
-    exemption = models.ForeignKey(ExemptionType)
+    exemption = models.ForeignKey(Evaluation)
     uploaded = models.DateTimeField(default=timezone.now)
     accepted = models.BooleanField(default=False)
 
@@ -527,7 +527,7 @@ class Typo(models.Model):
 <<<<<<< HEAD
 class StudentMark(models.Model):
     user = models.ForeignKey(User)
-    category = models.ForeignKey(ExemptionType)
+    category = models.ForeignKey(Evaluation)
     score = models.IntegerField(blank=True, null=True)
 
     class Meta:

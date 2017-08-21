@@ -3,7 +3,7 @@ from django.forms import IntegerField
 from django.db.models import F
 from .models import (Announcement, Question, ProblemSet, Poll, PollQuestion,
 PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentDocument,
-ExemptionType, DocumentCategory, Typo, Tutorial, CSVBackup)
+Evaluation, DocumentCategory, Typo, Tutorial, CSVBackup)
 from django.contrib.admin import widgets
 
 class AnnouncementForm(forms.ModelForm):
@@ -49,7 +49,7 @@ class TextFieldForm(forms.Form):
 class QuizForm(forms.ModelForm):
     class Meta:
         model = Quiz
-        exclude = ['out_of']
+        exclude = ['_cat_list', 'out_of']
 
 class StudentDocumentForm(forms.ModelForm):
     class Meta:
@@ -109,7 +109,7 @@ class MarkedQuestionForm(forms.ModelForm):
 
 class ExemptionForm(forms.ModelForm):
     class Meta:
-        model = ExemptionType
+        model = Evaluation
         fields = ('name','out_of')
 
 class CategoryForm(forms.ModelForm):
@@ -125,7 +125,7 @@ class TypoForm(forms.ModelForm):
         exclude = ('user','verified',)
 
 class PopulateCategoryForm(forms.Form):
-    exemption = forms.ModelMultipleChoiceField(queryset=ExemptionType.objects.all())
+    exemption = forms.ModelMultipleChoiceField(queryset=Evaluation.objects.all())
 
 class ChangeTutorialForm(forms.Form):
     tutorial = forms.ModelChoiceField(queryset=Tutorial.objects.filter(cur_enrol__lt=F('max_enrol')))

@@ -35,7 +35,7 @@ import math
 from simpleeval import simple_eval, NameNotDefined
 
 from django.contrib.auth.models import User
-from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult, ExemptionType
+from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult, Evaluation
 from .forms import (AnnouncementForm, QuestionForm, ProblemSetForm,
         NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm,
         QuizForm, MarkedQuestionForm, CSVBackupForm)
@@ -112,7 +112,7 @@ def delete_item(request, objectStr, pk):
         elif objectStr == "markedquestion":
             theObj      = get_object_or_404(MarkedQuestion, pk = pk)
             the_quiz    = theObj.quiz
-            return_View = redirect('quiz_admin', quizpk=the_quiz.pk)
+            return_View = redirect('quiz_admin', quiz_pk=the_quiz.pk)
         else:
             return HttpResponse('<h1>Invalid Object Type</h1>')
 
@@ -992,34 +992,52 @@ def compute_entropy(question_dictionary):
 
 # --------------------- (end) Entropy -------------------- #
 
-# ----------------- (fold) Marked Questions ----------------------- #
+# ---------- Quizzes (fold) ---------- #
+
+# ---------- Quiz Add/Edit/Admin (fold) ---------- #
 
 @staff_required()
 def new_quiz(request):
+    """ Form for creating a new quiz. Requires
+        TODO: Check against 'can_edit_quiz" privileges.
+    """
+    if not request.user.is_staff:
+        raise HttpResponse('You are not authorized to create quizzes')
+
     if request.method == "POST":
         form = QuizForm(request.POST)
         if form.is_valid():
             quiz = form.save(commit=False)
             quiz.update_out_of()
             # Create an exemption type for the quiz and update it's out_of field
-            exemption, created = ExemptionType.objects.get_or_create(name=quiz.name)
-            exemption.quiz_update_out_of(quiz)
+            evaluation, created = Evaluation.objects.get_or_create(name=quiz.name)
+            evaluation.quiz_update_out_of(quiz)
             
             # For database convenience, populate the category as well. Updates will be made
             # in the function 'display_question', which will also take care of any student whose
             # record was not made to begin with
-            ret_flag = populate_category_helper(exemption)
-            return redirect(administrative)
+            #ret_flag = populate_category_helper(exemption)
+            return redirect('quizzes')
     else:
         form = QuizForm()
 
-    return render(request, 'Problems/edit_announcement.html', {'form' : form})
+    return render(
+        request, 
+        'Problems/edit_announcement.html', 
+        { 'form' : form,
+          'header': "Add Quiz to Course",
+        }
+    )
 
 @staff_required()
-def edit_quiz(request, quizpk):
-    """ Fetches a quiz instance to populate an editable form."""
+def edit_quiz(request, quiz_pk):
+    """ Fetches a quiz instance to populate an editable form. 
+        <<Input>>
+        course_pk, quiz_pk - (Integers) The primary key for the quiz and course
+        respectively.
+    """
 
-    quiz = get_object_or_404(Quiz, pk=quizpk)
+    quiz = get_object_or_404(Quiz, pk=quiz_pk)
     if request.method == "POST":
         form = QuizForm(request.POST, instance=quiz)
         if form.is_valid():
@@ -1027,18 +1045,26 @@ def edit_quiz(request, quizpk):
             quiz.update_out_of()
             # Since we might have changed the quiz's score, we also need to fix the
             # exemption score
-            exemption, created = ExemptionType.objects.get_or_create(name=quiz.name)
-            exemption.quiz_update_out_of(quiz)
-            return redirect('quiz_admin', quizpk=quiz.pk)
+            evaluation, created = Evaluation.objects.get_or_create(name=quiz.name)
+            evaluation.quiz_update_out_of(quiz)
+            return redirect('quiz_admin', quiz_pk=quiz.pk)
     else:
         form = QuizForm(instance=quiz)
-        return render(request, 'Problems/edit_announcement.html', {'form' : form})
+        return render(
+            request, 
+            'Problems/edit_announcement.html', 
+            { 'form' : form,
+              'header': 'Edit Quiz',
+            }
+        )
 
 @login_required
-def quizzes(request, message=''):
+def list_quizzes(request, message=''):
     """ Show the list of all quizzes, including the live ones. Includes an adminstrative
     portion for staff. Can be redirected to when max-attempts on a live quiz is reached
-    Input: message (String) default = '' A message to return to the student
+    <<Input>> 
+    message (String) default = '' A message to return to the student
+    TODO: Need to add new row level privileges
     """
     all_quizzes = Quiz.objects.all()
     if request.user.is_staff:
@@ -1050,7 +1076,11 @@ def quizzes(request, message=''):
     live_quiz   = all_quizzes.filter(live__lte=timezone.now(), expires__gt=timezone.now())
 
     # Get this specific user's previous quiz results
-    student_quizzes = SQRTable(StudentQuizResult.objects.filter(student=request.user).order_by('quiz'))
+    student_quizzes = SQRTable(
+        StudentQuizResult.objects.select_related(
+            'quiz').filter(
+                student=request.user,).order_by('quiz')
+    )
     RequestConfig(request, paginate={'per_page': 10}).configure(student_quizzes)
 
     return render(request, 'Problems/list_quizzes.html', 
@@ -1062,42 +1092,48 @@ def quizzes(request, message=''):
             });
 
 @staff_required()
-def quiz_admin(request, quizpk):
-    quiz      = get_object_or_404(Quiz,pk=quizpk)
+def quiz_admin(request, quiz_pk):
+    """ Generates the quiz administration page.
+        <<Input>>
+        quiz_pk (Integers) The primary keys for the quiz
+        respectively.
+        TODO: Change access dependencies to new row privileges.
+    """
+    quiz      = get_object_or_404(Quiz,pk=quiz_pk)
 
     questions = MarkedQuestionTable(quiz.markedquestion_set.all())
     RequestConfig(request, paginate={'per_page': 25}).configure(questions)
 #    questions = quiz.markedquestion_set.all()
 
     return render(request, 'Problems/quiz_admin.html',
-            {
-             'quiz': quiz,
-             'questions': questions
-            });
+        { 'quiz': quiz,
+          'questions': questions,
+        }
+    )
 
 @staff_required()
-def edit_quiz_question(request, quizpk, mpk=None):
-    """
-        View designed to add/edit a question. If mpk is None then we make the question, otherwise
-        we design the form to be edited.
+def edit_quiz_question(request, quiz_pk, mq_pk=None):
+    """ View designed to add/edit a question. If mq_pk is None then we make the
+        question, otherwise we design the form to be edited.
     """
 
-    quiz = get_object_or_404(Quiz, pk=quizpk)
+    quiz = get_object_or_404(Quiz, pk=quiz_pk)
 
-    if mpk is None: # Adding a new question, so create the form.
+    if mq_pk is None: # Adding a new question, so create the form.
         if request.method == "POST":
             form = MarkedQuestionForm(request.POST)
             if form.is_valid():
                 mquestion = form.save(commit=False)
                 mquestion.update(quiz)
                 # Also update the exemption score, if necessary
-                exemption, created = ExemptionType.objects.get_or_create(name=mquestion.quiz.name)
-                exemption.quiz_update_out_of(mquestion.quiz)
-                return redirect('edit_choices', mpk=mquestion.pk)
+                evaluation, created = Evaluation.objects.get_or_create(
+                        name=mquestion.quiz.name)
+                evaluation.quiz_update_out_of(mquestion.quiz)
+                return redirect('edit_choices', quiz_pk=quiz_pk, mq_pk=mquestion.pk)
         else:
             form = MarkedQuestionForm()
     else: # Editing a question, so populate with current question
-        mquestion = get_object_or_404(MarkedQuestion, pk=mpk)
+        mquestion = get_object_or_404(MarkedQuestion, pk=mq_pk)
         if request.method == "POST":
             form = MarkedQuestionForm(request.POST, instance=mquestion)
             if form.is_valid():
@@ -1105,17 +1141,18 @@ def edit_quiz_question(request, quizpk, mpk=None):
                 mquestion.update(quiz)
                 mquestion.quiz.update_out_of()
                 # Also update the exemption score, if necessary
-                exemption, created = ExemptionType.objects.get_or_create(name=mquestion.quiz.name)
-                exemption.quiz_update_out_of(mquestion.quiz)
+                evaluation, created = Evaluation.objects.get_or_create(
+                        name=mquestion.quiz.name)
+                evaluation.quiz_update_out_of(mquestion.quiz)
 
                 # Check to see if there are any possible issues with the format of the question
-                return redirect('quiz_admin', quizpk=quiz.pk)
+                return redirect('quiz_admin', quiz_pk=quiz.pk)
         else:
             form = MarkedQuestionForm(instance=mquestion)
 
     sidenote = """
     <h4> Notes </h4>
-    <ul class="diff">
+    <ul class="mathrender">
         <li>LaTeX brackets must be double bracketed. For example, <code> e^{{ {v[0]} x}}</code>
         <li>You may use mathematical symbols, such as +,-,*,/ in your answer.
         <li>Exponentiation is indicated by using a**b; for example, \(2^3\) may be entered as 2**3
@@ -1126,16 +1163,19 @@ def edit_quiz_question(request, quizpk, mpk=None):
     </ul>"""
 
     return render(request, 'Problems/edit_announcement.html', 
-            {'form': form,
-             'sidenote': sidenote})
+        { 'form': form,
+          'sidenote': sidenote,
+          'header': "Create Quiz Question",
+        }
+    )
 
 def deserialize(s_str):
-    """
-        Helper function. Takes a string which embodies a list of choices for the variable
+    """ Helper function. Takes a string which embodies a list of choices for the variable
         inputs and returns the python object.
-        
-        Input: s_str (String) - A string serializing the list of choices
-        Output: list object which contains the possible choices.
+        <<Input>>
+        s_str (String) - A string serializing the list of choices
+        <<Output>>
+        list object which contains the possible choices.
     """
 
     if s_str is None:
@@ -1165,7 +1205,6 @@ def choice_is_valid(string, num_vars):
         return False, "Incorrect number of variables. Given {}, expected {}".format(len(parts), num_vars)
 
     # We run the function parse_abstract_choice. If it works then the input is valid, otherwise it's not
-
     try:
         parse_abstract_choice(string)
     except:
@@ -1185,7 +1224,6 @@ def choice_is_valid(string, num_vars):
 #        else:
 #            error_message = "Invalid input. Please insert the current number of variables, with appropriate range."
 #            return_value*= False
-
     return return_value, error_message
 
 
@@ -1196,19 +1234,27 @@ def isnumber(string):
     except:
         return False
 
-def edit_choices(request, mpk):
-    """
+def edit_choices(request, quiz_pk, mq_pk):
+    """ After adding/editing a MarkedQuestion object, we need to specify the
+        choices, which indicates what types of values can be substituted into
+        the variables {v[i]}. 
         View which handles the ability to add/edit choices.
-        Input: mpk - (integer) the marked question primary key
+        <<Input>>
+        quiz_pk (Integers) Not really needed, but for consistent urls
+        mq_pk (integer) the marked question primary key
     """
 
-    mquestion = get_object_or_404(MarkedQuestion, pk=mpk)
+    mquestion = get_object_or_404(
+        MarkedQuestion.objects.select_related('quiz'), 
+        pk=mq_pk
+    )
     error_message = ''
 
     if request.method == "POST":
         form_data = request.POST
         try:
             updated_choices = ''
+            # On post, we go through all the current choices and update them
             for field, data in form_data.items():
                 if 'choice' in field:
                     cur_choice = form_data[field]
@@ -1247,38 +1293,105 @@ def edit_choices(request, mpk):
                 "error_message": error_message,
             })
 
+@staff_required()
+def search_students(request):
+    """ AJAX view for searching for a student's records.
+    """
+    try:
+        if not request.user.is_staff:
+            raise HttpResponseForbidden('Insufficient privileges')
+
+        if 'query' in request.GET:
+            query = request.GET['query']
+
+            fields = ["username__contains", "first_name__contains", "last_name__contains",]
+            queries = [Q(**{f:query}) for f in fields]
+            qs = Q()
+            for query in queries:
+                qs = qs | query
+
+            # Filter by course as well
+            users = User.objects.filter(qs).distinct()
+            ret_list = users[0:10]
+#            for user in users:
+#                try:
+#                    if course in user.membership.courses.all():
+#                        ret_list.append(user)
+#                except Exception as e:
+#                    continue #membership might not exist
+
+            return render(request, 'Problems/search_students.html',
+                { 'users': ret_list,
+                }
+            )
+
+    except Exception as e:
+        print(str(e))
+        raise Http404('Invalid request type')
+
+@staff_required()
+def student_results(request, user_pk):
+    if not request.user.is_staff:
+        raise HttpResponseForbidden('Insufficient Privileges')
+    student = get_object_or_404(User, pk=user_pk)
+    # Get this specific user's previous quiz results
+    student_quizzes = SQRTable(
+        StudentQuizResult.objects.select_related(
+            'quiz').filter(student=student).order_by('quiz')
+    )
+    RequestConfig(request, paginate={'per_page': 10}).configure(student_quizzes)
+
+    return render(request, 'Problems/student_results.html', 
+            { 'student_quizzes': student_quizzes,
+              'student': student,
+            });
+
+# ---------- Quiz Add/Edit/Admin (end) ---------- #
+
+# ---------- Quiz Handler (fold) ---------- #
+
 @login_required
-def start_quiz(request, quizpk):
-    """ View to handle when a student begins a quiz.
-        Input: quizpk (integer) - corresponding to the primary key of the quiz
-        Output: HttpResponse object. Renders Problems/start_quiz.html or redirects 
+def start_quiz(request, quiz_pk):
+    """ View to handle when a student begins a quiz. 
+        <<Input>>
+        quiz_pk (integer) - corresponding to the primary key of the quiz
+        <<Output>>
+        HttpResponse object. Renders quizzes/start_quiz.html or redirects 
                                      to display_question
+
+        Depends on: generate_next_question
     """
 
-    this_quiz = get_object_or_404(Quiz, pk=quizpk, live__lte=timezone.now(), expires__gt=timezone.now())
+    this_quiz = get_object_or_404(
+            Quiz, 
+            pk=quiz_pk, 
+            live__lte=timezone.now(), 
+            expires__gt=timezone.now())
     
+    # Get the StudentQuizResults corresponding to this student. If there are
+    # none, this is the first try. If there are some, we need to find the most
+    # current one (ie the one with the largest `attempt' attribute. Then we need
+    # to check if that StudentQuizResult is still in progress, or if a new
+    # attempt needs to be created. In the latter, we also need to check that the
+    # student has not surpassed the number of attempts permitted
     student = request.user
-    quiz_results = StudentQuizResult.objects.filter(student=student, quiz=this_quiz)
+    quiz_results = StudentQuizResult.objects.filter(
+            student=student, quiz=this_quiz).select_related(
+                'quiz')
     high_score = -1
    
     # The user may be allowed several attempts. We need to determine what attempt the 
     # user is on, and whether they are in the middle of a quiz
-    
     is_new = False;
     if len(quiz_results) == 0: # First attempt
-        cur_quiz_res = StudentQuizResult(
-                student=student, 
-                quiz=this_quiz, 
-                attempt=1, 
-                score=0, 
-                result='{}',
-                cur_quest = 1
-                )
-        cur_quiz_res.save()
+        # Should be made into an SQR manager method
+        #cur_quiz_res = StudentQuizResult( student=student, quiz=this_quiz, attempt=1, score=0, result='{}',cur_quest = 1)
+        #cur_quiz_res.save()
+        cur_quiz_res = StudentQuizResult.create_new_record(student,this_quiz)
         generate_next_question(cur_quiz_res)
         is_new = True
-    else:
-        # Determine the most recent attempt
+    else: 
+        # Determine the most recent attempt by finding the max 'attempt'
         quiz_aggregate = quiz_results.aggregate(Max('attempt'), Max('score'))
         most_recent_attempt = quiz_aggregate['attempt__max']
         high_score = quiz_aggregate['score__max']
@@ -1288,19 +1401,16 @@ def start_quiz(request, quizpk):
         # if the student is allowed any more attempts
         if (cur_quiz_res.cur_quest == 0): # Current attempt is over.
             if (most_recent_attempt < this_quiz.tries or this_quiz.tries == 0): # Allowed more tries
-                cur_quiz_res = StudentQuizResult(
-                    student=student, 
-                    quiz=this_quiz, 
-                    attempt=most_recent_attempt+1,
-                    score=0,
-                    result='{}',
-                    cur_quest=1)
-                cur_quiz_res.save()
+                # Should be made into an SQR manager method
+                #cur_quiz_res = StudentQuizResult(student=student, quiz=this_quiz, attempt=most_recent_attempt+1,score=0,result='{}',cur_quest=1)
+                #cur_quiz_res.save()
+                cur_quiz_res = StudentQuizResult.create_new_record(
+                    student, this_quiz, most_recent_attempt+1)
                 generate_next_question(cur_quiz_res) #Should make this a model method
                 is_new = True
             else: # No more tries allowed
                 message = "Maximum number of attempts reached for {quiz_name}.".format(quiz_name=this_quiz.name)
-                return quizzes(request, message)
+                return list_quizzes(request, message=message) # Returns a view
 
     # Need to genererate the first question
     return render(request, 'Problems/start_quiz.html', 
@@ -1310,14 +1420,18 @@ def start_quiz(request, quizpk):
              })
 
 def eval_sub_expression(string):
-    """ Used to evaluate @-sign delimited subexpressions in senetences which do not totally render.
-        Note that variables should be passed into the string first, before passing to this function.
-        For example, if a string is if the form: "What is half of \(@2*{v[0]}@\)" then we should have
-        already substituted {v[0]} into the string, so that eval_sub_expression receives, for example,
-        "What is half of \(@2*3@\)?"
-
-        Input:  string (String) containing (possibly zero) @-delimited expressions.
-        Return: That string, but with the @ signs evaluated and removed.
+    """ Used to evaluate @-sign delimited subexpressions in sentences which do
+        not totally render. Variables should be passed into the string first,
+        before passing to this function.  For example, if a string is if the
+        form: "What is half of \(@2*{v[0]}@\)" then we should have already
+        substituted {v[0]} into the string, so that eval_sub_expression
+        receives, for example, "What is half of \(@2*3@\)?"
+    
+        <<INPUT>>
+        string (String) containing (possibly zero) @-delimited expressions.
+        <<OUTPUT>>
+        That string, but with the @ signs removed and the internal expression
+        evaluated.
     """
 
     # If no subexpression can be found, simply return
@@ -1333,43 +1447,52 @@ def eval_sub_expression(string):
             replacement = round(simple_eval(match.group(1)),4)
             temp_string = temp_string[:match.start()] + str(replacement) + temp_string[match.end():]
 
-    except Exception as e:
+    except Exception as e: # Should expand the error handling here. What can go wrong?
         raise e
 
     return temp_string
 
-def get_return_string(question,choices):
-    """ Renders a math-readable string for displaying to a student.
-        Input:  question (MarkedQuestion) object 
-                choices (string) for the choices to insert into the question text
-        Output: A string rendered correctly.
+def sub_into_question_string(question, choices):
+    """ Given a MarkedQuestion object and a particular choice set for the
+        variables {v[0]}=5, {v[1]}=-10, etc, substitute tese into the problem
+        and return the string.
+        <<INPUT>
+        question (MarkedQuestion) object 
+        choices (string) for the choices to insert into the question text. For
+            example, if question.problem_str has variables {v[0]} and {v[1]},
+            then choices should be something of the form "5;-10", in which case
+            we make the substitution {v[0]} = 5, {v[1]} = -10.
+        <<OUTPUT>> 
+        A string rendered correctly.
 
-        Done: Use delimeters to allow for mid string evaluation. For example.
-              "What is @2*{v[0]}@ more than 5?"
+        Depends on: eval_sub_expression 
     """
-    problem = question.problem_str
+    problem = question.problem_str # Grab the question string
+    # Remove any troublesome white space, and split the choices (delimited by a
+    # semi-colon). Then substitute them into the sring.
     problem = problem.format(v=choices.replace(' ', '').split(';'))
 
     # Pass the string through the sub-expression generator
     problem = eval_sub_expression(problem)
     return problem
 
-    #numbers = [ float(x) for x in choices.replace(' ', '').split(';') ]
-    #
-    #return problem.format(v=numbers)
-
 def mark_question(sqr, string_answer, accuracy=10e-5):
-    """ Helper question to check if the answers are the same.
-        Input: sqr (StudentQuizResult) - the quiz record
-               string_answer (string) - the correct answer
-               accuracy (float) - The desired accuracy. Default is 10e-5;
-                                  that is, four decimal places.
-        Output: is_last (Boolean) - indicates if the last question has been marked
+    """ Helper question to check if the answers are the same. Updates SQR
+        internally and returns a boolean flag indicating whether this is the
+        last question.
+        <<INPUT>>
+        sqr (StudentQuizResult) - the quiz record
+        string_answer (string) - the correct answer
+        accuracy (float) - The desired accuracy. Default is 10e-5;
+            that is, four decimal places.
+        <<OUTPUT>>
+        is_last (Boolean) - indicates if the last question has been marked
     """
-    result, qnum = sqr.get_result()
+    # Result is a python dict, qnum is the attempt of the quiz
+    result, qnum = sqr.get_result() 
 
     # Already the last question, so don't check anything and return true
-    if qnum=='0':
+    if qnum == '0':
         return True
 
     correct = result[qnum]['answer']
@@ -1389,9 +1512,13 @@ def mark_question(sqr, string_answer, accuracy=10e-5):
         correct = float(correct) # Recast to float for numeric comparison
         
         try:
-            guess   = round(simple_eval(string_answer, 
-                                names=settings.UNIVERSAL_CONSTANTS, 
-                                functions=settings.PREDEFINED_FUNCTIONS),4) #numeric input
+            guess = round(
+                simple_eval(
+                    string_answer, 
+                    names=settings.UNIVERSAL_CONSTANTS, 
+                    functions=settings.PREDEFINED_FUNCTIONS
+                ),
+            4) #numeric input, rounds to 4 decimal places
             result[qnum]['guess'] = guess
             result[qnum]['guess_string'] = string_answer
         except Exception as e:
@@ -1408,28 +1535,40 @@ def mark_question(sqr, string_answer, accuracy=10e-5):
     return is_last
 
 def generate_next_question(sqr):
-    """ Given a StudentQuizResult, creates a new question. Most often this function will be called
-        after a question has been marked and a new one needs to be created. However, it is also used
-        to instantiate the first question of a quiz.
-        Input: sqr (StudentQuizResult) - contains all the appropriate information for generating a new
-                                         question
-        Output: q_string (String) - The generated question, formated in a math renderable way
-               mc_choices (String) - The multiple choice options
+    """ Given a StudentQuizResult, creates a new question. Most often this
+        function will be called after a question has been marked and a new one
+        needs to be created. However, it is also used to instantiate the first
+        question of a quiz.  
+        <<INPUT>>
+        sqr (StudentQuizResult) contains all the appropriate information for
+            generating a new question 
+        <<OUTPUT>>
+        q_string (String)  The generated question, formated in a math renderable
+            way 
+        mc_choices (String) The multiple choice options
+
+        Depends on: get_mc_choices, sub_into_question_string
     """
     result, qnum = sqr.get_result()
-    # The following is defined so it can be returned, but is only ever used if question type is MC
+    # The following is defined so it can be returned, but is only ever used if
+    # question type is MC
     mc_choices = ''
 
-    # the cur_quest value of sqr should always correspond to the new question, as it is updated before
-    # calling this function. We randomly choose an element from quiz.category = sqr.cur_quest, and from
-    # that question we then choose a random choice, possibly randomizing yet a third time of the choices
-    # are also random
-    
-    question = sqr.quiz.get_random_question(sqr.cur_quest)
+    # the cur_quest value of sqr should always correspond to the new question,
+    # as it is updated before calling this function. We randomly choose an
+    # element from quiz.category = sqr.cur_quest, and from that question we then
+    # choose a random choice, possibly randomizing yet a third time of the
+    # choices are also random
+    try:
+        question = sqr.quiz.get_random_question(sqr.q_order[sqr.cur_quest-1])
+    except IndexError as e:
+        print(e)
+
     # From this question, we now choose a random input choice
     a_choice = question.get_random_choice()
-    # This choice could either be a tuple of numbers, a randomizer, or a mix. We need to parse these into
-    # actual numbers
+
+    # This choice could either be a tuple of numbers, a randomizer, or a mix. We
+    # need to parse these into actual numbers
     choices = parse_abstract_choice(a_choice)
     answer = get_answer(question, choices)
 
@@ -1443,31 +1582,37 @@ def generate_next_question(sqr):
             'type': question.q_type
             }
     
-    # If the question we grabbed is multiple choice, then we must also generate the multiple choice options.
+    # If the question we grabbed is multiple choice, then we must also generate
+    # the multiple choice options.
     if question.q_type == "MC":
         mc_choices = get_mc_choices(question, choices, answer)
         result[qnum].update({'mc_choices': mc_choices})
     
     sqr.update_result(result)
 
-    return get_return_string(question,choices), mc_choices
+    return sub_into_question_string(question,choices), mc_choices
 
 def get_mc_choices(question, choices, answer):
-    """ Given a question and a choice for the variable inputs, get the multiple choice options.
-        Input: question (MarkedQuestion)
-               choices  (String) corresponding to the concrete choices for the v[0],...,v[n]
-               answer   (String) to concatenate to the choices list
-        Output: A list of strings with numeric values. For example ['13', '24', '52.3', 'None of the above']
+    """ Given a question and a choice for the variable inputs, get the multiple
+        choice options.
+        <<INPUT>>
+        question (MarkedQuestion)
+        choices  (String) corresponding to the concrete choices for the v[0],...,v[n]
+        answer   (String) to concatenate to the choices list
+        <<OUTPUT>> 
+        A list of strings with numeric values. For example ['13', '24', '52.3',
+            'None of the above']
 
-        ToDo: Allow for @-sign based delimeter expressions. May want to do this based on the exception raised on
-              simple_eval
+        ToDo: Allow for @-sign based delimeter expressions. May want to do this
+        based on the exception raised on simple_eval
     """
     split_choices = choices.split(';')
     mc_choices = []
 
     for part in question.mc_choices.split(';'):
-        """ Internal flow: See if variables are present. If so, substitute the variables. If not, it's hard coded.
-            If we do not find variables but cannot evaluate, the answer is a sentence/word. So just append it.
+        """ Internal flow: See if variables are present. If so, substitute the
+            variables. If not, it's hard coded.  If we do not find variables but
+            cannot evaluate, the answer is a sentence/word. So just append it.
         """
         if re.findall(r'{v\[\d+\]}', part): # matches no variables
             part = part.format(v=split_choices)
@@ -1476,7 +1621,13 @@ def get_mc_choices(question, choices, answer):
         try:
             # Remove troublesome whitespace as well
             eval_string = part.replace(' ','')
-            value = round(simple_eval(eval_string, functions=settings.PREDEFINED_FUNCTIONS,names=settings.UNIVERSAL_CONSTANTS),4)
+            value = round(
+                simple_eval(
+                    eval_string, 
+                    functions=settings.PREDEFINED_FUNCTIONS,
+                    names=settings.UNIVERSAL_CONSTANTS
+                ),
+            4)
                 
             mc_choices.append(str(value))
         except: #If not an exectuable string, then it must be a hardcoded answer
@@ -1490,19 +1641,24 @@ def get_mc_choices(question, choices, answer):
     return mc_choices
 
 def parse_abstract_choice(abstract_choice):
-    """ Parses an abstract choice into a concrete choice. Expects a single choice input. Currently can
-        only handle integer ranges.
-        Input: abstract_choice (String) - Used to indicate an abstract choice, separated by ';'
-        Output: (String) A concrete choice 
+    """ Parses an abstract choice into a concrete choice. Expects a single
+        choice input. Currently can only handle integer ranges.
+        <<INPUT>>
+        abstract_choice (String) - Used to indicate an abstract choice,
+            separated by ';'
+        <<OUTPUT>>
+        (String) A concrete choice 
     """
     choice = ''
     for part in abstract_choice.replace(' ', '').split(';'):
         if isnumber(part): # If already a number
             choice += part + ";"
         else: # it must be a command, one of 'rand' or 'uni'
-            pre_choice = simple_eval(part, 
-                                 names=settings.UNIVERSAL_CONSTANTS,
-                                 functions=settings.PREDEFINED_FUNCTIONS)
+            pre_choice = simple_eval(
+                part, 
+                names=settings.UNIVERSAL_CONSTANTS,
+                functions=settings.PREDEFINED_FUNCTIONS
+            )
             choice += str(pre_choice)+";"
 
 #        elif part[0] in 'zZ':
@@ -1521,9 +1677,11 @@ def parse_abstract_choice(abstract_choice):
 
 def get_answer(question, choices):
     """ Evaluates the mathematical expression to compute the answer.
-        Input: question (MarkedQuestion) - the object containing the question
-               choices (String) - String containing *concrete* choices
-        Return: (Integer) - The answer, to be saved
+        <<INPUT>>
+        question (MarkedQuestion) The object containing the question
+        choices (String) String containing *concrete* choices
+        <<OUTPUT>>
+        (Integer)  The answer, to be saved
 
         Depends: simpleeval.simple_eval
     """
@@ -1542,7 +1700,13 @@ def get_answer(question, choices):
         functions = eval(question.functions)
         functions.update(settings.PREDEFINED_FUNCTIONS)
 
-        return round(simple_eval(eval_string, functions=functions, names=settings.UNIVERSAL_CONSTANTS),4)
+        return round(
+            simple_eval(
+                eval_string, 
+                functions=functions, 
+                names=settings.UNIVERSAL_CONSTANTS
+            ),
+        4)
     except (SyntaxError, NameNotDefined,) as e:
         # Enter this exception if the answer is not one that can be evaluated.
         # In that case, the answer is just the answer
@@ -1556,62 +1720,92 @@ def get_answer(question, choices):
         raise e
 
 @login_required
-def display_question(request, sqrpk, submit=None):
-    """ Shows the current question quiz-question. Is almost a redirect which handles the question.
-        Input: sqrpk (integer) - indicating the StudentQuizResult primary key
-        Output: HttpResponse - renders the quiz question
+def display_question(request, sqr_pk, submit=None):
+    """ When a student accesses a quiz, there is a redirect to this view which
+        shows the current question quiz-question. This view also handles the
+        submission of an answer, checking the correct answer and generating
+        either the next question or the results page. 
+        <<INPUT>>
+        sqr_pk (integer) indicating the StudentQuizResult primary key
+        submit (Boolean default:None) Checks if the student is seeing the
+            question (None/False) or has submitted an answer that we need to
+            grade (True)
+        <<OUTPUT>>
+        HttpResponse - renders the quiz question
 
-        Depends: get_return_string, mark_question, generate_next_question
+        <<DEPENDS>> 
+          sub_into_question_string, mark_question,
+          generate_next_question, update_marks
     """
-    sqr = StudentQuizResult.objects.select_related('quiz').get(pk=sqrpk)
+    sqr = StudentQuizResult.objects.select_related('quiz').get(pk=sqr_pk)
     string_answer = ''
     error_message = ''
     mc_choices = None
-    # Start by doing some validation to make sure only the correct student has access to this page
+    # Start by doing some validation to make sure only the correct student has
+    # access to this page
     if sqr.student != request.user:
-        return HttpResponseForbidden()
+        raise HttpResponseForbidden(
+            'You are not authorized to see this question')
 
-    # Just display the current question
+    # submit=None means the student is just viewing the question and hasn't
+    # submitted a solution. In this case, simply render the question.
     if submit is None:
         result, qnum = sqr.get_result()
-        # Asked to display a quiz which has already been finished
+        # If qnum is 0, then the quiz is finished. In this case, render the
+        # results page.
         if qnum == '0':
             result_table = get_result_table(sqr.result)
             return render(request, 'Problems/completed_quiz.html', 
-                    {   'sqr': sqr,
-                        'result_table': result_table,
-                    })
-
-        # result[qnum] has fields (MarkedQuestion) pk, inputs, score, type, (mc_choices)
+                { 'sqr': sqr,
+                  'result_table': result_table,
+                }
+            )
+         
+        # Otherwise, pick out the current question and its multiple choice
+        # answers (if applicable).
+        # result[qnum] has fields (MarkedQuestion) pk, inputs, score, type,
+        # (mc_choices)
         question = MarkedQuestion.objects.get(pk=int(result[qnum]['pk']))
         choices  = result[qnum]['inputs']
-        q_string = get_return_string(question, choices)
+        # Input the choices into the question string
+        q_string = sub_into_question_string(question, choices)
         
         if result[qnum]['type'] == "MC":
             mc_choices = result[qnum]['mc_choices']
-
-    else: # We need to mark the question and generate the next question
-
-        if request.method == "GET": # Refreshed the page/sorted the table
+    # Information was submitted, so verify that the input is correctly
+    # formmated, mark the question, and either return the results page (if done)
+    # or generate the next question.
+    else: 
+        # The page was either refreshed or the table with the results was sorted
+        if request.method == "GET": 
             result_table = get_result_table(sqr.result)
             RequestConfig(request, paginate={'per_page', 10}).configure(result_table)
             return render(request, 'Problems/completed_quiz.html', 
-                    {   'sqr': sqr,
-                        'result_table': result_table,
-                    })
+                { 'sqr': sqr,
+                  'result_table': result_table,
+                }
+            )
 
-        q_string = request.POST['problem'] # Grab this in case we need to return the question on error
-        # Note: I need to provide the above line with a default. It sometimes
-        # throws an error for some reason. Also need to track down this bug
+        # Grab the question string in case we need to return the question on
+        # error Note: I need to provide the above line with a default. If
+        # sometimes throws an error for some reason. Also need to track down
+        # this bug
+        q_string = request.POST['problem'] 
         try:
             string_answer = request.POST['answer'] #string input
-            is_last       = mark_question(sqr, string_answer)
+            # Mark the question. If it's the last question, is_last = True and
+            # we generate the results page
+            is_last = mark_question(sqr, string_answer)
 
-            if not is_last: # There are more questions, so make the next one
+            if not is_last: 
+                # There are more questions, so generate the next one
                 q_string, mc_choices = generate_next_question(sqr)
                 string_answer = ''
-            else: # The quiz is over, so generate the result table. Also, update the student mark
+            else: 
+                # The quiz is over, so generate the result table. Also, update
+                # the student mark
                 result_table = get_result_table(sqr.result)
+                # We are not tracking marks, so this is commented out
                 update_marks(sqr) # Call a helper method for updating the student's marks 
                 RequestConfig(request, paginate={'per_page', 10}).configure(result_table)
                 return render(request, 'Problems/completed_quiz.html', 
@@ -1628,35 +1822,49 @@ def display_question(request, sqrpk, submit=None):
 #                return HttpResponse(json.dumps(return_data))
 
         except ValueError as e:
-            error_message = "The expression '{}' did not parse to a valid mathematical expression. Please try again".format(string_answer)
-            # Technically if we get here, we do not have the mc_choices to return if it was a multiple choice
-            # question; however, this should never happen as it should be impossible to pass a bad input with mc
+            error_message =  ("The expression '{}' did not parse to a valid"
+                " mathematical expression. Please try"
+                " again").format(string_answer)
+            # Technically if we get here, we do not have the mc_choices to
+            # return if it was a multiple choice question; however, this should
+            # never happen as it should be impossible to pass a bad input with
+            # mc
 
     return render(request, 'Problems/display_question.html', 
-            {'sqr': sqr,
-             'question': q_string, 
-             'sqrpk': sqrpk,
-             'error_message': error_message,
-             'string_answer': string_answer,
-             'mc_choices': mc_choices,
-             })
+        { 'sqr': sqr,
+          'question': q_string, 
+          'error_message': error_message,
+          'string_answer': string_answer,
+          'mc_choices': mc_choices,
+         }
+    )
 
 def update_marks(quiz_result):
     """ Helper function for updating quiz marks once a quiz has been completed.
         Input: quiz_record (StudentQuizResult)
     """
     try:
-        exemption, cr = ExemptionType.objects.get_or_create(name=quiz_result.quiz.name)
+        evaluation, cr = Evaluation.objects.get_or_create(
+                name=quiz_result.quiz.name)
+        # Should rarely need to be triggered, but if a quiz was imported without
+        # creating an evaluation, the first student who writes it will create the
+        # evaluation. Hence we also need to update the out_of
+        if cr: 
+            evaluation.quiz_update_out_of(quiz_result.quiz)
         cur_grade, created = StudentMark.objects.get_or_create(
-                        user     = quiz_result.student,
-                        category = exemption
+                        user = quiz_result.student,
+                        evaluation = evaluation
                     )
         cur_grade.set_score(quiz_result.score, 'HIGH')
-    except ExemptionType.DoesNotExist as e:
+    except Exception as e:
         print(e)
 
 def get_result_table(result):
-    """ Turns the (string) StudentQuizResults.results into a table.
+    """ Turns the string StudentQuizResults.results and generated a table.
+        <<INPUT>>
+        result (string) serialized JSON object to be converted to a table
+        <<OUTPUT>
+        QuizResulTable populated with the data.
     """
     
     ret_data = []
@@ -1671,13 +1879,21 @@ def get_result_table(result):
     return QuizResultTable(ret_data)
 
 @staff_required()
-def test_quiz_question(request, mpk):
+def test_quiz_question(request, quiz_pk, mq_pk):
     """ Generates many examples of the given question for testing purpose.
         Input: mpk (Integer) MarkedQuestion primary key
-    """
-    mquestion = get_object_or_404(MarkedQuestion, pk=mpk)
 
-    if request.method == "POST":
+        Depends on: sub_into_question_string, render_html_for_question
+    """
+    mquestion = get_object_or_404(
+            MarkedQuestion.objects.select_related('quiz'), 
+            pk=mq_pk)
+
+    if not request.user.is_staff:
+        raise HttpResponseForbidden('You are not authorized to test this.')
+        
+
+    if request.method == "POST": # Testing the question
         num_tests = request.POST['num_tests']
         html = ''
 
@@ -1691,9 +1907,14 @@ def test_quiz_question(request, mpk):
                 else:
                     mc_choices = ''
 
-                problem = get_return_string(mquestion, choice)
+                problem = sub_into_question_string(mquestion, choice)
                 
                 html += render_html_for_question(problem, answer, choice, mc_choices)
+                # Should add better error handling here.
+        except KeyError as e:
+            html = ("Key Error: Likely an instance of single braces '{{,'}} when"
+            " double braces should have been used. See the code<br>"
+            " '{{ {} }}'").format(str(e))
         except Exception as e:
             html = e
 
@@ -1713,7 +1934,7 @@ def render_html_for_question(problem, answer, choice, mc_choices):
     """
 
     template = """
-               <div class = "diff quiz-divs question-detail">
+               <div class = "mathrender quiz-divs question-detail">
                    {problem}
                </div>
                
@@ -1732,25 +1953,31 @@ def render_html_for_question(problem, answer, choice, mc_choices):
     return template
 
 @login_required
-def quiz_details(request, sqrpk):
-    """ A view which allows students to see the details of a completed/in-progress quiz.
+def quiz_details(request, sqr_pk):
+    """ A view which allows students to see the details of a
+        completed/in-progress quiz.  
+
+    Depends on: sub_into_question_string
     """
 
-    quiz_results = get_object_or_404(StudentQuizResult, pk=sqrpk)
+    quiz_results = get_object_or_404(StudentQuizResult, pk=sqr_pk)
 
-    if request.user != quiz_results.student:
-        return HttpResponseForbidden()
+    if not ( (request.user == quiz_results.student) 
+                or
+             (request.user.is_staff)
+           ):
+        raise HttpResponseForbidden()
 
     result_dict = quiz_results.get_result()[0]
     template = """
     <li> 
-        <div class = "diff question-detail">
+        <div class = "mathrender question-detail">
             {problem}
         </div>
         {correct}
         <ul>
-            <li><b>Correct Answer</b>: <span class="diff">{answer}</span>
-            <li><b>Your Answer</b>: <span class="diff">&quot;{guess_string}&quot; evaluated to {guess}</span>
+            <li><b>Correct Answer</b>: <span class="mathrender">{answer}</span>
+            <li><b>Your Answer</b>: <span class="mathrender">&quot;{guess_string}&quot; evaluated to {guess}</span>
         </ul>
     """
 
@@ -1765,7 +1992,7 @@ def quiz_details(request, sqrpk):
 
         mquestion = MarkedQuestion.objects.get(pk = temp_dict['pk'])
 
-        problem = get_return_string(mquestion, temp_dict['inputs'])
+        problem = sub_into_question_string(mquestion, temp_dict['inputs'])
 
         if int(temp_dict['score']):
             correct = "<p style='color:green'>Correct</p>"
@@ -1784,10 +2011,11 @@ def quiz_details(request, sqrpk):
             {'return_html': return_html,
              'sqr': quiz_results,
             })
+            
+# ---------- Quiz Handler (end) ---------- #
 
-
-# -------------------- (end) MARKED QUESTION ----------------------- #
-
+# ---------- Quizzes (end) ---------- #
+#
 # -------------------- Student Note (fold) ----------------------- #
 
 @login_required
@@ -1920,7 +2148,7 @@ def create_exemption(request, exemption_pk=None):
         else:
             form = ExemptionForm()
     else: # Editing a question, so populate with current question
-        exemption = get_object_or_404(ExemptionType, pk=mpk)
+        exemption = get_object_or_404(Evaluation, pk=mpk)
         if request.method == "POST":
             form = ExemptionForm(request.POST, instance=exemption)
             if form.is_valid():
@@ -1940,7 +2168,7 @@ def create_exemption(request, exemption_pk=None):
 
 def populate_category_helper(category):
     """ Helper method for populating a category.
-        Input: category (ExemptionType) category to populate
+        Input: category (Evaluation) category to populate
         Out  : return_flag - (0) Exception
                              (1) Success
                              (2) Already populated, nothing performed
@@ -1973,7 +2201,7 @@ def populate_category(request):
         
         try:
             exemption_pk = int(request.POST['exemption'])
-            category = get_object_or_404(ExemptionType, pk=exemption_pk)
+            category = get_object_or_404(Evaluation, pk=exemption_pk)
         except:
             raise Http404('Non integer primary key')
 
@@ -2042,7 +2270,7 @@ def marks_search(request):
         query = request.GET['query']
         cat   = request.GET['category']
 
-        category = get_object_or_404(ExemptionType, pk=cat)
+        category = get_object_or_404(Evaluation, pk=cat)
 
         # Search for StudentMark with category=cat and users satisfying the query
         fields = ["user__username__contains", "user__first_name__contains", "user__last_name__contains", "user__info__student_number__contains"]
@@ -2108,7 +2336,7 @@ def get_marks_data():
         with empty strings.
         Returns (Dict) Dictionary of student data, with fields
         {last_name, first_name, user_name, number}
-        and a field for each ExemptionType assessment
+        and a field for each Evaluation assessment
     """
     table_data = [];
     students = User.objects.prefetch_related('marks', 'info', 'notes').filter(is_staff=False, is_active=True)
@@ -2143,7 +2371,7 @@ def download_all_marks(request):
 
     # The csv DictWriter needs to know the field names.
     ident_names = [ 'last_name', 'first_name', 'username', 'number'] 
-    cat_names   = ExemptionType.objects.all().values_list('name', flat=True)
+    cat_names   = Evaluation.objects.all().values_list('name', flat=True)
     # cat_names will have spaces in them, while table_data stripped spaces
     cat_names = [cat.replace(' ','') for cat in cat_names]
     field_names = ident_names + cat_names
@@ -2209,7 +2437,7 @@ def submit_marks(request, category=''):
     if request.method == "GET":
 
         # We always need this to populate the scroller
-        list_of_categories = ExemptionType.objects.all()
+        list_of_categories = Evaluation.objects.all()
 
         if category:
             try:
@@ -2244,7 +2472,7 @@ def submit_marks(request, category=''):
             cat   = int(data_dict['category'])
             user  = int(data_dict['user'])
 
-            category = get_object_or_404(ExemptionType, pk=cat)
+            category = get_object_or_404(Evaluation, pk=cat)
             user     = get_object_or_404(User, pk=user)
             smark    = StudentMark.objects.get(user=user, category=category)
 
@@ -2467,7 +2695,7 @@ def backup_current_grades(category, user):
     """ Creates a CSVBackup model element with a backup for the grades. Called
         'upload_marks_file'.
         Input:
-            category - (ExemptionType) specifying which assessment is to be
+            category - (Evaluation) specifying which assessment is to be
                        backed up.
         Output:
             (CSVBackup) Model element containing the backup information
