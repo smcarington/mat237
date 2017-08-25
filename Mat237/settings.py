@@ -62,11 +62,11 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'accounts.UtorAuthMiddleware',
+    'accounts.middleware.UtorAuthMiddleware.UtorAuthMiddleware',
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'accounts.backends.CourseSpecificBackend',
+    'accounts.backends.CourseSpecificBackend.CourseSpecificBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 

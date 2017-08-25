@@ -24,8 +24,10 @@ from django.contrib.auth.views import (login, logout, password_change,
 from django.contrib import admin
 
 url_prepend = settings.URL_PREPEND
+import accounts.views as account_views
 
 urlpatterns = [
+    url(r'^tholden/login/$', account_views.remote_login, name='remote_login'),
     url(r'^{prepend}superuser/'.format(prepend=url_prepend), admin.site.urls),
     url(r'^{prepend}accounts/'.format(prepend=url_prepend),
         include('accounts.urls')),
