@@ -62,6 +62,12 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'accounts.UtorAuthMiddleware',
+]
+
+AUTHENTICATION_BACKENDS = [
+    'accounts.backends.CourseSpecificBackend',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 ROOT_URLCONF = 'Mat237.urls'
