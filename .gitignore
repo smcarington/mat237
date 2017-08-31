@@ -7,4 +7,5 @@ db.sqlite3
 *~
 /media*
 local_settings.py
+local_settings.py~
 /notes*
