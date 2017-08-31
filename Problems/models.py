@@ -791,8 +791,8 @@ class Tutorial(models.Model):
     """ For storing tutorial information.
     """
     name      = models.CharField(max_length=20)
-    max_enrol = models.IntegerField()
-    cur_enrol = models.IntegerField()
+    max_enrol = models.IntegerField(default=40)
+    cur_enrol = models.IntegerField(default=0)
     ta        = models.ForeignKey(User, null=True, blank=True)
     add_info  = models.TextField(null=True,blank=True)
 

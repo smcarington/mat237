@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import IntegrityError
 
 from Problems.models import *
+import logging
 
 class Command(BaseCommand):
     """ A command for registering student en masse.
@@ -14,8 +15,12 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('filename')
+        parser.add_argument('--log', dest='log')
 
     def handle(self, *args, **options):
+        if options['log']:
+            logging.basicConfig(filename=options['log'], level=logging.DEBUG)
+
         with open(options['filename']) as e_file:
             lines = [line.strip().split(',') for line in e_file]
 
