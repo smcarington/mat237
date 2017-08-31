@@ -54,8 +54,12 @@ The {site_name} Instructors"""
                 user.email = email
                 user.save()
 
-                if not created:
-                    tutorial = Tutorial.objects.get(name=tutorial)
+                if tutorial:
+                    tutorial,_cr = Tutorial.objects.get_or_create(name=tutorial)
+                else:
+                    tutorial,_cr = Tutorial.objects.get_or_create(name="9999")
+
+                if not created: # User already exists
                     print('User {} {} already exists. Updating information'.format(first_name, last_name))
                     try: # If somehow the info does not exist, we make it
                         user.info.update(student_number = student_number,
@@ -69,8 +73,8 @@ The {site_name} Instructors"""
                         user_info.save()
                 else:
                     print('Creating user for {} {}.'.format(first_name, last_name))
-                    rpass = User.objects.make_random_password()
-                    user.set_password(rpass)
+#                    rpass = User.objects.make_random_password()
+#                    user.set_password(rpass)
                     user.save()
 
                     # Now create the additional user information model
@@ -80,15 +84,15 @@ The {site_name} Instructors"""
                                             lecture = lecture)
                     user_info.save()
 
-                    # Now send the email
-                    custom_message = body.format(username = username, 
-                                                 password = rpass, 
-                                                 site_name= settings.SITE_NAME,
-                                                 site_url = settings.SITE_URL)
-
-                    send_mail(subject_line, custom_message, "tholden@math.toronto.edu", [email])
-
-                    print('Email sent to {first} {last} with username: {username} at {email}'.format(first=first_name, last=last_name,username=username, email=email))
+                    # Now send the email. Removed email sending
+#                    custom_message = body.format(username = username, 
+#                                                 password = rpass, 
+#                                                 site_name= settings.SITE_NAME,
+#                                                 site_url = settings.SITE_URL)
+#
+#                    send_mail(subject_line, custom_message, "tholden@math.toronto.edu", [email])
+#
+#                    print('Email sent to {first} {last} with username: {username} at {email}'.format(first=first_name, last=last_name,username=username, email=email))
             except Exception as e:
                 print(e)
                 print('ERROR: {first} {last} with username: {username} at {email}. \n Exception: {e}'.format(first=first_name, last=last_name, username=username, email=email, e=e))
