@@ -321,7 +321,7 @@ def update_status(request):
         status.save()
         response_data['response']='Status successfully updated!'
     else:
-        raise HttpResponseForbidden()
+        return HttpResponseForbidden()
 
     return HttpResponse(json.dumps(response_data))
 
@@ -1033,7 +1033,7 @@ def new_quiz(request):
 def edit_quiz(request, quiz_pk):
     """ Fetches a quiz instance to populate an editable form. 
         <<Input>>
-        course_pk, quiz_pk - (Integers) The primary key for the quiz and course
+        quiz_pk - (Integers) The primary key for the quiz and course
         respectively.
     """
 
@@ -1076,11 +1076,12 @@ def list_quizzes(request, message=''):
     live_quiz   = all_quizzes.filter(live__lte=timezone.now(), expires__gt=timezone.now())
 
     # Get this specific user's previous quiz results
-    student_quizzes = SQRTable(
-        StudentQuizResult.objects.select_related(
-            'quiz').filter(
-                student=request.user,).order_by('quiz')
-    )
+    student_sqrs = StudentQuizResult.objects.select_related(
+        'quiz').filter(student=request.user).order_by('quiz')
+    # Now we need to filter these according to whether the solutions_are_visible
+    # property is true on each quiz
+    student_sqrs = [sqr for sqr in student_sqrs if sqr.quiz.solutions_are_visible]
+    student_quizzes = SQRTable(student_sqrs)
     RequestConfig(request, paginate={'per_page': 10}).configure(student_quizzes)
 
     return render(request, 'Problems/list_quizzes.html', 
@@ -1146,7 +1147,7 @@ def edit_quiz_question(request, quiz_pk, mq_pk=None):
                 evaluation.quiz_update_out_of(mquestion.quiz)
 
                 # Check to see if there are any possible issues with the format of the question
-                return redirect('quiz_admin', quiz_pk=quiz.pk)
+                return redirect('edit_choices', quiz_pk=quiz.pk, mq_pk=mquestion.pk)
         else:
             form = MarkedQuestionForm(instance=mquestion)
 
@@ -1299,7 +1300,7 @@ def search_students(request):
     """
     try:
         if not request.user.is_staff:
-            raise HttpResponseForbidden('Insufficient privileges')
+            return HttpResponseForbidden('Insufficient privileges')
 
         if 'query' in request.GET:
             query = request.GET['query']
@@ -1332,7 +1333,7 @@ def search_students(request):
 @staff_required()
 def student_results(request, user_pk):
     if not request.user.is_staff:
-        raise HttpResponseForbidden('Insufficient Privileges')
+        return HttpResponseForbidden('Insufficient Privileges')
     student = get_object_or_404(User, pk=user_pk)
     # Get this specific user's previous quiz results
     student_quizzes = SQRTable(
@@ -1419,7 +1420,7 @@ def start_quiz(request, quiz_pk):
              'high_score': high_score,
              })
 
-def eval_sub_expression(string):
+def eval_sub_expression(string, question):
     """ Used to evaluate @-sign delimited subexpressions in sentences which do
         not totally render. Variables should be passed into the string first,
         before passing to this function.  For example, if a string is if the
@@ -1429,26 +1430,64 @@ def eval_sub_expression(string):
     
         <<INPUT>>
         string (String) containing (possibly zero) @-delimited expressions.
+        question (MarkedQuestion) object. Contains the user-defined functions.
         <<OUTPUT>>
         That string, but with the @ signs removed and the internal expression
         evaluated.
     """
 
     # If no subexpression can be found, simply return
+
     if not "@" in string:
-        return string
+        return post_process(string)
 
     temp_string = string
     pattern = re.compile(r'@(.+?)@')
+    functions = eval(question.functions)
+    functions.update(settings.PREDEFINED_FUNCTIONS)
     try:
         while "@" in temp_string:
             match = pattern.search(temp_string)
             # Evaluate the expression and substitute it back into the string
-            replacement = round(simple_eval(match.group(1)),4)
+            replacement = simple_eval(
+                    match.group(1),
+                    names=settings.UNIVERSAL_CONSTANTS, 
+                    functions=functions
+                    )
+            try: # Round if a number
+                replacement = round(replacement,4)
+            except TypeError as e: #Otherwise it's a string do nothing
+                pass
+            except Exception as e:
+                raise e
+
             temp_string = temp_string[:match.start()] + str(replacement) + temp_string[match.end():]
 
     except Exception as e: # Should expand the error handling here. What can go wrong?
         raise e
+
+    temp_string = post_process(temp_string)
+
+    return temp_string
+
+def post_process(input_string):
+    """ Hack fix to certain math problems, such as 1x, a^1, or +- or --.
+        <<INPUT>>
+        input_string (String) The string to process
+    """
+    temp_string = input_string
+    
+    # List of regex's to find issues, and their replacement string
+    regex_patterns = [
+        (re.compile(r'(?<!\d)1\s*(\\?[a-zA-Z])'), r'\g<1>'), # Should match 1x and replace with x
+        (re.compile(r'(\w*)\^1'), 'r\g<1>'), # Matches a^1 and replaces with a
+        (re.compile(r'(\w*)\^{{\s*1\s*}}'), 'r\g<1>'), # Matches a^1 and replaces with a
+        (re.compile(r'\+\s*\-'), '-'), #Matches +- and replaces with -
+        (re.compile(r'\-\-'), '+'), #matches -- and replaces with +
+    ]
+
+    for pat, repl in regex_patterns:
+        temp_string = pat.sub(repl, temp_string)
 
     return temp_string
 
@@ -1473,7 +1512,7 @@ def sub_into_question_string(question, choices):
     problem = problem.format(v=choices.replace(' ', '').split(';'))
 
     # Pass the string through the sub-expression generator
-    problem = eval_sub_expression(problem)
+    problem = eval_sub_expression(problem, question)
     return problem
 
 def mark_question(sqr, string_answer, accuracy=10e-5):
@@ -1616,7 +1655,7 @@ def get_mc_choices(question, choices, answer):
         """
         if re.findall(r'{v\[\d+\]}', part): # matches no variables
             part = part.format(v=split_choices)
-            part = eval_sub_expression(part)
+            part = eval_sub_expression(part, question)
 
         try:
             # Remove troublesome whitespace as well
@@ -1690,7 +1729,7 @@ def get_answer(question, choices):
         return answer
     if re.findall(r'{v\[\d+\]}', answer): # matches no variables
         answer = answer.format(v=choices.split(';'))
-        answer = eval_sub_expression(answer)
+        answer = eval_sub_expression(answer, question)
 
     try:
         # Substitute the variables into the string and evaluate the functions dictionary
@@ -1744,7 +1783,7 @@ def display_question(request, sqr_pk, submit=None):
     # Start by doing some validation to make sure only the correct student has
     # access to this page
     if sqr.student != request.user:
-        raise HttpResponseForbidden(
+        return HttpResponseForbidden(
             'You are not authorized to see this question')
 
     # submit=None means the student is just viewing the question and hasn't
@@ -1870,7 +1909,7 @@ def get_result_table(result):
     ret_data = []
     res_dict = json.loads(result)
     for field, data in res_dict.items():
-        part = {'q_num': field, 
+        part = {'q_num': int(field), 
                 'correct': str(data['answer']), 
                 'guess': str(data['guess']),
                 'score': data['score']}
@@ -1890,8 +1929,7 @@ def test_quiz_question(request, quiz_pk, mq_pk):
             pk=mq_pk)
 
     if not request.user.is_staff:
-        raise HttpResponseForbidden('You are not authorized to test this.')
-        
+        return HttpResponseForbidden('You are not authorized to test this.')
 
     if request.method == "POST": # Testing the question
         num_tests = request.POST['num_tests']
@@ -1915,6 +1953,14 @@ def test_quiz_question(request, quiz_pk, mq_pk):
             html = ("Key Error: Likely an instance of single braces '{{,'}} when"
             " double braces should have been used. See the code<br>"
             " '{{ {} }}'").format(str(e))
+        except AttributeError as e:
+            html = ("Attribute Error: Likely you failed to close a @..@ group"
+                    " or have an unbalanced @ group. See the code <br>"
+            " '{{ {} }}'").format(str(e))
+        except SyntaxError as e:
+            html = ("Syntax Error: Evaluation failed. Did you forget to "
+                    "use an arithmetic operator? <br>"
+                    " '{{ {} }}'").format(str(e))
         except Exception as e:
             html = e
 
@@ -1956,17 +2002,26 @@ def render_html_for_question(problem, answer, choice, mc_choices):
 def quiz_details(request, sqr_pk):
     """ A view which allows students to see the details of a
         completed/in-progress quiz.  
+        <<INPUT>>
+        sqr_pk (int) The primary key of the quiz result
 
     Depends on: sub_into_question_string
     """
 
-    quiz_results = get_object_or_404(StudentQuizResult, pk=sqr_pk)
+    quiz_results = get_object_or_404(
+        StudentQuizResult.objects.select_related('quiz'), 
+        pk=sqr_pk)
 
+    # Ensure you're looking at your own results or you're an admin
     if not ( (request.user == quiz_results.student) 
                 or
              (request.user.is_staff)
            ):
-        raise HttpResponseForbidden()
+        return HttpResponseForbidden()
+
+    # Next ensure that you are allowed to see the results
+    if not (quiz.solutions_are_visible or request.user.is_staff):
+        raise Http404('Solutions are unavailable at this time')
 
     result_dict = quiz_results.get_result()[0]
     template = """
@@ -2420,7 +2475,6 @@ def see_all_marks(request):
              'title': 'All Marks',
              'sidenote': sidenote,
             })
-
 
 @staff_required()
 def submit_marks(request, category=''):

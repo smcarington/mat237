@@ -12,8 +12,9 @@
 {% endblock %}
 
 {% block content %}
-    <h1> Add and Edit Choices</h1>
     <a href="{% url 'quiz_admin' quiz_pk=mquestion.quiz.pk %}">&#171; Return to {{mquestion.quiz.name}} Administration</a>
+    <h1> Add and Edit Choices</h1>
+    <a href="{% url 'edit_quiz_question' quiz_pk=mquestion.quiz.pk mq_pk=mquestion.pk %}">&#171; Edit the Question</a>
 
     <div class="diff quiz-divs question-detail">
         {{mquestion.problem_str}}

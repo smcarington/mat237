@@ -6,6 +6,8 @@ PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentDocument,
 Evaluation, DocumentCategory, Typo, Tutorial, CSVBackup)
 from django.contrib.admin import widgets
 
+import re
+
 class AnnouncementForm(forms.ModelForm):
     class Meta:
         model = Announcement
@@ -78,6 +80,26 @@ class MarkedQuestionForm(forms.ModelForm):
 #    category = IntegerField(min_value=1, initial=1)
 #
 #    problem_str = forms.CharField(widget=forms.Textarea(text_area_attrs))
+
+    def clean_problem_str(self):
+        """ Validate that the index variables occur in the correct order """
+        problem_str = self.cleaned_data['problem_str']
+        list_of_vars = re.findall(r'{v\[(\d+)\]}', problem_str)
+        # Find the distinct indices, convert them to integers, and sort
+        list_of_vars = list(set(list_of_vars))
+        list_of_vars = [int(var_ind) for var_ind in list_of_vars]
+        list_of_vars = sorted(list_of_vars)
+        # Now we check whether they are sequential
+        if not list_of_vars:
+            raise ValidationError(
+                "No variables specified. Consider hiding one in an input tag"
+                )
+        if all(a==b for a,b in enumerate(list_of_vars, list_of_vars[0])):
+            return problem_str
+        else:
+            raise ValidationError(
+                "Variables have non-sequential indices {}".format(list_of_vars)
+            )
 
     class Meta:
         text_area_attrs = {'cols':'80', 'rows': '5'}
