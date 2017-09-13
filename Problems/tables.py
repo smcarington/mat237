@@ -30,8 +30,8 @@ class MathColumn(Column):
 class MarkedQuestionTable(Table):
     # Record is a MarkedQuestion
     problem_str = MathColumn()
-    choices = Column(empty_values=())
-    test = Column(empty_values=())
+    choices = Column(empty_values=(), orderable=False)
+    test = Column(empty_values=(), orderable=False)
     class Meta:
         attrs = {'class': 'paleblue'}
         model = MarkedQuestion
