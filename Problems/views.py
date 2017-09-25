@@ -1515,6 +1515,23 @@ def sub_into_question_string(question, choices):
     problem = eval_sub_expression(problem, question)
     return problem
 
+def strip_string(string):
+    """ Remove all line breaks and spaces from a string:
+    """
+    fix_list = [
+        ('\r', ''),
+        ('\n', ''),
+        (' ',  ''),
+    ]
+ 
+    temp_string = string
+ 
+    for fix in fix_list:
+        temp_string = temp_string.replace(fix[0], fix[1])
+ 
+    return temp_string
+ 
+
 def mark_question(sqr, string_answer, accuracy=10e-5):
     """ Helper question to check if the answers are the same. Updates SQR
         internally and returns a boolean flag indicating whether this is the
@@ -1538,7 +1555,7 @@ def mark_question(sqr, string_answer, accuracy=10e-5):
 
     # For multiple choice questions, we do not want to evaluate, just compare strings
     if result[qnum]['type'] == "MC":
-        if str(correct) == string_answer:
+        if strip_string(str(correct)) == strip_string(string_answer):
             result[qnum]['score']='1'
             sqr.update_score()
         else:
@@ -1892,7 +1909,7 @@ def update_marks(quiz_result):
             evaluation.quiz_update_out_of(quiz_result.quiz)
         cur_grade, created = StudentMark.objects.get_or_create(
                         user = quiz_result.student,
-                        evaluation = evaluation
+                        category = evaluation
                     )
         cur_grade.set_score(quiz_result.score, 'HIGH')
     except Exception as e:
@@ -2020,7 +2037,7 @@ def quiz_details(request, sqr_pk):
         return HttpResponseForbidden()
 
     # Next ensure that you are allowed to see the results
-    if not (quiz.solutions_are_visible or request.user.is_staff):
+    if not (quiz_results.quiz.solutions_are_visible or request.user.is_staff):
         raise Http404('Solutions are unavailable at this time')
 
     result_dict = quiz_results.get_result()[0]
@@ -2049,10 +2066,17 @@ def quiz_details(request, sqr_pk):
 
         problem = sub_into_question_string(mquestion, temp_dict['inputs'])
 
+        c_mark = ''
         if int(temp_dict['score']):
-            correct = "<p style='color:green'>Correct</p>"
+            c_temp = "<p style='color:green'><span class='text'>Correct</span>{}</p>"
         else:
-            correct = "<p style='color:red'>Incorrect</p>"
+            c_temp = "<p style='color:red'><span class='text'>Incorrect</span>{}</p>"
+
+        if request.user.is_staff:
+            c_mark=(" <small style='color:blue; cursor:pointer' class='change_mark' data-id={}>"
+                      "(Change)"
+                      "</small>").format(qnum)
+        correct = c_temp.format(c_mark)
         
         return_html += template.format(problem=problem, 
                                        correct=correct,
@@ -2067,6 +2091,35 @@ def quiz_details(request, sqr_pk):
              'sqr': quiz_results,
             })
             
+@staff_required()
+def change_mark(request):
+    """
+        Used to easily change a student mark.
+    """
+    try:
+        if request.method == "POST":
+            sqr_pk = request.POST['sqr_pk']
+            qnum = request.POST['qnum']
+            sqr = get_object_or_404(
+                StudentQuizResult.objects.select_related('quiz'), 
+                pk=int(sqr_pk)
+            )
+            res, _ = sqr.get_result()
+            res[qnum]['score'] =str( int(not int(res[qnum]['score'])))
+            sqr.update_result(res)
+            # Update the score. update_score by default adds one to the score,
+            # but takes option argument 'minus' to subtract. We modify based off
+            # the new score.
+            sqr.update_score(not int(res[qnum]['score']))
+
+            # Finally, we update the marks
+            update_marks(sqr)
+
+            return HttpResponse(json.dumps({'result': 'success'}))
+
+    except Exception as e:
+        return HttpResponse(json.dumps({'result': str(e)}))
+
 # ---------- Quiz Handler (end) ---------- #
 
 # ---------- Quizzes (end) ---------- #

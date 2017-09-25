@@ -54,6 +54,7 @@ urlpatterns = [
     url(r'^quiz/search_students/$', views.search_students, name='search_students'),
     url(r'^quiz/student_results/(?P<user_pk>\d+)/$', views.student_results, name='student_results'),
     url(r'^quiz/details/(?P<sqr_pk>\d+)/$', views.quiz_details, name='quiz_details'),
+    url(r'^quiz/change_mark/$', views.change_mark, name='change_mark'),
     url(r'^upload_note/$', views.upload_student_note, name='upload_student_note'),
     url(r'^get_note/(?P<filename>.*)$', views.get_note, name='get_note'),
     url(r'^see_notes/$', views.see_notes, name='see_notes'),
