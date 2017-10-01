@@ -5,6 +5,8 @@
     Context contains {{table}} MarkSubmitTable
     Context contains {{category}} (String)
     Context contains {{list_of_categories}} (List of Strings)
+    Context contains {{tuts}} (List of Tutorials)
+    Context contains {{tut_name}} (Name of Current Tutorial)
 {% endcomment %}
 
 {% block title %}
@@ -13,11 +15,22 @@
 
 {% block content %}
     <h1> Submit Marks </h1>
-    <select id="poll-select" class="form-control">
-        {% for cat in list_of_categories %}
-        <option value="{{cat.pk}}" {% if cat.pk|stringformat:"i" == category %}selected="selected"{% endif %}>{{cat.name}}</option>
-        {% endfor %}
-    </select>
+    <div>
+        <select id="poll-select" class="form-control select">
+            {% for cat in list_of_categories %}
+                <option value="{{cat.pk}}" {% if cat.pk|stringformat:"i" == category %}selected="selected"{% endif %}>{{cat.name}}</option>
+            {% endfor %}
+        </select>
+        <select id="tutorial-select" class="form-control select">
+            {% for tut in tuts %}
+                <option value="{{tut.name}}" {% if tut.name == tut_name %} selected="selected" {% endif %}>{{tut.name}}</option>
+            {% endfor %}
+            {% if tut_name == 'all' %}
+                <option value="{{tut.name}}" selected="selected">All Tutorials</option>
+            {% endif %}
+        </select>
+    </div>
+
 
     <div id="ajax_search_wrapper">
         <p><b>Search: </b><input type="text" size="100" id="ajax_search"></p>

@@ -69,6 +69,7 @@ urlpatterns = [
     url(r'^verify_typo/$', views.verify_typo, name='verify_typo'),
     url(r'^populate_category/$', views.populate_category, name='populate_category'),
     url(r'^administrative/marks/see_marks/$', views.see_marks, name='see_marks'),
+    url(r'^administrative/marks/submit_marks/(?P<category>\d+)/(?P<tutorial>\w+)$', views.submit_marks, name='submit_marks'),
     url(r'^administrative/marks/submit_marks/(?P<category>\d+)/$', views.submit_marks, name='submit_marks'),
     url(r'^administrative/marks/submit_marks/$', views.submit_marks, name='submit_marks'),
     url(r'^administrative/marks/see_all_marks/$', views.see_all_marks, name='see_all_marks'),

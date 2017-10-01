@@ -414,7 +414,7 @@ dd {
     position: absolute;
 }
 
-#poll-select {
+.select {
     width: 20%;
     margin-bottom: 10pt;
     font-weight: bold;

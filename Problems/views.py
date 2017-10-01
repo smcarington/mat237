@@ -2536,7 +2536,7 @@ def see_all_marks(request):
             })
 
 @staff_required()
-def submit_marks(request, category=''):
+def submit_marks(request, category='', tutorial=''):
     """ A view for populating a table and submitting marks.
         Input: category (String) indicating the primary key of the category.
 
@@ -2551,6 +2551,8 @@ def submit_marks(request, category=''):
 
         # We always need this to populate the scroller
         list_of_categories = Evaluation.objects.all()
+        # Get the list of tutorials
+        tuts = Tutorial.objects.all()
 
         if category:
             try:
@@ -2564,7 +2566,20 @@ def submit_marks(request, category=''):
             except Exception as e:
                 raise Http404('No mark objects')
 
-        marks = StudentMark.objects.filter(category=this_category)
+        if tutorial:
+            try:
+                tut = tuts.get(name=tutorial)
+                tut_name = tut.name
+                marks = StudentMark.objects.filter(
+                    category=this_category,
+                    user__info__tutorial = tut,
+                    )
+            except Exception as e:
+                raise Http404('No such tutorial: {}'.format(str(e)))
+        else:
+            tut_name = 'all'
+            marks = StudentMark.objects.filter(category=this_category)
+
         table = MarkSubmitTable(marks)
         RequestConfig(request).configure(table)
 
@@ -2576,6 +2591,8 @@ def submit_marks(request, category=''):
                  'category': category,
                  'list_of_categories': list_of_categories,
                  'ajax_url': ajax_url,
+                 'tut_name': tut_name,
+                 'tuts': tuts,
                 })
 
     elif request.method == "POST": # Score input
