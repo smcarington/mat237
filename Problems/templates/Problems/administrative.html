@@ -45,12 +45,10 @@
             {% endif %}
         </div>
 
-        {% if not user.is_staff %}
         <div class="quiz-div">
             <h3>Tutorials <small>(Currently enrolled in TUT{{user.info.tutorial.name}})<small></h3> 
             <a href="{% url 'change_tutorial' %}" class="btn btn-default">Change Tutorial</a>
         </div>
-        {% endif %}
 {% endblock %}
 
 {% block sidenote %}
