@@ -2420,10 +2420,11 @@ def get_student_marks_for_table(student):
         ToDo: Could see_marks benefit from this?
         Warning: If iterating over students, should prefetch marks
     """
+    stud_num = student.info.student_number if student.info else "No info"
     return_dict = {'last_name': student.last_name,
                    'first_name': student.first_name,
                    'username': student.username,
-                   'number': student.info.student_number}
+                   'number': stud_num}
     for smark in student.marks.iterator():
         notes = smark.has_note()
         if notes:
