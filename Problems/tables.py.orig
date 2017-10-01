@@ -137,6 +137,7 @@ class NotesTable(Table):
     def render_preview(self, value, record):
         return format_html('<a href={}>Click to Preview</a>', reverse('get_note', args=(record.doc_file.name,)))
 
+<<<<<<< HEAD
 def html_for_notes(notes):
     """ Subroutine for returning the html strings for notes, whether
         accepted or not. Used in both render_score and render_percent. 
@@ -156,6 +157,12 @@ class MarksTable(Table):
     name    = Column(verbose_name="Name", empty_values=())
     out_of  = Column(verbose_name="Out of", empty_values=())
     score   = Column(verbose_name="Score", empty_values=())
+=======
+class MarksTable(Table):
+    name    = Column(verbose_name="Name", empty_values=())
+    score   = Column(verbose_name="Score", empty_values=())
+    out_of  = Column(verbose_name="Out of", empty_values=())
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
     percent = Column(verbose_name="Percent", empty_values=())
 
     class Meta:
@@ -167,6 +174,7 @@ class MarksTable(Table):
     def render_out_of(self, value, record):
         return str(record.category.out_of)
 
+<<<<<<< HEAD
     def render_score(self, value, record):
         notes = record.has_note()
         if notes: 
@@ -183,6 +191,13 @@ class MarksTable(Table):
                 return str(round(100*record.score/record.category.out_of,2))
             else:
                 return ''
+=======
+    def render_percent(self, value, record):
+        if record.score:
+            return str(round(100*record.score/record.category.out_of,2))
+        else:
+            return ''
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
 
 class MarkSubmitTable(Table):
     last_name  = Column(verbose_name="First Name", accessor='user.last_name')
@@ -215,11 +230,19 @@ class SeeAllMarksTable(Table):
 
 def define_all_marks_table():
     """ A helper function which extends the base SeeAllMarksTable for variable category types.
+<<<<<<< HEAD
         Input: categories (List of Evaluation) - Add these as columns to the table
         Return: (SeeAllMarksTable, Table) object
     """
     
     categories = Evaluation.objects.all().order_by('name')
+=======
+        Input: categories (List of ExemptionType) - Add these as columns to the table
+        Return: (SeeAllMarksTable, Table) object
+    """
+    
+    categories = ExemptionType.objects.all().order_by('name')
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
     attrs = dict( (cat.name.replace(' ', ''), Column(verbose_name=cat.name)) for cat in categories)
     # Meta is not inherited, so need to explicitly define it
     attrs['Meta'] = type('Meta', 
@@ -231,6 +254,7 @@ def define_all_marks_table():
     dyntable = type('FullMarksTable', (SeeAllMarksTable,), attrs)
 
     return dyntable
+<<<<<<< HEAD
 
 class CSVPreviewTable(Table):
     student_number = Column(verbose_name="Student Number")
@@ -253,3 +277,5 @@ class CSVPreviewTable(Table):
             return value
         except:
             return format_html('<span style="color:red">{}</span>', value)
+=======
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff

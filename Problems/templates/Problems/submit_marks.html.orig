@@ -1,0 +1,142 @@
+<<<<<<< HEAD
+{% extends 'accounts/base.html' %}
+=======
+{% extends 'Problems/base.html' %}
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
+{% load render_table from django_tables2 %}
+
+{% comment %}
+    Context contains {{table}} MarkSubmitTable
+    Context contains {{category}} (String)
+    Context contains {{list_of_categories}} (List of Strings)
+{% endcomment %}
+
+{% block title %}
+    <title>Submit Marks - {{site_name}}</title>
+{% endblock %}
+
+{% block content %}
+    <h1> Submit Marks </h1>
+    <select id="poll-select" class="form-control">
+        {% for cat in list_of_categories %}
+        <option value="{{cat.pk}}" {% if cat.pk|stringformat:"i" == category %}selected="selected"{% endif %}>{{cat.name}}</option>
+        {% endfor %}
+    </select>
+
+<<<<<<< HEAD
+    <div id="ajax_search_wrapper">
+        <p><b>Search: </b><input type="text" size="100" id="ajax_search"></p>
+
+        <div id="ajax_results">
+            
+        </div>
+    </div>
+
+=======
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
+    <div id="message">
+        <div id="dialog">
+        </div>
+    </div>
+
+    <div id="marks_wrapper">
+        {% render_table table %}
+    </div>
+
+<<<<<<< HEAD
+=======
+    <div id="ajax_search_wrapper">
+        <p><b>Search: </b><input type="text" size="100" id="ajax_search"></p>
+
+        <div id="ajax_results">
+            
+        </div>
+    </div>
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(document).ready( function() {
+            $("#poll-select").change( function() {
+                category_number = $(this).val();
+                window.location.replace("{% url 'submit_marks' %}"+category_number.toString());
+            });
+
+            var $dialog = $('#dialog');
+            var curFunHandle;
+            var old_result;
+
+            function timeoutClearDialog() {
+                if (curFunHandle) {
+                    clearTimeout(curFunHandle);
+                }
+                curFunHandle = setTimeout( function() {$dialog.html('');}, 2000 );
+            }
+
+            // Handles ajax request for uploading new marks. Returns the user id for updating
+            function submitNewScore(event) {
+                $orig = $(event.target);
+                category = $orig.attr('data-category');
+                score    = $orig.val()
+                user     = $orig.attr('data-user');
+
+                //Validate that number entered
+                if (isNaN(parseFloat(score))) {
+                    $dialog.html('<p>Entry: "' + score + '" is not a valid input</p>')
+                    timeoutClearDialog();
+                    $orig.val(old_result);
+                } else {
+                    $.post("{{ajax_url}}",
+                        {user :    user,
+                         score:    score,
+                         category: category},
+                         function(data) {
+                             if (!data['success']) {
+                                $dialog.html('<p>An error occured while entering the grade</p>');
+                                timeoutClearDialog();
+                                $orig.val(old_result);
+                            } else {
+                                $dialog.html(data['response']);
+                                timeoutClearDialog();
+                            } 
+                         },
+                         "json");
+                }
+                return [user,score];
+            }
+
+            //Detects a change in the page and sends a post to the server to update
+            $("#marks_wrapper")
+                .on("focus", "input", 
+                    function () {
+                        old_result = $(this).val();
+                    })
+                .change( function(event) {submitNewScore(event)} );
+
+            $("#ajax_results")
+                .on("focus", "input", 
+                    function () {
+                        old_result = $(this).val();
+                    })
+                .change( function(event) {
+                            [user, score] = submitNewScore(event);
+                            // If this user is on the page, update it's score as well
+                            $("#marks_wrapper").find("input[data-user='" + user + "']").val(score);
+                        });
+
+            $("#ajax_search").keyup( function() {
+                var query = $(this).val();
+                $.get('{% url "marks_search" %}', 
+                    {query:query,
+                     category:{{category}}
+                    },
+                    function (data) {
+                        $("#ajax_results").html(data);
+                    },
+                    "html"
+                );
+            });
+        });
+    </script>
+{% endblock %}

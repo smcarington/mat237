@@ -351,6 +351,7 @@ class LinkedDocument(UserDocument):
     def __str__(self):
         return "Public link. Uploaded: " + self.user.username + ' Doc Name: ' + self.doc_file.name
 
+<<<<<<< HEAD
 class CSVBackup(UserDocument):
     """ Inherits UserDocument. Used for storing CSV files, whether user uploaded
         or the backup for a grade change.
@@ -367,6 +368,16 @@ class CSVBackup(UserDocument):
         the_name = "{user}_{doc_name}_{timestamp}".format(user=the_user,
                 doc_name=self.doc_file.name, timestamp=the_time)
         self.file_name = the_name
+=======
+class ExemptionType(models.Model):
+    name = models.CharField(max_length=200)
+    out_of = models.IntegerField(default=0)
+
+    def quiz_update_out_of(self, quiz):
+        """ If the exemption corresponds to a quiz, we update the out_of category
+        """
+        self.out_of = quiz.out_of
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
         self.save()
 
     def __str__(self):

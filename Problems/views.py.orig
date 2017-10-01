@@ -1,6 +1,10 @@
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
+<<<<<<< HEAD
 from django.utils.html import mark_safe, format_html
+=======
+from django.utils.html import mark_safe
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required, permission_required, user_passes_test
 from django.contrib.auth.views import password_change
@@ -11,7 +15,11 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.core.files import File
 from django.conf import settings
+<<<<<<< HEAD
 from django.db.models import Max, Q, F
+=======
+from django.db.models import Max, Q
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
 from django.db import IntegrityError
 
 from django_tables2 import RequestConfig
@@ -29,12 +37,17 @@ from sendfile import sendfile
 
 from django.contrib.auth.models import User
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, StudentVote, StudentDocument, Typo, StudentMark, StudentInfo
+<<<<<<< HEAD
 from .forms import *
+=======
+from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, StudentDocumentForm, ExemptionForm, CategoryForm, TypoForm, PopulateCategoryForm
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
 import random
 import math
 from simpleeval import simple_eval, NameNotDefined
 
 from django.contrib.auth.models import User
+<<<<<<< HEAD
 from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult, Evaluation
 from .forms import (AnnouncementForm, QuestionForm, ProblemSetForm,
         NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm,
@@ -42,6 +55,11 @@ from .forms import (AnnouncementForm, QuestionForm, ProblemSetForm,
 from .tables import (MarkedQuestionTable, AllQuizTable, QuizResultTable,
         SQRTable, NotesTable, MarksTable, MarkSubmitTable, define_all_marks_table,
         CSVPreviewTable)
+=======
+from .models import Announcement, ProblemSet, Question, QuestionStatus, Poll, PollQuestion, PollChoice, LinkedDocument, Quiz, MarkedQuestion, StudentQuizResult, ExemptionType
+from .forms import AnnouncementForm, QuestionForm, ProblemSetForm, NewStudentUserForm, PollForm, LinkedDocumentForm, TextFieldForm, QuizForm, MarkedQuestionForm
+from .tables import MarkedQuestionTable, AllQuizTable, QuizResultTable, SQRTable, NotesTable, MarksTable, MarkSubmitTable, define_all_marks_table
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
 
 # Create your views here.
 
@@ -109,10 +127,13 @@ def delete_item(request, objectStr, pk):
         elif objectStr == "typo":
             theObj      = get_object_or_404(Typo, pk = pk)
             return_View = redirect('see_typos')
+<<<<<<< HEAD
         elif objectStr == "markedquestion":
             theObj      = get_object_or_404(MarkedQuestion, pk = pk)
             the_quiz    = theObj.quiz
             return_View = redirect('quiz_admin', quiz_pk=the_quiz.pk)
+=======
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
         else:
             return HttpResponse('<h1>Invalid Object Type</h1>')
 
@@ -222,6 +243,7 @@ def calendar(request):
 
 @login_required
 def notes(request, page_number=''):
+<<<<<<< HEAD
     # Post links in the sidebar. If user is staff, show unavailable links as
     # well
     if request.user.is_staff:
@@ -232,6 +254,11 @@ def notes(request, page_number=''):
     cat_names = DocumentCategory.objects.all().values_list('cat_name',
             flat=True) 
 #    cat_names = docs.values_list('category__cat_name', flat=True).distinct()
+=======
+    # Post links in the sidebar
+    docs = LinkedDocument.objects.select_related('category').all().order_by('category')
+    cat_names = docs.values_list('category__cat_name', flat=True).distinct()
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
 
     link_url = settings.NOTES_URL + '#'+ page_number
 
@@ -1010,14 +1037,24 @@ def new_quiz(request):
             quiz = form.save(commit=False)
             quiz.update_out_of()
             # Create an exemption type for the quiz and update it's out_of field
+<<<<<<< HEAD
             evaluation, created = Evaluation.objects.get_or_create(name=quiz.name)
             evaluation.quiz_update_out_of(quiz)
+=======
+            exemption, created = ExemptionType.objects.get_or_create(name=quiz.name)
+            exemption.quiz_update_out_of(quiz)
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
             
             # For database convenience, populate the category as well. Updates will be made
             # in the function 'display_question', which will also take care of any student whose
             # record was not made to begin with
+<<<<<<< HEAD
             #ret_flag = populate_category_helper(exemption)
             return redirect('quizzes')
+=======
+            ret_flag = populate_category_helper(exemption)
+            return redirect(administrative)
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
     else:
         form = QuizForm()
 
@@ -1045,9 +1082,15 @@ def edit_quiz(request, quiz_pk):
             quiz.update_out_of()
             # Since we might have changed the quiz's score, we also need to fix the
             # exemption score
+<<<<<<< HEAD
             evaluation, created = Evaluation.objects.get_or_create(name=quiz.name)
             evaluation.quiz_update_out_of(quiz)
             return redirect('quiz_admin', quiz_pk=quiz.pk)
+=======
+            exemption, created = ExemptionType.objects.get_or_create(name=quiz.name)
+            exemption.quiz_update_out_of(quiz)
+            return redirect('quiz_admin', quizpk=quiz.pk)
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
     else:
         form = QuizForm(instance=quiz)
         return render(
@@ -1126,10 +1169,16 @@ def edit_quiz_question(request, quiz_pk, mq_pk=None):
                 mquestion = form.save(commit=False)
                 mquestion.update(quiz)
                 # Also update the exemption score, if necessary
+<<<<<<< HEAD
                 evaluation, created = Evaluation.objects.get_or_create(
                         name=mquestion.quiz.name)
                 evaluation.quiz_update_out_of(mquestion.quiz)
                 return redirect('edit_choices', quiz_pk=quiz_pk, mq_pk=mquestion.pk)
+=======
+                exemption, created = ExemptionType.objects.get_or_create(name=mquestion.quiz.name)
+                exemption.quiz_update_out_of(mquestion.quiz)
+                return redirect('edit_choices', mpk=mquestion.pk)
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
         else:
             form = MarkedQuestionForm()
     else: # Editing a question, so populate with current question
@@ -1141,9 +1190,14 @@ def edit_quiz_question(request, quiz_pk, mq_pk=None):
                 mquestion.update(quiz)
                 mquestion.quiz.update_out_of()
                 # Also update the exemption score, if necessary
+<<<<<<< HEAD
                 evaluation, created = Evaluation.objects.get_or_create(
                         name=mquestion.quiz.name)
                 evaluation.quiz_update_out_of(mquestion.quiz)
+=======
+                exemption, created = ExemptionType.objects.get_or_create(name=mquestion.quiz.name)
+                exemption.quiz_update_out_of(mquestion.quiz)
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
 
                 # Check to see if there are any possible issues with the format of the question
                 return redirect('quiz_admin', quiz_pk=quiz.pk)
@@ -1234,10 +1288,15 @@ def isnumber(string):
     except:
         return False
 
+<<<<<<< HEAD
 def edit_choices(request, quiz_pk, mq_pk):
     """ After adding/editing a MarkedQuestion object, we need to specify the
         choices, which indicates what types of values can be substituted into
         the variables {v[i]}. 
+=======
+def edit_choices(request, mpk):
+    """
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
         View which handles the ability to add/edit choices.
         <<Input>>
         quiz_pk (Integers) Not really needed, but for consistent urls
@@ -1420,6 +1479,7 @@ def start_quiz(request, quiz_pk):
              })
 
 def eval_sub_expression(string):
+<<<<<<< HEAD
     """ Used to evaluate @-sign delimited subexpressions in sentences which do
         not totally render. Variables should be passed into the string first,
         before passing to this function.  For example, if a string is if the
@@ -1433,6 +1493,51 @@ def eval_sub_expression(string):
         That string, but with the @ signs removed and the internal expression
         evaluated.
     """
+=======
+    """ Used to evaluate @-sign delimited subexpressions in senetences which do not totally render.
+        Note that variables should be passed into the string first, before passing to this function.
+        For example, if a string is if the form: "What is half of \(@2*{v[0]}@\)" then we should have
+        already substituted {v[0]} into the string, so that eval_sub_expression receives, for example,
+        "What is half of \(@2*3@\)?"
+
+        Input:  string (String) containing (possibly zero) @-delimited expressions.
+        Return: That string, but with the @ signs evaluated and removed.
+    """
+
+    # If no subexpression can be found, simply return
+    if not "@" in string:
+        return string
+
+    temp_string = string
+    pattern = re.compile(r'@(.+?)@')
+    try:
+        while "@" in temp_string:
+            match = pattern.search(temp_string)
+            # Evaluate the expression and substitute it back into the string
+            replacement = round(simple_eval(match.group(1)),4)
+            temp_string = temp_string[:match.start()] + str(replacement) + temp_string[match.end():]
+
+    except Exception as e:
+        raise e
+
+    return temp_string
+
+def get_return_string(question,choices):
+    """ Renders a math-readable string for displaying to a student.
+        Input:  question (MarkedQuestion) object 
+                choices (string) for the choices to insert into the question text
+        Output: A string rendered correctly.
+
+        Done: Use delimeters to allow for mid string evaluation. For example.
+              "What is @2*{v[0]}@ more than 5?"
+    """
+    problem = question.problem_str
+    problem = problem.format(v=choices.replace(' ', '').split(';'))
+
+    # Pass the string through the sub-expression generator
+    problem = eval_sub_expression(problem)
+    return problem
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
 
     # If no subexpression can be found, simply return
     if not "@" in string:
@@ -1593,6 +1698,7 @@ def generate_next_question(sqr):
     return sub_into_question_string(question,choices), mc_choices
 
 def get_mc_choices(question, choices, answer):
+<<<<<<< HEAD
     """ Given a question and a choice for the variable inputs, get the multiple
         choice options.
         <<INPUT>>
@@ -1605,14 +1711,29 @@ def get_mc_choices(question, choices, answer):
 
         ToDo: Allow for @-sign based delimeter expressions. May want to do this
         based on the exception raised on simple_eval
+=======
+    """ Given a question and a choice for the variable inputs, get the multiple choice options.
+        Input: question (MarkedQuestion)
+               choices  (String) corresponding to the concrete choices for the v[0],...,v[n]
+               answer   (String) to concatenate to the choices list
+        Output: A list of strings with numeric values. For example ['13', '24', '52.3', 'None of the above']
+
+        ToDo: Allow for @-sign based delimeter expressions. May want to do this based on the exception raised on
+              simple_eval
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
     """
     split_choices = choices.split(';')
     mc_choices = []
 
     for part in question.mc_choices.split(';'):
+<<<<<<< HEAD
         """ Internal flow: See if variables are present. If so, substitute the
             variables. If not, it's hard coded.  If we do not find variables but
             cannot evaluate, the answer is a sentence/word. So just append it.
+=======
+        """ Internal flow: See if variables are present. If so, substitute the variables. If not, it's hard coded.
+            If we do not find variables but cannot evaluate, the answer is a sentence/word. So just append it.
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
         """
         if re.findall(r'{v\[\d+\]}', part): # matches no variables
             part = part.format(v=split_choices)
@@ -1621,6 +1742,7 @@ def get_mc_choices(question, choices, answer):
         try:
             # Remove troublesome whitespace as well
             eval_string = part.replace(' ','')
+<<<<<<< HEAD
             value = round(
                 simple_eval(
                     eval_string, 
@@ -1628,6 +1750,9 @@ def get_mc_choices(question, choices, answer):
                     names=settings.UNIVERSAL_CONSTANTS
                 ),
             4)
+=======
+            value = round(simple_eval(eval_string, functions=settings.PREDEFINED_FUNCTIONS,names=settings.UNIVERSAL_CONSTANTS),4)
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
                 
             mc_choices.append(str(value))
         except: #If not an exectuable string, then it must be a hardcoded answer
@@ -1737,7 +1862,11 @@ def display_question(request, sqr_pk, submit=None):
           sub_into_question_string, mark_question,
           generate_next_question, update_marks
     """
+<<<<<<< HEAD
     sqr = StudentQuizResult.objects.select_related('quiz').get(pk=sqr_pk)
+=======
+    sqr = StudentQuizResult.objects.select_related('quiz').get(pk=sqrpk)
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
     string_answer = ''
     error_message = ''
     mc_choices = None
@@ -1801,11 +1930,16 @@ def display_question(request, sqr_pk, submit=None):
                 # There are more questions, so generate the next one
                 q_string, mc_choices = generate_next_question(sqr)
                 string_answer = ''
+<<<<<<< HEAD
             else: 
                 # The quiz is over, so generate the result table. Also, update
                 # the student mark
                 result_table = get_result_table(sqr.result)
                 # We are not tracking marks, so this is commented out
+=======
+            else: # The quiz is over, so generate the result table. Also, update the student mark
+                result_table = get_result_table(sqr.result)
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
                 update_marks(sqr) # Call a helper method for updating the student's marks 
                 RequestConfig(request, paginate={'per_page', 10}).configure(result_table)
                 return render(request, 'Problems/completed_quiz.html', 
@@ -1990,8 +2124,13 @@ def quiz_details(request, sqr_pk):
         </div>
         {correct}
         <ul>
+<<<<<<< HEAD
             <li><b>Correct Answer</b>: <span class="mathrender">{answer}</span>
             <li><b>Your Answer</b>: <span class="mathrender">&quot;{guess_string}&quot; evaluated to {guess}</span>
+=======
+            <li><b>Correct Answer</b>: <span class="diff">{answer}</span>
+            <li><b>Your Answer</b>: <span class="diff">&quot;{guess_string}&quot; evaluated to {guess}</span>
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
         </ul>
     """
 
@@ -2025,12 +2164,20 @@ def quiz_details(request, sqr_pk):
             {'return_html': return_html,
              'sqr': quiz_results,
             })
+<<<<<<< HEAD
             
 # ---------- Quiz Handler (end) ---------- #
 
 # ---------- Quizzes (end) ---------- #
 #
 # -------------------- Student Note (fold) ----------------------- #
+=======
+
+
+# -------------------- End MARKED QUESTION ----------------------- #
+
+# -------------------- Student Note ----------------------- #
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
 
 @login_required
 def upload_student_note(request):
@@ -2176,13 +2323,20 @@ def create_exemption(request, exemption_pk=None):
     return render(request, 'Problems/edit_announcement.html', {"form": form})
 
 # --------------- (end) Notes --------------- #
+<<<<<<< HEAD
 
+=======
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
 # Though the previous method is used in Marks #
 # --------------- (fold) Marks --------------- #
 
 def populate_category_helper(category):
     """ Helper method for populating a category.
+<<<<<<< HEAD
         Input: category (Evaluation) category to populate
+=======
+        Input: category (ExemptionType) category to populate
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
         Out  : return_flag - (0) Exception
                              (1) Success
                              (2) Already populated, nothing performed
@@ -2215,7 +2369,11 @@ def populate_category(request):
         
         try:
             exemption_pk = int(request.POST['exemption'])
+<<<<<<< HEAD
             category = get_object_or_404(Evaluation, pk=exemption_pk)
+=======
+            category = get_object_or_404(ExemptionType, pk=exemption_pk)
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
         except:
             raise Http404('Non integer primary key')
 
@@ -2246,6 +2404,7 @@ def see_marks(request):
 
     user  = request.user
     marks = StudentMark.objects.filter(user=user)
+<<<<<<< HEAD
 
     marks_table = MarksTable(marks)
 
@@ -2871,3 +3030,312 @@ def upload_marks_file(request, csvfile_pk=None):
 
 
 # --------------------- (end) Upload Data --------------------- #
+=======
+
+    marks_table = MarksTable(marks)
+
+    return render(request, 'Problems/list_table.html', 
+                  {'table': marks_table,
+                   'title': 'Current Marks',
+                  })
+
+def append_to_log(the_dict, log_location):
+    """ A helper function which appends to a python dictionary to a data-log.
+        Inputs: the_dict (Dictionary) - A python dictionary to be appended
+                log_location (string) - The path to the log-file
+        Return: Void
+    """
+
+    # We will use JSON serialization. Open the log as an 'append', and dump the dictionary
+    with open(log_location, 'a') as f:
+        json.dump(the_dict, f)
+        f.write(os.linesep)
+
+@staff_required()
+def marks_search(request):
+    if request.is_ajax():
+        query = request.GET['query']
+        cat   = request.GET['category']
+
+        category = get_object_or_404(ExemptionType, pk=cat)
+
+        # Search for StudentMark with category=cat and users satisfying the query
+        fields = ["user__username__contains", "user__first_name__contains", "user__last_name__contains", "user__info__student_number__contains"]
+        queries = [Q(**{f:query}) for f in fields]
+
+        qs = Q()
+        for query in queries:
+            qs = qs | query
+
+        marks = StudentMark.objects.filter(qs, category=category).distinct()
+        table = MarkSubmitTable(marks)
+        RequestConfig(request).configure(table)
+
+    return render(request, 'Problems/render_table.html', {'table': table})
+
+def create_marks_log_entry(smark, staff):
+    """ Creates a python dictionary for logging data.
+        Input: smark (StudentMark) object
+               staff (User) who made the adjustment
+        Return: (Dictionary) consisting of
+        {'staff': ___, 'category': ___, 'student': {'username': ___, 'pk': ___}, 'datetime': ___ }
+    """
+
+    return {'staff': staff.username,
+            'category': smark.category.name,
+            'student': {'username': smark.user.username,
+                        'pk': smark.user.pk},
+            'datetime': str(timezone.now())
+            }
+
+def get_student_marks_for_table(student):
+    """ A helper function which outputs the dictionary of student marks.
+        Input: student (User) the student whose marks we are getting
+        Return: (Dictionary) suitable for entry into djangot-tables2
+
+        ToDo: Could see_marks benefit from this?
+        Warning: If iterating over students, should prefetch marks
+    """
+    return_dict = {'last_name': student.last_name,
+                   'first_name': student.first_name,
+                   'username': student.username,
+                   'number': student.info.student_number}
+
+    for smark in student.marks.iterator():
+        return_dict[smark.category.name.replace(' ','')]=smark.score
+
+    return return_dict
+
+@staff_required()
+def see_all_marks(request):
+    """ A view for returning all student marks.
+    """
+
+    # From scratch, we summon all student data. Ensure to prefetch the reverse relationships,
+    # otherwise this will hit the database a lot
+    table_data = [];
+    students = User.objects.prefetch_related('marks', 'info').filter(is_staff=False)
+    for student in students:
+        try:
+            table_data.append(get_student_marks_for_table(student))
+        except StudentInfo.DoesNotExist:
+            # Make en empty StudentInfo object so that the student still appears in the grade sheet list
+            student_info = StudentInfo(user=student,
+                                student_number = '',
+                                tutorial = '',
+                                lecture = '')
+            student_info.save()
+            table_data.append(get_student_marks_for_table(student))
+
+    # Generate the table. This is dynamic to the number of categories which currently exists
+    table = define_all_marks_table()(table_data)
+    RequestConfig(request, paginate=False).configure(table)
+    return render(request, 'Problems/list_table.html',
+            {'table': table,
+             'title': 'All Marks',
+            })
+
+
+@staff_required()
+def submit_marks(request, category=''):
+    """ A view for populating a table and submitting marks.
+        Input: category (String) indicating the primary key of the category.
+
+        AJAX: Requires input (score, category, user), which are strings but can
+              be cast as (float, int, int). Returns json element
+              'success': (Boolean) indicating whether the mark was successfuly recorded
+              'response': (String) with a message
+    """
+
+    #Standard handling
+    if request.method == "GET":
+
+        # We always need this to populate the scroller
+        list_of_categories = ExemptionType.objects.all()
+
+        if category:
+            try:
+                this_category = list_of_categories.filter(pk=int(category))
+            except Exception as e:
+                raise Http404('No such category: {}'.format(str(e)))
+        else:
+            try:
+                this_category = list_of_categories.latest('id')
+                category = str(this_category.pk)
+            except Exception as e:
+                raise Http404('No mark objects')
+
+        marks = StudentMark.objects.filter(category=this_category)
+        table = MarkSubmitTable(marks)
+        RequestConfig(request).configure(table)
+
+        #Get the address of the ajax method (which is just this view as well)
+        ajax_url = reverse('submit_marks')
+
+        return render(request, 'Problems/submit_marks.html',
+                {'table':table,
+                 'category': category,
+                 'list_of_categories': list_of_categories,
+                 'ajax_url': ajax_url,
+                })
+
+    elif request.method == "POST": # Score input
+        data_dict = request.POST
+        try:
+            score = float(data_dict['score'])
+            cat   = int(data_dict['category'])
+            user  = int(data_dict['user'])
+
+            category = get_object_or_404(ExemptionType, pk=cat)
+            user     = get_object_or_404(User, pk=user)
+            smark    = StudentMark.objects.get(user=user, category=category)
+
+            smark.set_score(score)
+
+            response_string= "Mark for {user} successfully recorded".format(user=user.username)
+            ret_data = {'success': True, 'response':response_string}
+            
+            log_entry = create_marks_log_entry(smark,request.user)
+            append_to_log(log_entry, settings.MARKS_LOG)
+
+        except Exception as e:
+            ret_data = {'success': False, 'response': str(e)}
+
+        return HttpResponse(json.dumps(ret_data))
+
+
+# ------------------ (end) Marks  ------------------ #
+# ------------------ Typos (fold) ------------------ #
+
+def submit_typo(request, url_redirect=''):
+    """ View for handling typo submissions. In particular, checks if user is logged in. If the
+        user is not logged in, then we must return a human verification checkbox.
+    """
+   
+    # If user is anonymous
+    if request.user.username:
+        user = request.user
+    else:
+        user = None 
+
+    # If post, then form was submitted
+    if request.method == "POST":
+        form = TypoForm(request.POST)
+        # Check to see that user is logged in, or verified human
+        if (user is not None or 'check-cap' in request.POST):
+            if form.is_valid():
+                post = form.save(commit=False)
+                post.set_user(user)
+
+                if not url_redirect:
+                    url_redirect = reverse('administrative')
+
+                success_string = "Typo successfully submitted."
+                redirect_string = '<a href="{url}">Return to Previous Page</a>'.format(url=url_redirect)
+
+                return render(request, 
+                              'Problems/success.html', 
+                              { 'success_string': success_string, 
+                                'redirect_string': redirect_string,
+                              })
+
+        else: # Return the form
+            return render(request, 
+                          'Problems/typo_form.html', 
+                          { 'form' : form,
+                            'user' : user,
+                          })
+    else:
+        form = TypoForm()
+
+    return render(request, 
+                  'Problems/typo_form.html', 
+                  { 'form' : form,
+                    'user' : user,
+                  })
+
+def see_typos(request, document=''):
+    """ Displays the typos, ordered by page and document. If user is staff
+        then also gives unverified typos.
+    """
+
+    if document == "all":
+        if request.user.is_staff:
+            typos = Typo.objects.all()
+        else:
+            typos = Typo.objects.filter(verified=True)
+    else:
+        if request.user.is_staff:
+            typos = Typo.objects.filter(document=document)
+        else:
+            typos = Typo.objects.filter(verified=True, document=document)
+
+    typos=typos.order_by('page')
+
+    typos_url  = reverse('see_typos')
+    verify_url = reverse('verify_typo')
+
+    if request.is_ajax():
+        return render(request, 'Problems/base_typo.html',
+                {'typos': typos,
+                })
+
+    return render(request, 'Problems/see_typos.html', 
+            {'typos': typos,
+             'typos_url': typos_url,
+             'verify_url': verify_url,
+             'document': document,
+            })
+
+@staff_required()
+def edit_typo(request, typopk, url_redirect=''):
+    """ Edits a typo. Expects url_redirect to be the document type for see_typos
+    """
+    typo = get_object_or_404(Typo, pk=typopk)
+    if request.method == "POST":
+        form = TypoForm(request.POST, instance=typo)
+        if form.is_valid():
+            typo = form.save()
+            return redirect(reverse('see_typos', kwargs={'document': url_redirect}))
+    else:
+        form = TypoForm(instance=typo)
+
+    return render(request, 'Problems/edit_announcement.html', 
+            {'form' : form,
+            })
+
+@staff_required()
+def verify_typo(request):
+    """ Verifies a typo. Should be done by ajax.
+        Expects: 'typopk' in POST, which is the primary key of the Typo object
+    """
+
+    if request.method =="POST":
+        response_dict = {}
+        try:
+            typopk = int(request.POST['typopk'])
+            typo = get_object_or_404(Typo, pk=typopk)
+            typo.verify()
+            response_dict['response'] = "Typo verified"
+            response_dict['flag'] = 0
+        except Exception as e:
+            response_dict['response'] = "Error: {}".format(e)
+            response_dict['flag'] = 1
+
+        return HttpResponse(json.dumps(response_dict))
+
+# ------------------ Typos (end) ------------------ #
+
+@staff_required()
+def latex_playground(request):
+    """ A view for people to play around with latex.
+    """
+
+    file_path = settings.MEDIA_ROOT + "/latex_help.txt"
+    with open(file_path, 'r') as f:
+        latex_help = f.read()
+
+    return render(request, 'Problems/latex_playground.html',
+            {'latex_help': latex_help,
+            })
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff

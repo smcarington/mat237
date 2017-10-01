@@ -1,0 +1,31 @@
+<<<<<<< HEAD
+{% extends 'accounts/base.html' %}
+=======
+{% extends 'Problems/base.html' %}
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
+
+{% comment %}
+    Has context {{problem}} of type Question
+{% endcomment %}
+
+{% block title %}
+    <title>Question Solution - {{site_name}}</title>
+{% endblock %}
+
+{% block content %}
+    <h1> Solution </h1>
+    <a href="{% url 'list_problem_set' pk=problem.problem_set.pk %}">&#171; Return to {{problem.problem_set.title}}</a>
+
+    <div class="solution_wrapper">
+        <div class="diff question-detail">
+            <p><b>Question </b></p>
+            {{ problem.text | safe}}
+        </div>
+        <div class="diff question-detail">
+            <p><b>Solution</b></p>
+            {{ problem.solution | safe}}
+        </div>
+
+
+{% endblock %}
+

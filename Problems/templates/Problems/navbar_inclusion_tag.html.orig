@@ -1,0 +1,79 @@
+{% load navbar_inclusion_tag %}
+
+{% comment %}
+    Has problem_sets element of type ProblemSets. Set by navbar_inclusion_tag.py
+{% endcomment %}
+
+<nav class="navbar navbar-default navbar-fixed-top"> 
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand">{{site_name}}</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                {% if 'announcements' in modules %}
+                <li><a class = "{% check_active request 'announcements' %}" href="{% url 'announcements' %}">Announcements</a></li>
+                {% endif %}
+
+                {% if 'problem_set' in modules %}
+                <li class="dropdown">
+                <a class="{% check_active request 'problem_set' %}" href="javascript:void(0)" data-toggle="dropdown" class="dropdown-toggle">Problem Sets<b class="caret"></b></a>
+                    <ul class="dropdown-menu ps-columns">
+                        {% for ps in problem_sets %}
+                            {% if ps.visible %}
+                                <li><a href="{% url 'list_problem_set' pk=ps.pk %}">{{ ps.title }}</a></li>
+                            {% elif request.user.is_staff %}
+                                <li><a class="unavailable" href="{% url 'list_problem_set' pk=ps.pk %}">{{ ps.title }}</a></li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+
+                {% if 'syllabus' in modules %}
+                <li><a class="{% check_active request 'syllabus' %}" href="{% url 'syllabus' %}" >Syllabus</a></li>
+                {% endif %}
+
+                {% if 'calendar' in modules %}
+                <li><a class="{% check_active request 'calendar' %}" href="{% url 'calendar' %}" >Calendar</a></li>
+                {% endif %}
+
+                {% if 'notes' in modules %}
+<<<<<<< HEAD
+                <li><a class="{% check_active request 'notes' %}" href="{% url 'notes' %}" >Notes and Uploads</a></li>
+=======
+                <li><a class="{% check_active request 'notes' %}" href="{% url 'notes' %}" >Notes</a></li>
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
+                {% endif %}
+
+                {% if 'polls' in modules %}
+                <li><a class="{% check_active request 'poll' %}" href="{% url 'polls' %}" >Polls</a></li>
+                {% endif %}
+
+                {% if 'quizzes' in modules %}
+                <li><a class="{% check_active request 'quiz' %}" href="{% url 'quizzes' %}" >Quizzes</a></li>
+                {% endif %}
+
+                {% if 'administrative' in modules %}
+                <li><a class="{% check_active request 'administrative' %}" href="{% url 'administrative' %}">Administration</a></li>
+                {% endif %}
+
+            </ul>
+            <div class="navbar-right">
+                {% if request.user.is_authenticated %}
+                <p class="top-menu">Hello {{ request.user.username }}<small> (<a href="{% url 'django.contrib.auth.views.logout' %}?next={{logout_page}}">Log out</a>)<br> (<a href="{% url 'password_change' %}">Change Password</a>)</small></p>
+                    {% else %}
+                    <div class="top-menu">
+                        <a href="{% url 'login' %}" class="top-menu"><span class="glyphicon glyphicon-lock"></span>Log In</a>
+                        <br>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</nav>

@@ -26,6 +26,7 @@ class Command(BaseCommand):
         if options['log']:
             logging.basicConfig(filename=options['log'], level=logging.DEBUG)
 
+<<<<<<< HEAD
         students=User.objects.filter(is_staff=False, is_active=True).prefetch_related('info').order_by('last_name')
 
         # Generate sorting code as follows: 
@@ -70,6 +71,17 @@ class Command(BaseCommand):
                                   'student_number': student.info.student_number,
                                   'tutorial': student.info.tutorial.name,
                                   'sort': sort_string})
+=======
+        # Marks all students as inactive
+        students=User.objects.filter(is_staff=False, is_active=not options['all']).prefetch_related('info').order_by('last_name')
+
+        for student in students:
+            try:
+                print(json.dumps({'first_name': student.first_name,
+                                  'last_name' : student.last_name,
+                                  'student_number': student.info.student_number,
+                                  'tutorial': student.info.tutorial})
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
                      )
             
             except Exception as e:

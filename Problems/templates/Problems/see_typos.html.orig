@@ -1,0 +1,73 @@
+<<<<<<< HEAD
+{% extends 'accounts/base.html' %}
+=======
+{% extends 'Problems/base.html' %}
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
+
+{% comment %}
+    Has context {{typos}} which is a list of Typo-objects
+    Has context {{typos_url}} for using window.location and changing select
+    Has context {{verify_url}} for using window.location for verifying a typo
+    Has context {{document}} which is the name of the request document
+{% endcomment %}
+
+{% block title %}
+    <title>Typo List - {{site_name}}</title>
+{% endblock %} 
+{% block content %}
+    <h1>Typo List - {{document}}</h1>
+
+    <select id="poll-select" class="form-control">
+        <option value="all">See all</option>
+        {% for choice in doc_choices %}
+        <option value="{{choice.0}}" {% if choice.0 == document %}selected="selected"{% endif %}>{{choice.1}}</option>
+        {% endfor %}
+    </select>
+    <ul>
+    {% for typo in typos %}
+    <li> 
+        <div class="diff question-detail"> 
+            <b>{{typo.get_document_display}}:</b> <small>(Page {{typo.page}})</small>
+            <p>{{typo.description | linebreaks}} </p>
+            {% if user.is_staff %}
+                <a href="{% url 'edit_typo' typopk=typo.pk url_redirect=document%}"><small>Edit</small></a>
+                <a href="{% url 'delete_item' objectStr='typo' pk=typo.pk %}"><small>Delete</small></a>
+                {% if not typo.verified %}
+                <a href=javascript:void(0) class="verify_link" data-id="{{typo.pk}}"><small>Verify</small></a>
+                {% endif %}
+            {% endif %}
+        </div>
+
+    {% endfor %}
+    </ul>
+
+{% endblock %}
+
+
+{% block script %}
+    <script>
+        $(document).ready( function() {
+            $("#poll-select").change( function() {
+                doc_type = $(this).val();
+                window.location.replace("{{typos_url}}"+doc_type+"/");
+            });
+
+            $(".verify_link").click( function () {
+                $link_space = $(this);
+                typopk = $link_space.attr('data-id')
+                $.post(
+                    "{{verify_url}}",
+                    {'typopk':typopk},
+                    function (data) {
+                        if (data['flag'] == 1) {
+                            alert(data['response']);
+                        } else {
+                            $link_space.replaceWith( "<p class='warning'>Verified</p>" );
+                            setTimeout( function() {$("p.warning").remove()}, 2000)
+                        }
+                    },
+                    "json");
+            });
+        });
+    </script>
+{% endblock %}

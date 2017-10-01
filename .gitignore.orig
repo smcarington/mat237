@@ -6,8 +6,9 @@ db.sqlite3
 .DS_Store
 *~
 /media*
-<<<<<<< HEAD
 local_settings.py
+<<<<<<< HEAD
+local_settings.py~
 =======
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
 /notes*
->>>>>>> studentnote

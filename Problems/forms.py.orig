@@ -113,7 +113,11 @@ class MarkedQuestionForm(forms.ModelForm):
 
 class ExemptionForm(forms.ModelForm):
     class Meta:
+<<<<<<< HEAD
         model = Evaluation
+=======
+        model = ExemptionType
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
         fields = ('name','out_of')
 
 class CategoryForm(forms.ModelForm):
@@ -127,6 +131,7 @@ class TypoForm(forms.ModelForm):
     class Meta:
         model = Typo
         exclude = ('user','verified',)
+<<<<<<< HEAD
 
 class PopulateCategoryForm(forms.Form):
     exemption = forms.ModelMultipleChoiceField(queryset=Evaluation.objects.all())
@@ -135,7 +140,12 @@ class ChangeTutorialForm(forms.Form):
     tutorial = forms.ModelChoiceField(queryset=Tutorial.objects.filter(cur_enrol__lt=F('max_enrol')))
 
     class Meta:
-
+        help_text = {
             'tutorial': "Select your tutorial. If a tutorial is not visible, "
                         "is at full capacity.",
         }
+=======
+
+class PopulateCategoryForm(forms.Form):
+    exemption = forms.ModelMultipleChoiceField(queryset=ExemptionType.objects.all())
+>>>>>>> fead8ced507f999bce693098ef96a753b7c9a7ff
