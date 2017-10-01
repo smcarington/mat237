@@ -2420,7 +2420,10 @@ def get_student_marks_for_table(student):
         ToDo: Could see_marks benefit from this?
         Warning: If iterating over students, should prefetch marks
     """
-    stud_num = student.info.student_number if student.info else "No info"
+    try:
+        stud_num = student.info.student_number
+    except Exception as e:
+        stud_num = "No info"
     return_dict = {'last_name': student.last_name,
                    'first_name': student.first_name,
                    'username': student.username,
@@ -2448,7 +2451,9 @@ def get_marks_data():
         and a field for each Evaluation assessment
     """
     table_data = [];
-    students = User.objects.prefetch_related('marks', 'info', 'notes').filter(is_staff=False, is_active=True)
+    students = User.objects.prefetch_related(
+        'marks', 'info', 'notes').filter(
+        is_staff=False, is_active=True)
     for student in students:
         try:
             table_data.append(get_student_marks_for_table(student))
