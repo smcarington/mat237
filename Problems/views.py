@@ -2536,7 +2536,7 @@ def see_all_marks(request):
             })
 
 @staff_required()
-def submit_marks(request, category='', tutorial=''):
+def submit_marks(request, category='', tutorial='all'):
     """ A view for populating a table and submitting marks.
         Input: category (String) indicating the primary key of the category.
 
@@ -2566,7 +2566,7 @@ def submit_marks(request, category='', tutorial=''):
             except Exception as e:
                 raise Http404('No mark objects')
 
-        if tutorial:
+        if tutorial != 'all':
             try:
                 tut = tuts.get(name=tutorial)
                 tut_name = tut.name

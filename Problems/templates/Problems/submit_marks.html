@@ -25,9 +25,7 @@
             {% for tut in tuts %}
                 <option value="{{tut.name}}" {% if tut.name == tut_name %} selected="selected" {% endif %}>{{tut.name}}</option>
             {% endfor %}
-            {% if tut_name == 'all' %}
-                <option value="{{tut.name}}" selected="selected">All Tutorials</option>
-            {% endif %}
+            <option value="all" {% if tut_name == 'all' %}selected="selected" {% endif %}>All Tutorials</option>
         </select>
     </div>
 
@@ -54,9 +52,12 @@
 {% block script %}
     <script>
         $(document).ready( function() {
-            $("#poll-select").change( function() {
-                category_number = $(this).val();
-                window.location.replace("{% url 'submit_marks' %}"+category_number.toString());
+            $(".select").change( function() {
+                category_number = $("#poll-select").val();
+                tutorial = $("#tutorial-select").val();
+                window.location.replace(
+                    "{% url 'submit_marks'%}"+category_number.toString()+"/"+tutorial.toString()
+                );
             });
 
             var $dialog = $('#dialog');
