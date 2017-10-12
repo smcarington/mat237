@@ -2897,7 +2897,8 @@ def error_report_and_backup(log_location, backup_file):
     
 @staff_required()
 def upload_marks_file(request, csvfile_pk=None):
-    """ A simple form for uploading a csv file. First column must be 
+    """ A simple form for uploading a csv file. First column must be username,
+        second column is the grade
         csvfile_pk - In form POST, has the primary key for the CSVBackup file
         containing the marks
     """
@@ -2925,9 +2926,9 @@ def upload_marks_file(request, csvfile_pk=None):
                 try:
                     # More pythonic to do [student_number, score] in table data,
                     # but doesn't check against invalid information
-                    [student_number, score] = row
+                    [uname, score] = row
                     try:
-                        user = User.objects.get(info__student_number=student_number)
+                        user = User.objects.get(username=uname)
                     except Exception as e:
                         message='Error for entry {}: {} <br>'.format(row, e)
                         append_to_log(message, log_location)
