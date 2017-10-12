@@ -2927,12 +2927,18 @@ def upload_marks_file(request, csvfile_pk=None):
                 try:
                     # More pythonic to do [student_number, score] in table data,
                     # but doesn't check against invalid information
+<<<<<<< HEAD
                     [ub, score] = row
                     try:
-                        if upload_by == 'SN':
+                        if upload_by='SN'
                             user = User.objects.get(info__student_number=ub)
-                        elif upload_by == 'UN':
+                        else if upload_by = 'UN'
                             user = User.objects.get(username=ub)
+=======
+                    [uname, score] = row
+                    try:
+                        user = User.objects.get(username=uname)
+>>>>>>> 2a025115dcdc78b8d8dc16c7920280ab7151e494
                     except Exception as e:
                         message='Error for entry {}: {} <br>'.format(row, e)
                         append_to_log(message, log_location)
