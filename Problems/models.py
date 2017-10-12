@@ -332,6 +332,7 @@ class UserDocument(models.Model):
     doc_file = models.FileField(upload_to=directory_setter,
                                 validators=[validate_file]
                                )
+
     class Meta:
         abstract = True
 
@@ -355,8 +356,17 @@ class CSVBackup(UserDocument):
     """ Inherits UserDocument. Used for storing CSV files, whether user uploaded
         or the backup for a grade change.
     """
+    UB_CHOICES = (
+        ('UN', 'UTORid'),
+        ('SN', 'Student Number'),
+    )
+
     file_name = models.CharField(max_length=200)
     category  = models.ForeignKey(Evaluation, null=True, blank=True)
+    upload_by = models.CharField(
+        max_length=2, 
+        choices=UB_CHOICES, 
+        null=True, blank=True)
 
     def set_user_and_name(self, the_user):
         """ Model method for setting the user. Will automatically save."""

@@ -71,10 +71,11 @@ class CSVBackupForm(forms.ModelForm):
 
         if not include_cat:
             del self.fields['category']
+            del self.fields['upload_by']
 
     class Meta:
         model = CSVBackup
-        fields = ['doc_file', 'category']
+        fields = ['doc_file', 'category', 'upload_by']
 
 class MarkedQuestionForm(forms.ModelForm):
 #    category = IntegerField(min_value=1, initial=1)

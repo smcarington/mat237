@@ -2908,6 +2908,7 @@ def upload_marks_file(request, csvfile_pk=None):
             # Recall that saved CSV file and update the student marks
             csv_file = CSVBackup.objects.get(pk=csvfile_pk)
             category = csv_file.category
+            upload_by = csv_file.upload_by
             table_data = extract_csv_data(csv_file.doc_file)
 
             # Initialize the logger to track the old grades and the new grades
@@ -2925,9 +2926,12 @@ def upload_marks_file(request, csvfile_pk=None):
                 try:
                     # More pythonic to do [student_number, score] in table data,
                     # but doesn't check against invalid information
-                    [student_number, score] = row
+                    [ub, score] = row
                     try:
-                        user = User.objects.get(info__student_number=student_number)
+                        if upload_by='SN'
+                            user = User.objects.get(info__student_number=ub)
+                        else if upload_by = 'UN'
+                            user = User.objects.get(username=ub)
                     except Exception as e:
                         message='Error for entry {}: {} <br>'.format(row, e)
                         append_to_log(message, log_location)
