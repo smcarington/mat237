@@ -67,7 +67,7 @@ MIDDLEWARE_CLASSES = [
 ]
 
 AUTHENTICATION_BACKENDS = [
-    'accounts.backends.CourseSpecificBackend.CourseSpecificBackend',
+#    'accounts.backends.CourseSpecificBackend.CourseSpecificBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
